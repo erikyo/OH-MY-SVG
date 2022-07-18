@@ -12,10 +12,13 @@ import {
 	Placeholder,
 	RangeControl,
 	TextareaControl,
+	ColorPicker,
 	ToolbarGroup,
 	ResizableBox,
 	Button,
 	ButtonGroup,
+	ColorIndicator,
+	Dropdown,
 } from '@wordpress/components';
 import {
 	BlockControls,
@@ -78,6 +81,20 @@ const Edit = ( props ) => {
 		return serializer.serializeToString( svgDoc );
 	};
 
+	const collectColors = ( fileContent ) => {
+		const colorCollection = [];
+		for ( const match of fileContent.matchAll(
+			/#[a-zA-Z0-9]{6}|rgb\((?:\s*\d+\s*,){2}\s*\d+\)|rgba\((\s*\d+\s*,){3}[\d.]+\)/g
+		) ) {
+			if ( match[ 0 ] ) {
+				colorCollection.push( match[ 0 ] );
+				if ( colorCollection.length > 10 ) return;
+			}
+		}
+		return [ ...new Set( colorCollection ) ];
+	};
+
+	// TODO: attributes {el: [path, circle, rect], borderWidth: 2, borderColor: 'hex' }
 	const svgAddPathStroke = () => {
 		const svgDoc = getSvgDoc( svg );
 		svgDoc.querySelectorAll( 'path, circle, rect' ).forEach( ( item ) => {
@@ -87,6 +104,18 @@ const Edit = ( props ) => {
 		const svgString = getSvgString( svgDoc );
 		setAttributes( {
 			svg: DOMPurify.sanitize( svgString ),
+		} );
+	};
+
+	const updateColor = ( newColor, color ) => {
+		// updates the colors array
+		const newSvg = svg.replaceAll( color, newColor );
+
+		const colorCollection = collectColors( svg ) || [];
+
+		setAttributes( {
+			colors: colorCollection,
+			svg: newSvg,
 		} );
 	};
 
@@ -109,7 +138,6 @@ const Edit = ( props ) => {
 				// sanitize content first
 				const fileContent = DOMPurify.sanitize( reader.result );
 				const parsedData = {};
-				const colorCollection = [];
 
 				if ( fileContent ) {
 					const viewBox = fileContent.match(
@@ -138,23 +166,16 @@ const Edit = ( props ) => {
 					}
 
 					// collect colors
-					for ( const match of fileContent.matchAll(
-						/#[a-zA-Z0-9]{6}|rgb\((?:\s*\d+\s*,){2}\s*\d+\)|rgba\((\s*\d+\s*,){3}[\d.]+\)/g
-					) ) {
-						if ( match[ 0 ] ) {
-							colorCollection.push( match[ 0 ] );
-						}
-					}
-					console.log( colorCollection );
-				}
+					const colorCollection = collectColors( fileContent ) || [];
 
-				setAttributes( {
-					originalSvg: fileContent,
-					svg: fileContent,
-					height: parsedData.height,
-					width: parsedData.width,
-					colors: colorCollection,
-				} );
+					setAttributes( {
+						originalSvg: fileContent,
+						svg: fileContent,
+						height: parsedData.height,
+						width: parsedData.width,
+						colors: colorCollection,
+					} );
+				}
 			};
 			reader.onabort = () => console.log( 'file reading was aborted' );
 			reader.onerror = () => console.log( 'file reading has failed' );
@@ -201,97 +222,128 @@ const Edit = ( props ) => {
 
 	return (
 		<div { ...useBlockProps() }>
-			<InspectorControls key="setting">
-				<Panel header="Settings">
-					<PanelBody
-						title="SVG Block"
-						icon="code"
-						initialOpen={ true }
-					>
-						<RangeControl
-							label={ 'Width' }
-							type={ 'number' }
-							value={ width }
-							min={ 0 }
-							max={ 2000 }
-							step={ 1 }
-							onChange={ ( ev ) => {
-								setAttributes( {
-									width: ev,
-								} );
-							} }
-						/>
-						<RangeControl
-							label={ 'Height' }
-							type={ 'number' }
-							value={ height }
-							min={ 0 }
-							max={ 2000 }
-							step={ 1 }
-							onChange={ ( ev ) => {
-								setAttributes( {
-									height: ev,
-								} );
-							} }
-						/>
-						<PanelRow>
-							<b>SVGO</b>
-							<ButtonGroup>
-								<Button
-									isSmall={ true }
-									variant={ 'primary' }
-									onClick={ () => {
-										setAttributes( {
-											svg: optimizeSvg(),
-										} );
-									} }
-								>
-									{ __( 'Optimize' ) }
-								</Button>
-								&nbsp;
-								<Button
-									isSmall={ true }
-									variant={ 'secondary' }
-									onClick={ () => {
-										setAttributes( {
-											svg: originalSvg,
-										} );
-									} }
-								>
-									{ __( 'Reset' ) }
-								</Button>
-							</ButtonGroup>
-						</PanelRow>
-						<PanelRow>
-							<b>Animation</b>
-							<ButtonGroup>
-								<Button
-									isSmall={ true }
-									variant={ 'primary' }
-									onClick={ ( e ) => svgAddPathStroke( e ) }
-								>
-									{ __( 'Add Stroke' ) }
-								</Button>
-								&nbsp;
-								<Button
-									isSmall={ true }
-									variant={ 'primary' }
-									onClick={ ( e ) => svgRemoveFill( e ) }
-								>
-									{ __( 'Remove Fill' ) }
-								</Button>
-							</ButtonGroup>
-						</PanelRow>
-						<h4>SVG markup</h4>
-						<TextareaControl
-							label={ 'Code' }
-							value={ svg }
-							onChange={ ( ev ) => {
-								setAttributes( { svg: ev } );
-							} }
-						/>
-					</PanelBody>
-				</Panel>
+			<InspectorControls key="settings">
+				<PanelBody title="SVG Block" icon="code" initialOpen={ true }>
+					<RangeControl
+						label={ 'Width' }
+						type={ 'number' }
+						value={ width }
+						min={ 0 }
+						max={ 2000 }
+						step={ 1 }
+						onChange={ ( ev ) => {
+							setAttributes( {
+								width: ev,
+							} );
+						} }
+					/>
+					<RangeControl
+						label={ 'Height' }
+						type={ 'number' }
+						value={ height }
+						min={ 0 }
+						max={ 2000 }
+						step={ 1 }
+						onChange={ ( ev ) => {
+							setAttributes( {
+								height: ev,
+							} );
+						} }
+					/>
+					<PanelRow>
+						<b>SVGO</b>
+						<ButtonGroup>
+							<Button
+								isSmall={ true }
+								variant={ 'primary' }
+								onClick={ () => {
+									setAttributes( {
+										svg: optimizeSvg(),
+									} );
+								} }
+							>
+								{ __( 'Optimize' ) }
+							</Button>
+							&nbsp;
+							<Button
+								isSmall={ true }
+								variant={ 'secondary' }
+								onClick={ () => {
+									setAttributes( {
+										svg: originalSvg,
+									} );
+								} }
+							>
+								{ __( 'Reset' ) }
+							</Button>
+						</ButtonGroup>
+					</PanelRow>
+					<h4>SVG markup</h4>
+					<TextareaControl
+						label={ 'Code' }
+						value={ svg || '' }
+						onChange={ ( ev ) => {
+							setAttributes( { svg: ev } );
+						} }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<InspectorControls key="style">
+				<PanelBody header="SVG Edit">
+					<PanelRow>
+						<b>Editor</b>
+					</PanelRow>
+					<ButtonGroup>
+						<Button
+							variant={ 'primary' }
+							onClick={ ( e ) => svgAddPathStroke( e ) }
+						>
+							{ __( 'Add Stroke' ) }
+						</Button>
+						&nbsp;
+						<Button
+							variant={ 'primary' }
+							onClick={ ( e ) => svgRemoveFill( e ) }
+						>
+							{ __( 'Remove Fill' ) }
+						</Button>
+					</ButtonGroup>
+				</PanelBody>
+			</InspectorControls>
+			<InspectorControls key="colors">
+				<PanelBody>
+					<div style={ { display: 'flex', flexDirection: 'column' } }>
+						<b>Colors</b>
+						{ colors &&
+							colors.map( ( color, index ) => (
+								<Dropdown
+									key={ index }
+									renderToggle={ ( { onToggle } ) => (
+										<Button
+											style={ { width: '100%' } }
+											onClick={ onToggle }
+										>
+											<ColorIndicator
+												colorValue={ color }
+											/>
+											<p style={ { marginLeft: '8px' } }>
+												{ color }
+											</p>
+										</Button>
+									) }
+									renderContent={ () => (
+										<ColorPicker
+											color={ color }
+											onChange={ ( e ) =>
+												updateColor( e, color )
+											}
+											defaultValue={ color }
+										/>
+									) }
+								></Dropdown>
+							) ) }
+					</div>
+				</PanelBody>
 			</InspectorControls>
 			{ svg && (
 				<BlockControls group="block">
@@ -345,7 +397,15 @@ const Edit = ( props ) => {
 			{ ! svg &&
 				( isSelected ? (
 					<>
-						<div className="svg-preview-container">
+						<div
+							className="svg-preview-container"
+							style={ {
+								backgroundColor: '#f3f3f3',
+								padding: '24px',
+								borderRadius: '8px',
+								textAlign: 'center',
+							} }
+						>
 							<SvgDropZone />
 							<div>
 								<span>
@@ -364,6 +424,7 @@ const Edit = ( props ) => {
 											onClick={ ( event ) =>
 												( event.target.value = '' )
 											}
+											variant={ 'secondary' }
 											onChange={ ( ev ) => {
 												onImageSelect(
 													Object.values(
@@ -382,8 +443,26 @@ const Edit = ( props ) => {
 						</div>
 					</>
 				) : (
-					<Placeholder icon={ blockIcon }>
-						Click here to add a svg
+					<Placeholder
+						icon={ blockIcon }
+						style={ {
+							textAlign: 'center',
+						} }
+					>
+						<h2>SVG</h2>
+						<p>Click here to add a svg</p>
+						<FormFileUpload
+							accept={ ALLOWED_MEDIA_TYPES }
+							onClick={ ( event ) => ( event.target.value = '' ) }
+							variant={ 'primary' }
+							onChange={ ( ev ) => {
+								onImageSelect(
+									Object.values( ev.target.files )
+								);
+							} }
+						>
+							Add a SVG image from your computer
+						</FormFileUpload>
 					</Placeholder>
 				) ) }
 		</div>
@@ -449,11 +528,14 @@ registerBlockType( blockConfig.name, {
 			type: 'number',
 			default: false,
 		},
+		colors: {
+			type: 'array',
+			default: [],
+		},
 		svgData: {
 			type: 'object',
 			default: {
 				pathStroke: 2,
-				colors: [],
 			},
 		},
 	},

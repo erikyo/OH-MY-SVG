@@ -1,7 +1,0 @@
-{
-  "apiVersion": 2,
-  "name": "codekraft/svg-block",
-  "title": "SVG",
-  "category": "media",
-  "editorScript": "file:../build/index.js"
-}
