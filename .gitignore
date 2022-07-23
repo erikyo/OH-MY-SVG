@@ -28,6 +28,3 @@ node_modules/
 
 # Jetbrains editor config
 .idea
-
-# The build compile folder
-build

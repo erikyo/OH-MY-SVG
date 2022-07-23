@@ -1,12 +1,11 @@
 /**
  * WordPress dependencies
  */
-import { Component } from '@wordpress/element';
+import { Component, useEffect } from '@wordpress/element';
 import { registerBlockType } from '@wordpress/blocks';
 import {
 	DropZone,
 	FormFileUpload,
-	Panel,
 	PanelBody,
 	PanelRow,
 	Placeholder,
@@ -19,17 +18,23 @@ import {
 	ButtonGroup,
 	ColorIndicator,
 	Dropdown,
+	ToolbarButton,
+	Popover,
 } from '@wordpress/components';
 import {
 	BlockControls,
 	InspectorControls,
 	MediaUpload,
 	MediaUploadCheck,
+	__experimentalLinkControl as LinkControl,
 	useBlockProps,
 } from '@wordpress/block-editor';
+import { useState, useRef } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { link as linkIcon, linkOff } from '@wordpress/icons';
+
 import DOMPurify from 'dompurify';
 import optimize from 'svgo-browser/lib/optimize';
-import { __ } from '@wordpress/i18n';
 
 const blockIcon = (
 	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
@@ -54,14 +59,65 @@ const blockStyle = ( width, height ) => {
 };
 
 const ALLOWED_MEDIA_TYPES = [ 'image/svg+xml' ];
+const NEW_TAB_REL = 'noreferrer noopener';
 
 const Edit = ( props ) => {
 	const {
-		attributes: { height, width, svg, originalSvg, colors },
+		attributes: {
+			linkTarget,
+			rel,
+			url,
+			height,
+			width,
+			svg,
+			originalSvg,
+			colors,
+		},
 		isSelected,
 		setAttributes,
 		toggleSelection,
 	} = props;
+	// LINK toolbar stuff
+	const ref = useRef();
+	const [ isEditingURL, setIsEditingURL ] = useState( false );
+	const isURLSet = !! url;
+	const opensInNewTab = linkTarget === '_blank';
+
+	useEffect( () => {
+		if ( ! isSelected ) {
+			setIsEditingURL( false );
+		}
+	}, [ isSelected ] );
+
+	function onToggleOpenInNewTab( value ) {
+		const newLinkTarget = value ? '_blank' : undefined;
+
+		let updatedRel = rel;
+		if ( newLinkTarget && ! rel ) {
+			updatedRel = NEW_TAB_REL;
+		} else if ( ! newLinkTarget && rel === NEW_TAB_REL ) {
+			updatedRel = undefined;
+		}
+
+		setAttributes( {
+			linkTarget: newLinkTarget,
+			rel: updatedRel,
+		} );
+	}
+
+	function startEditing( event ) {
+		event.preventDefault();
+		setIsEditingURL( true );
+	}
+
+	function unlink() {
+		setAttributes( {
+			url: undefined,
+			linkTarget: undefined,
+			rel: undefined,
+		} );
+		setIsEditingURL( false );
+	}
 
 	const optimizeSvg = () => {
 		optimize( svg ).then( ( el ) => {
@@ -361,7 +417,52 @@ const Edit = ( props ) => {
 							Replace{ ' ' }
 						</FormFileUpload>
 					</ToolbarGroup>
+
+					{ ! isURLSet && (
+						<ToolbarButton
+							name="link"
+							icon={ linkIcon }
+							title={ __( 'Link' ) }
+							onClick={ startEditing }
+						/>
+					) }
+					{ isURLSet && (
+						<ToolbarButton
+							name="link"
+							icon={ linkOff }
+							title={ __( 'Unlink' ) }
+							onClick={ unlink }
+							isActive={ true }
+						/>
+					) }
 				</BlockControls>
+			) }
+			{ isSelected && isEditingURL && (
+				<Popover
+					position="bottom center"
+					onClose={ () => {
+						setIsEditingURL( false );
+						// richTextRef.current?.focus();
+					} }
+					anchorRef={ ref.current }
+					focusOnMount={ isEditingURL ? 'firstElement' : false }
+				>
+					<LinkControl
+						className="wp-block-navigation-link__inline-link-input"
+						value={ { url } }
+						onChange={ ( {
+							url: newURL = '',
+							opensInNewTab: newOpensInNewTab,
+						} ) => {
+							setAttributes( { url: newURL } );
+
+							if ( opensInNewTab !== newOpensInNewTab ) {
+								onToggleOpenInNewTab( newOpensInNewTab );
+							}
+						} }
+						forceIsEditingLink={ isEditingURL }
+					/>
+				</Popover>
 			) }
 			{ svg && isSelected ? (
 				<ResizableBox
@@ -478,9 +579,16 @@ export const Save = ( { attributes } ) => {
 
 	const customStyle = blockStyle( attributes.width, attributes.height );
 
-	return (
+	return attributes.url ? (
+		<a
+			{ ...useBlockProps.save( { style: customStyle } ) }
+			href={ attributes.url }
+			dangerouslySetInnerHTML={ createMarkup() }
+		/>
+	) : (
 		<div
 			{ ...useBlockProps.save( { style: customStyle } ) }
+			href={ attributes.url }
 			dangerouslySetInnerHTML={ createMarkup() }
 		/>
 	);
@@ -514,11 +622,15 @@ registerBlockType( blockConfig.name, {
 		},
 		svg: {
 			type: 'string',
-			default: false,
+			default: '',
 		},
 		originalSvg: {
 			type: 'string',
 			default: false,
+		},
+		url: {
+			type: 'string',
+			default: '',
 		},
 		height: {
 			type: 'number',
