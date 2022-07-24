@@ -8,26 +8,26 @@
  * Requires PHP:      7.1.0
  * Author:            codekraft
  * Author URI:        https://codekraft.it
- * License:           GPL v2 or later
+ * License:           GPL v3 or later
  * License URI:       https://www.gnu.org/licenses/gpl-3.0.html
- * Text Domain:       bsvg
+ * Text Domain:       oms
  */
 
 /**
- * Registers and enqueue the block assets
+ * Register the block by passing the location of block.json to register_block_type.
  */
-function oh_my_svg_plugin_register_block() {
-	// Register the block by passing the location of block.json to register_block_type.
+add_action( 'init', function() {
 	register_block_type( __DIR__ . '/src' );
-}
-add_action( 'init', 'oh_my_svg_plugin_register_block' );
+} );
 
 /**
  * Registers and enqueue the Editor scripts
  */
-function oh_my_svg_editor_scripts() {
-	$asset = include __DIR__ . '/build/oh-my-svg-editor.asset.php';
-	wp_enqueue_script( 'bsvg-editor-scripts', plugin_dir_url( __FILE__ ) . 'build/oh-my-svg-editor.js', $asset['dependencies'] );
-}
-
-add_action( 'enqueue_block_editor_assets', 'oh_my_svg_editor_scripts' );
+add_action( 'enqueue_block_editor_assets', function() {
+	$dep = include __DIR__ . '/build/oh-my-svg-editor.asset.php';
+	wp_enqueue_script(
+		'oh-my-svg-editor',
+		plugin_dir_url( __FILE__ ) . 'build/oh-my-svg-editor.js',
+		$dep['dependencies']
+	);
+} );

@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "author": "Erik",
     "license": "GPL-2.0-or-later",
-    "main": "build/index.js",
+    "main": "build/oh-my-svg-editor.js",
     "scripts": {
         "build": "wp-scripts build",
         "start": "wp-scripts start",
