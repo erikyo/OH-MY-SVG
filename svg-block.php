@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Plugin Name: OH MY SVG
- * Description: A Simple plugin that adds an SVG Block to your Gutenberg block editor. Some basic features are provided like automatic markup sanitation, svgo optimization, color editor. Has the same controls as images but actually the content is xml markup (ps also works with html) this allows the possibility to use css animations or js script to animate it
- * Version: 0.1.0
+ * Plugin Name:       OH MY SVG
+ * Description:       A Simple plugin that adds the SVG Block to your Gutenberg block editor.
+ * Version:           0.1.0
  * Requires at least: 5.7
  * Requires PHP:      7.1.0
  * Author:            codekraft
