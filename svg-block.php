@@ -19,15 +19,3 @@
 add_action( 'init', function() {
 	register_block_type( __DIR__ . '/src' );
 } );
-
-/**
- * Registers and enqueue the Editor scripts
- */
-add_action( 'enqueue_block_editor_assets', function() {
-	$dep = include __DIR__ . '/build/oh-my-svg-editor.asset.php';
-	wp_enqueue_script(
-		'oh-my-svg-editor',
-		plugin_dir_url( __FILE__ ) . 'build/oh-my-svg-editor.js',
-		$dep['dependencies']
-	);
-} );

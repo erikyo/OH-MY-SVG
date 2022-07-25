@@ -1,9 +1,15 @@
 {
-    "name": "@codekraft/oh-my-svg",
+    "name": "oh-my-svg",
     "version": "1.0.0",
     "author": "Erik",
     "license": "GPL-2.0-or-later",
     "main": "build/oh-my-svg-editor.js",
+    "files": [
+        "build/*",
+        "svg-block.php",
+        "LICENSE.md",
+        "readme.txt"
+    ],
     "scripts": {
         "build": "wp-scripts build",
         "start": "wp-scripts start",
