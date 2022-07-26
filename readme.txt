@@ -1,6 +1,6 @@
 === OH MY SVG ===
 Contributors:      codekraft
-Tags:              svg, block, upload, sanitize, sanitise, security, svg upload, image, vector, file, graphic, media
+Tags:              svg, block, upload, sanitize, link, svg upload, image, vector, file, graphic, media, svgo
 Requires at least: 5.7
 Tested up to:      6.1
 Stable tag:        0.1.0
@@ -37,3 +37,16 @@ It can also be installed manually using a zip file.
 = 0.1.0 - 2022-07-25 =
 * Initial Release.
 
+
+= Contribute =
+We love your input! We want to make contributing to this project as easy and transparent as possible, whether it's:
+
+* Reporting a bug
+* Testing the plugin with different user agent and report fingerprinting failures
+* Discussing the current state, features, improvements
+* Submitting a fix or a new feature
+
+We use github to host code, to track issues and feature requests, as well as accept pull requests.
+By contributing, you agree that your contributions will be licensed under its GPLv3 License.
+
+[GitHub Repository](https://github.com/erikyo/svgb)
