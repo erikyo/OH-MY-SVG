@@ -3,7 +3,6 @@ import optimize from 'svgo-browser/lib/optimize';
 import DOMPurify from 'dompurify';
 import {
 	Button,
-	ButtonGroup,
 	ColorIndicator,
 	ColorPicker,
 	Dropdown,
@@ -12,7 +11,6 @@ import {
 	Panel,
 	PanelBody,
 	PanelRow,
-	Placeholder,
 	Popover,
 	RangeControl,
 	ResizableBox,
@@ -25,12 +23,11 @@ import {
 	InspectorControls,
 	MediaUpload,
 	MediaUploadCheck,
-	MediaPlaceholder,
 	useBlockProps,
 	__experimentalLinkControl as LinkControl,
 } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import { blockStyle, svgIcon } from './index';
+import { blockStyle } from './index';
 import { link as linkIcon, linkOff } from '@wordpress/icons';
 
 const ALLOWED_MEDIA_TYPES = [ 'image/svg+xml' ];
@@ -434,16 +431,16 @@ export const Edit = ( props ) => {
 						) }
 
 						<FormFileUpload
+							type={ 'file' }
 							label="Replace"
 							accept={ ALLOWED_MEDIA_TYPES }
-							onClick={ ( event ) => ( event.target.value = '' ) }
 							onChange={ ( ev ) => {
 								onImageSelect(
 									Object.values( ev.target.files )
 								);
 							} }
 						>
-							Replace{ ' ' }
+							Replace
 						</FormFileUpload>
 					</ToolbarGroup>
 				</BlockControls>
@@ -453,7 +450,6 @@ export const Edit = ( props ) => {
 					position="bottom center"
 					onClose={ () => {
 						setIsEditingURL( false );
-						// richTextRef.current?.focus();
 					} }
 					anchorRef={ ref.current }
 					focusOnMount={ isEditingURL ? 'firstElement' : false }
@@ -532,15 +528,12 @@ export const Edit = ( props ) => {
 								render={ () => (
 									<FormFileUpload
 										accept={ ALLOWED_MEDIA_TYPES }
-										onClick={ ( event ) =>
-											( event.target.value = '' )
-										}
-										variant={ 'secondary' }
 										onChange={ ( ev ) => {
 											onImageSelect(
 												Object.values( ev.target.files )
 											);
 										} }
+										variant={ 'secondary' }
 									>
 										{ svg
 											? 'Replace Object'

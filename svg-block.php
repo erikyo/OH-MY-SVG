@@ -18,5 +18,5 @@
  * Register the block by passing the location of block.json to register_block_type.
  */
 add_action( 'init', function() {
-	register_block_type( __DIR__ . '/src' );
+	register_block_type( __DIR__ . '/build' );
 } );
