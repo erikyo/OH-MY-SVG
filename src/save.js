@@ -9,7 +9,11 @@ export const Save = ( { attributes } ) => {
 		};
 	}
 
-	const customStyle = blockStyle( attributes.width, attributes.height );
+	const customStyle = blockStyle(
+		attributes.width,
+		attributes.height,
+		attributes.rotation
+	);
 
 	return attributes.url ? (
 		<a

@@ -18,10 +18,11 @@ export const svgIcon = (
 // The block configuration
 const blockConfig = require( './block.json' );
 
-export const blockStyle = ( width, height ) => {
+export const blockStyle = ( width, height, rotation ) => {
 	return {
 		width: width || null,
 		height: height || null,
+		transform: rotation ? 'rotate(' + rotation + 'deg)' : null,
 		display: 'flex',
 		justifyContent: 'center',
 	};
@@ -42,6 +43,7 @@ registerBlockType( blockConfig.name, {
 		className: true,
 		color: {
 			background: true,
+			gradients: true,
 		},
 		spacing: {
 			margin: true, // Enable margin UI control.
@@ -72,6 +74,10 @@ registerBlockType( blockConfig.name, {
 		width: {
 			type: 'number',
 			default: false,
+		},
+		rotation: {
+			type: 'number',
+			default: 0,
 		},
 		colors: {
 			type: 'array',

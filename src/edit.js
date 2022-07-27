@@ -41,6 +41,7 @@ export const Edit = ( props ) => {
 			url,
 			height,
 			width,
+			rotation,
 			svg,
 			originalSvg,
 			colors,
@@ -49,10 +50,12 @@ export const Edit = ( props ) => {
 		setAttributes,
 		toggleSelection,
 	} = props;
+
+	const [ pathStrokeWith, setPathStrokeWith ] = useState( 1.0 );
+
 	// LINK toolbar stuff
 	const ref = useRef();
 	const [ isEditingURL, setIsEditingURL ] = useState( false );
-	const [ pathStrokeWith, setPathStrokeWith ] = useState( 1.0 );
 	const isURLSet = !! url;
 	const opensInNewTab = linkTarget === '_blank';
 
@@ -100,9 +103,9 @@ export const Edit = ( props ) => {
 		} );
 	};
 
-	const getSvgDoc = ( svg ) => {
+	const getSvgDoc = ( svgData ) => {
 		const parser = new DOMParser();
-		return parser.parseFromString( svg, 'image/svg+xml' );
+		return parser.parseFromString( svgData, 'image/svg+xml' );
 	};
 
 	const getSvgString = ( svgDoc ) => {
@@ -113,9 +116,10 @@ export const Edit = ( props ) => {
 	const collectColors = ( fileContent ) => {
 		const colorCollection = [];
 		if ( fileContent ) {
-			for ( const match of fileContent.matchAll(
+			const matchedColors = fileContent.matchAll(
 				/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}|rgb\((?:\s*\d+\s*,){2}\s*\d+\)|rgba\((\s*\d+\s*,){3}[\d.]+\)/g
-			) ) {
+			);
+			for ( const match of matchedColors ) {
 				if ( match[ 0 ] ) {
 					colorCollection.push( match[ 0 ] );
 					if ( colorCollection.length > 10 ) return;
@@ -124,6 +128,7 @@ export const Edit = ( props ) => {
 		}
 		return [ ...new Set( colorCollection ) ] || [];
 	};
+
 	useEffect( () => {
 		const colorCollection = collectColors( svg );
 		setAttributes( {
@@ -132,6 +137,14 @@ export const Edit = ( props ) => {
 	}, [ svg ] );
 
 	// svg
+	const loadSvg = ( res ) => {
+		const svgMarkup = DOMPurify.sanitize( res );
+		getSvgSize( svgMarkup );
+		setAttributes( {
+			originalSvg: originalSvg || svgMarkup,
+			svg: svgMarkup || '😓 error!',
+		} );
+	};
 
 	// TODO: attributes {el: [path, circle, rect], borderWidth: 2, borderColor: 'hex' }
 	const svgAddPathStroke = () => {
@@ -170,51 +183,45 @@ export const Edit = ( props ) => {
 		} );
 	};
 
+	const getSvgSize = ( fileContent ) => {
+		const parsedData = {};
+		if ( fileContent ) {
+			// then get the image size data
+			const viewBox = fileContent.match( /viewBox=["']([^\\"']*)/ );
+			if ( viewBox ) {
+				const svgDataRaw = viewBox[ 1 ].split( ' ' );
+				parsedData.width = parseInt( svgDataRaw[ 2 ], 10 );
+				parsedData.height = parseInt( svgDataRaw[ 3 ], 10 );
+			} else {
+				const sizes = [
+					...fileContent.matchAll( /(height|width)=["']([^\\"']*)/g ),
+				];
+				sizes.forEach( ( size ) => {
+					switch ( size[ 1 ] ) {
+						case 'width':
+						case 'height':
+							return ( parsedData[ size[ 1 ] ] = parseInt(
+								size[ 2 ],
+								10
+							) );
+					}
+				} );
+			}
+
+			setAttributes( {
+				height: parsedData.height || height,
+				width: parsedData.width || width,
+			} );
+
+			return parsedData;
+		}
+	};
+
 	const onImageSelect = ( files ) => {
 		files.forEach( ( file ) => {
 			const reader = new FileReader();
 			reader.onload = () => {
-				// sanitize content first
-				const fileContent = DOMPurify.sanitize( reader.result );
-				const parsedData = {};
-
-				if ( fileContent ) {
-					const viewBox = fileContent.match(
-						/viewBox=["']([^\\"']*)/
-					);
-					if ( viewBox ) {
-						const svgDataRaw = viewBox[ 1 ].split( ' ' );
-						parsedData.width = parseInt( svgDataRaw[ 2 ], 10 );
-						parsedData.height = parseInt( svgDataRaw[ 3 ], 10 );
-					} else {
-						const sizes = [
-							...fileContent.matchAll(
-								/(height|width)=["']([^\\"']*)/g
-							),
-						];
-						sizes.forEach( ( size ) => {
-							switch ( size[ 1 ] ) {
-								case 'width':
-								case 'height':
-									return ( parsedData[ size[ 1 ] ] = parseInt(
-										size[ 2 ],
-										10
-									) );
-							}
-						} );
-					}
-
-					// collect colors
-					const colorCollection = collectColors( fileContent ) || [];
-
-					setAttributes( {
-						originalSvg: fileContent,
-						svg: fileContent,
-						height: parsedData.height,
-						width: parsedData.width,
-						colors: colorCollection,
-					} );
-				}
+				loadSvg( reader.result );
 			};
 			reader.onabort = () => console.log( 'file reading was aborted' );
 			reader.onerror = () => console.log( 'file reading has failed' );
@@ -238,7 +245,7 @@ export const Edit = ( props ) => {
 
 			return (
 				<div
-					style={ blockStyle( width, height ) }
+					style={ blockStyle( width, height, rotation ) }
 					dangerouslySetInnerHTML={ createMarkup() }
 				/>
 			);
@@ -290,13 +297,44 @@ export const Edit = ( props ) => {
 								} );
 							} }
 						/>
+						<RangeControl
+							label={ 'Rotation' }
+							type={ 'number' }
+							value={ rotation }
+							min={ 0 }
+							max={ 359 }
+							marks={ [
+								{
+									value: 0,
+									label: '0',
+								},
+								{
+									value: 90,
+									label: '90',
+								},
+								{
+									value: 180,
+									label: '180',
+								},
+								{
+									value: 270,
+									label: '270',
+								},
+							] }
+							step={ 1 }
+							onChange={ ( ev ) => {
+								setAttributes( {
+									rotation: ev,
+								} );
+							} }
+						/>
 					</PanelBody>
 				</Panel>
 
 				<Panel title="editor">
 					<PanelBody title="Editor" initialOpen={ false }>
 						<PanelRow>
-							<b>SVGO</b>
+							<p>SVGO</p>
 							<Button
 								isSmall={ true }
 								variant={ 'primary' }
@@ -544,11 +582,7 @@ export const Edit = ( props ) => {
 						</MediaUploadCheck>
 						<span>or copy and paste the svg markup here:</span>
 						<TextareaControl
-							onChange={ ( e ) =>
-								setAttributes( {
-									svg: e,
-								} )
-							}
+							onChange={ ( e ) => loadSvg( e ) }
 						></TextareaControl>
 					</div>
 				</>
