@@ -24,7 +24,6 @@ export const Save = ( { attributes } ) => {
 	) : (
 		<div
 			{ ...useBlockProps.save( { style: customStyle } ) }
-			href={ attributes.url }
 			dangerouslySetInnerHTML={ createMarkup() }
 		/>
 	);

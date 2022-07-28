@@ -34,6 +34,19 @@ const ALLOWED_MEDIA_TYPES = [ 'image/svg+xml' ];
 const NEW_TAB_REL = 'noreferrer noopener';
 
 export const Edit = ( props ) => {
+	/**
+	 * The cat properties.
+	 *
+	 * @typedef {Object} props the svg edit properties
+	 * @property {string} rel         - stores whether the link opens into a new window
+	 * @property {string} url         - the target of the hyperlink
+	 * @property {number} height      - the Svg image height
+	 * @property {number} width       - the Svg image width
+	 * @property {number} rotation    - the Svg image rotation
+	 * @property {number} svg         - the Svg image markup
+	 * @property {number} originalSvg - the original Svg before changes
+	 * @property {Array}  colors      - the collection of the color used in the Svg
+	 */
 	const {
 		attributes: {
 			linkTarget,
@@ -95,6 +108,10 @@ export const Edit = ( props ) => {
 		setIsEditingURL( false );
 	}
 
+	/**
+	 * SVGO Optimizations
+	 *
+	 */
 	const optimizeSvg = () => {
 		optimize( svg ).then( ( el ) => {
 			setAttributes( {
@@ -103,16 +120,31 @@ export const Edit = ( props ) => {
 		} );
 	};
 
+	/**
+	 * Returns HtmlElement from string
+	 *
+	 * @param {string} svgData
+	 */
 	const getSvgDoc = ( svgData ) => {
-		const parser = new DOMParser();
+		const parser = new window.DOMParser();
 		return parser.parseFromString( svgData, 'image/svg+xml' );
 	};
 
+	/**
+	 * Returns string from HtmlElement
+	 *
+	 * @param {Node} svgDoc
+	 */
 	const getSvgString = ( svgDoc ) => {
-		const serializer = new XMLSerializer();
+		const serializer = new window.XMLSerializer();
 		return serializer.serializeToString( svgDoc );
 	};
 
+	/**
+	 * Collect the colors used into the svg
+	 *
+	 * @param {string} fileContent
+	 */
 	const collectColors = ( fileContent ) => {
 		const colorCollection = [];
 		if ( fileContent ) {
@@ -129,6 +161,11 @@ export const Edit = ( props ) => {
 		return [ ...new Set( colorCollection ) ] || [];
 	};
 
+	/**
+	 * Whenever the svg is changed it collects the colors used in the image
+	 *
+	 * @type {useEffect}
+	 */
 	useEffect( () => {
 		const colorCollection = collectColors( svg );
 		setAttributes( {
@@ -136,18 +173,29 @@ export const Edit = ( props ) => {
 		} );
 	}, [ svg ] );
 
-	// svg
+	/**
+	 * This function is launched when an SVG file is read,
+	 * sequentially first cleans up the markup,
+	 * tries to figure out the size of the image if is possibile,
+	 * and then replaces the current svg (if any with the new one
+	 *
+	 * @type {string} res - The string that was read into the file that is supposed to be an svg
+	 */
 	const loadSvg = ( res ) => {
 		const svgMarkup = DOMPurify.sanitize( res );
 		getSvgSize( svgMarkup );
 		setAttributes( {
-			originalSvg: originalSvg || svgMarkup,
+			originalSvg: svgMarkup || originalSvg || '',
 			svg: svgMarkup || '😓 error!',
 		} );
 	};
 
-	// TODO: attributes {el: [path, circle, rect], borderWidth: 2, borderColor: 'hex' }
+	/**
+	 * Add a stroke around path, circle, rect
+	 * this for example is useful if you want to animate the svg line
+	 */
 	const svgAddPathStroke = () => {
+		// TODO: attributes {el: [path, circle, rect], borderWidth: 2, borderColor: 'hex' }
 		const svgDoc = getSvgDoc( svg );
 		svgDoc.querySelectorAll( 'path, circle, rect' ).forEach( ( item ) => {
 			item.setAttribute( 'stroke-width', pathStrokeWith + 'px' );
@@ -159,6 +207,12 @@ export const Edit = ( props ) => {
 		} );
 	};
 
+	/**
+	 * Replace a color of the svg with another color
+	 *
+	 * @param {string} newColor
+	 * @param {string} color
+	 */
 	const updateColor = ( newColor, color ) => {
 		// updates the colors array
 		const newSvg = svg.replaceAll( color, newColor );
@@ -171,6 +225,9 @@ export const Edit = ( props ) => {
 		} );
 	};
 
+	/**
+	 * Adds the "fill:transparent" property to the current svg (basically makes it transparent apart from the borders)
+	 */
 	const svgRemoveFill = () => {
 		const svgDoc = getSvgDoc( svg );
 		svgDoc.querySelectorAll( 'path, circle, rect' ).forEach( ( item ) => {
@@ -183,6 +240,12 @@ export const Edit = ( props ) => {
 		} );
 	};
 
+	/**
+	 * Parse in svg content to look for viewbox first and,
+	 * if not found, height and width properties
+	 *
+	 * @param {string} fileContent
+	 */
 	const getSvgSize = ( fileContent ) => {
 		const parsedData = {};
 		if ( fileContent ) {
@@ -217,9 +280,16 @@ export const Edit = ( props ) => {
 		}
 	};
 
+	/**
+	 * Triggered when an image is selected with an input of file type
+	 * Loads the file with FileReader and then passes the result
+	 * to the function that cleans/parses in its contents
+	 *
+	 * @param {HTMLInputElement} files
+	 */
 	const onImageSelect = ( files ) => {
 		files.forEach( ( file ) => {
-			const reader = new FileReader();
+			const reader = new window.FileReader();
 			reader.onload = () => {
 				loadSvg( reader.result );
 			};
@@ -230,11 +300,21 @@ export const Edit = ( props ) => {
 				reader.readAsText( file );
 			} catch ( err ) {
 				console.log( err );
-				console.log( file );
 			}
 		} );
 	};
 
+	/**
+	 * The SVG Component
+	 * (prints the svg)
+	 *
+	 *  @typedef {Object} Props
+	 * @property {number} width    - the svg width
+	 * @property {number} height   - the svg height
+	 * @property {number} rotation - the svg rotation
+	 *
+	 * @return {Component} The SVG
+	 */
 	class SVG extends Component {
 		render() {
 			function createMarkup() {
@@ -252,15 +332,16 @@ export const Edit = ( props ) => {
 		}
 	}
 
+	/**
+	 * @return {Component} the SvgDropZone component
+	 */
 	const SvgDropZone = () => {
 		return (
 			<div>
 				<DropZone
-					onHTMLDrop={ ( e ) => console.log( e ) }
 					onFilesDrop={ ( files ) => {
 						onImageSelect( files );
 					} }
-					onDrop={ ( e ) => console.log( e ) }
 				/>
 			</div>
 		);
@@ -415,10 +496,15 @@ export const Edit = ( props ) => {
 					>
 						{ colors &&
 							colors.map( ( color, index ) => (
-								<Dropdown
+								<div
 									key={ index }
-									renderToggle={ ( { onToggle } ) => (
-										<PanelRow>
+									style={ {
+										minWidth: '100%',
+										borderBottom: '1px solid #f3f3f3',
+									} }
+								>
+									<Dropdown
+										renderToggle={ ( { onToggle } ) => (
 											<Button onClick={ onToggle }>
 												<ColorIndicator
 													colorValue={ color }
@@ -431,18 +517,18 @@ export const Edit = ( props ) => {
 													{ color }
 												</span>
 											</Button>
-										</PanelRow>
-									) }
-									renderContent={ () => (
-										<ColorPicker
-											color={ color }
-											onChange={ ( e ) =>
-												updateColor( e, color )
-											}
-											defaultValue={ color }
-										/>
-									) }
-								></Dropdown>
+										) }
+										renderContent={ () => (
+											<ColorPicker
+												color={ color }
+												onChange={ ( e ) =>
+													updateColor( e, color )
+												}
+												defaultValue={ color }
+											/>
+										) }
+									></Dropdown>
+								</div>
 							) ) }
 					</PanelBody>
 				</Panel>

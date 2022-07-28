@@ -18,6 +18,13 @@ export const svgIcon = (
 // The block configuration
 const blockConfig = require( './block.json' );
 
+/**
+ * Build the block style with stored props
+ *
+ * @param {number} width
+ * @param {number} height
+ * @param {number} rotation
+ */
 export const blockStyle = ( width, height, rotation ) => {
 	return {
 		width: width || null,
