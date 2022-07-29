@@ -165,6 +165,7 @@ export const Edit = ( props ) => {
 	 * Whenever the svg is changed it collects the colors used in the image
 	 *
 	 * @type {useEffect}
+	 * @module collectColors svg
 	 */
 	useEffect( () => {
 		const colorCollection = collectColors( svg );
@@ -176,10 +177,10 @@ export const Edit = ( props ) => {
 	/**
 	 * This function is launched when an SVG file is read,
 	 * sequentially first cleans up the markup,
-	 * tries to figure out the size of the image if is possibile,
+	 * tries to figure out the size of the image if is possible,
 	 * and then replaces the current svg (if any with the new one
 	 *
-	 * @type {string} res - The string that was read into the file that is supposed to be an svg
+	 * @param {string} res - The string that was read into the file that is supposed to be an svg
 	 */
 	const loadSvg = ( res ) => {
 		const svgMarkup = DOMPurify.sanitize( res );
@@ -293,13 +294,19 @@ export const Edit = ( props ) => {
 			reader.onload = () => {
 				loadSvg( reader.result );
 			};
-			reader.onabort = () => console.log( 'file reading was aborted' );
-			reader.onerror = () => console.log( 'file reading has failed' );
+			reader.onabort = () => {
+				throw new Error( 'file reading was aborted' );
+			};
+			reader.onerror = () => {
+				throw new Error( 'file reading has failed' );
+			};
 
 			try {
 				reader.readAsText( file );
 			} catch ( err ) {
-				console.log( err );
+				throw new Error( 'Failed to read the given file', {
+					cause: err,
+				} );
 			}
 		} );
 	};
@@ -353,7 +360,7 @@ export const Edit = ( props ) => {
 				<Panel header="Settings">
 					<PanelBody>
 						<RangeControl
-							label={ 'Width' }
+							label={ __( 'Width' ) }
 							type={ 'number' }
 							value={ width }
 							min={ 0 }
@@ -366,7 +373,7 @@ export const Edit = ( props ) => {
 							} }
 						/>
 						<RangeControl
-							label={ 'Height' }
+							label={ __( 'Height' ) }
 							type={ 'number' }
 							value={ height }
 							min={ 0 }
@@ -379,7 +386,7 @@ export const Edit = ( props ) => {
 							} }
 						/>
 						<RangeControl
-							label={ 'Rotation' }
+							label={ __( 'Rotation' ) }
 							type={ 'number' }
 							value={ rotation }
 							min={ 0 }
@@ -419,17 +426,13 @@ export const Edit = ( props ) => {
 							<Button
 								isSmall={ true }
 								variant={ 'primary' }
-								onClick={ () => {
-									setAttributes( {
-										svg: optimizeSvg(),
-									} );
-								} }
+								onClick={ () => optimizeSvg() }
 							>
 								{ __( 'Optimize' ) }
 							</Button>
 						</PanelRow>
 						<PanelRow>
-							<p>Restore Original</p>
+							<p>{ __( 'Restore Original' ) }</p>
 							<Button
 								isSmall={ true }
 								variant={ 'secondary' }
@@ -446,7 +449,7 @@ export const Edit = ( props ) => {
 						<hr />
 
 						<PanelRow>
-							<p>Remove Fill</p>
+							<p>{ __( 'Fill' ) }</p>
 							<Button
 								isSmall={ true }
 								variant={ 'primary' }
@@ -457,7 +460,7 @@ export const Edit = ( props ) => {
 						</PanelRow>
 
 						<PanelRow>
-							<p>Add Stroke</p>
+							<p>{ __( 'Outline' ) }</p>
 							<Button
 								isSmall={ true }
 								variant={ 'primary' }
@@ -479,7 +482,7 @@ export const Edit = ( props ) => {
 						<hr />
 
 						<TextareaControl
-							label={ 'SVG Markup Editor' }
+							label={ __( 'SVG Markup Editor' ) }
 							value={ svg || '' }
 							onChange={ ( ev ) => {
 								setAttributes( { svg: ev } );
@@ -490,7 +493,7 @@ export const Edit = ( props ) => {
 
 				<Panel title="colors">
 					<PanelBody
-						title="Colors"
+						title={ __( 'Colors' ) }
 						initialOpen={ true }
 						style={ { display: 'flex', flexDirection: 'column' } }
 					>
@@ -556,7 +559,7 @@ export const Edit = ( props ) => {
 
 						<FormFileUpload
 							type={ 'file' }
-							label="Replace"
+							label={ __( 'Replace SVG' ) }
 							accept={ ALLOWED_MEDIA_TYPES }
 							onChange={ ( ev ) => {
 								onImageSelect(
@@ -639,10 +642,12 @@ export const Edit = ( props ) => {
 					>
 						<SvgDropZone />
 						<div>
-							<span>Drop here a Svg</span>
+							<span>{ __( 'Drop here a Svg' ) }</span>
 						</div>
 						<div>
-							<span>or select one from your computer</span>
+							<span>
+								{ __( 'or select one from your computer' ) }
+							</span>
 						</div>
 						<MediaUploadCheck>
 							<MediaUpload
@@ -660,13 +665,15 @@ export const Edit = ( props ) => {
 										variant={ 'secondary' }
 									>
 										{ svg
-											? 'Replace Object'
-											: 'Select Object' }
+											? __( 'Replace Object' )
+											: __( 'Select Object' ) }
 									</FormFileUpload>
 								) }
 							/>
 						</MediaUploadCheck>
-						<span>or copy and paste the svg markup here:</span>
+						<span>
+							{ __( 'or copy and paste the svg markup here:' ) }
+						</span>
 						<TextareaControl
 							onChange={ ( e ) => loadSvg( e ) }
 						></TextareaControl>

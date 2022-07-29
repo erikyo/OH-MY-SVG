@@ -16,13 +16,13 @@ This plugin adds the SVG Block to your Gutenberg editor that could be used with 
 Some key features are provided like automatic markup sanitation, svgo optimization, and small utility to change the color and the markup.
 Has the same controls as images but actually the content is xml markup (ps also works with html) this allows the possibility to use css animations or js scripts to animate it.
 
-=== Security ===
+= Security =
 
 Since this plugin doesn't enable uploads of svg images into media library could be considered safer than all the others that enable the upload.
 As if that wasn't enough svg's will be cleaned with DOMpurifier which indeed is a first class js purifier, those used in php try to mimic how it works.
 Svgs will be included inside pages as xml fragment, they will not be processed by imagemagick and no one other than the user (with the block editor permission) will have the permission to "upload" (or better include) them.
 
-=== Inspirations, links ===
+= Inspirations, links =
 
 [Mario Heiderich the-image-that-called-me](https://www.slideshare.net/x00mario/the-image-that-called-me)
 [Fortinet - Anatomy of Scalable Vector Graphics (SVG) Attack Surface on the Web](https://www.fortinet.com/blog/threat-research/scalable-vector-graphics-attack-surface-anatomy)

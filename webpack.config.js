@@ -1,12 +1,11 @@
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const path = require( 'path' );
-const entry = {
-	'oh-my-svg-editor': path.resolve( process.cwd(), `src/index.js` ),
-};
 
 module.exports = {
 	...defaultConfig,
-	entry,
+	entry: {
+		'oh-my-svg-editor': path.resolve( process.cwd(), `src/index.js` ),
+	},
 	output: {
 		path: path.join( __dirname, './build' ),
 	},
