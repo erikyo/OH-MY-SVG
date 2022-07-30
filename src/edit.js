@@ -600,6 +600,7 @@ export const Edit = ( props ) => {
 			) }
 			{ svg && isSelected ? (
 				<ResizableBox
+					style={ { margin: 'auto' } }
 					size={ {
 						width: width ?? 'auto',
 						height: height ?? 'auto',
@@ -634,21 +635,19 @@ export const Edit = ( props ) => {
 					<div
 						className="svg-preview-container"
 						style={ {
-							backgroundColor: '#f3f3f3',
+							backgroundColor: '#fff',
+							border: '2px dashed #2271b1',
 							padding: '24px',
 							borderRadius: '8px',
 							textAlign: 'center',
 						} }
 					>
 						<SvgDropZone />
-						<div>
-							<span>{ __( 'Drop here a Svg' ) }</span>
-						</div>
-						<div>
-							<span>
-								{ __( 'or select one from your computer' ) }
-							</span>
-						</div>
+						<p>
+							{ __(
+								'Drop here your Svg or select one from your computer'
+							) }
+						</p>
 						<MediaUploadCheck>
 							<MediaUpload
 								type="image"
@@ -671,9 +670,9 @@ export const Edit = ( props ) => {
 								) }
 							/>
 						</MediaUploadCheck>
-						<span>
+						<p style={ { marginTop: '16px' } }>
 							{ __( 'or copy and paste the svg markup here:' ) }
-						</span>
+						</p>
 						<TextareaControl
 							onChange={ ( e ) => loadSvg( e ) }
 						></TextareaControl>

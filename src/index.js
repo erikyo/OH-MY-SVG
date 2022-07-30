@@ -31,7 +31,7 @@ export const blockStyle = ( width, height, rotation ) => {
 		height: height || null,
 		transform: rotation ? 'rotate(' + rotation + 'deg)' : null,
 		display: 'flex',
-		justifyContent: 'center',
+		margin: 'auto',
 	};
 };
 
