@@ -2,8 +2,9 @@
  * WordPress dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { Edit } from './edit';
-import { Save } from './save';
+import Edit from './edit';
+import Save from './save';
+const blockConfig = require( './block.json' ); // The block configuration
 
 export const svgIcon = (
 	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
@@ -14,9 +15,6 @@ export const svgIcon = (
 		/>
 	</svg>
 );
-
-// The block configuration
-const blockConfig = require( './block.json' );
 
 /**
  * Build the block style with stored props
@@ -35,8 +33,14 @@ export const blockStyle = ( width, height, rotation ) => {
 	};
 };
 
-// Register the block
-/// https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/
+/**
+ * Register the block
+ * https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/
+ *
+ * @function Object() { [native code] }
+ * @module Edit - the edit function
+ * @module Save - the save function
+ */
 registerBlockType( blockConfig.name, {
 	...blockConfig,
 	icon: svgIcon,

@@ -33,11 +33,11 @@ import { link as linkIcon, linkOff } from '@wordpress/icons';
 const ALLOWED_MEDIA_TYPES = [ 'image/svg+xml' ];
 const NEW_TAB_REL = 'noreferrer noopener';
 
-export const Edit = ( props ) => {
+const Edit = ( props ) => {
 	/**
-	 * The cat properties.
+	 * The edit View
 	 *
-	 * @typedef {Object} props the svg edit properties
+	 * @param    {Object} props       - the svg edit properties
 	 * @property {string} rel         - stores whether the link opens into a new window
 	 * @property {string} url         - the target of the hyperlink
 	 * @property {number} height      - the Svg image height
@@ -46,6 +46,8 @@ export const Edit = ( props ) => {
 	 * @property {number} svg         - the Svg image markup
 	 * @property {number} originalSvg - the original Svg before changes
 	 * @property {Array}  colors      - the collection of the color used in the Svg
+	 *
+	 * @return {Component}            - the edit view
 	 */
 	const {
 		attributes: {
@@ -78,6 +80,12 @@ export const Edit = ( props ) => {
 		}
 	}, [ isSelected ] );
 
+	/**
+	 * If the user has checked the "Open in new tab" checkbox, then set the linkTarget attribute to "_blank" and the rel attribute to "noreferrer noopener".
+	 * If the user has unchecked the "Open in new tab" checkbox, then set the linkTarget attribute to undefined and the rel attribute to undefined
+	 *
+	 * @param {boolean} value - The value of the checkbox.
+	 */
 	function onToggleOpenInNewTab( value ) {
 		const newLinkTarget = value ? '_blank' : undefined;
 
@@ -94,11 +102,21 @@ export const Edit = ( props ) => {
 		} );
 	}
 
+	/**
+	 * `startEditing` is a function that takes an event as an argument and prevents the default behavior of the event,
+	 * then sets the state of `isEditingURL` to true
+	 *
+	 * @param {Event} event - The event object that triggered the function.
+	 */
 	function startEditing( event ) {
 		event.preventDefault();
 		setIsEditingURL( true );
 	}
 
+	/**
+	 * It sets the attributes of the block to undefined,
+	 * and then sets the state of the block to not editing the URL
+	 */
 	function unlink() {
 		setAttributes( {
 			url: undefined,
@@ -110,7 +128,7 @@ export const Edit = ( props ) => {
 
 	/**
 	 * SVGO Optimizations
-	 *
+	 * It takes the SVG string, optimizes it, and then sets the `svg` attribute to the optimized SVG string
 	 */
 	const optimizeSvg = () => {
 		optimize( svg ).then( ( el ) => {
@@ -121,9 +139,10 @@ export const Edit = ( props ) => {
 	};
 
 	/**
-	 * Returns HtmlElement from string
+	 * It takes a string of SVG markup and returns a document object
 	 *
-	 * @param {string} svgData
+	 * @param {string} svgData - The SVG data that you want to convert to a PNG.
+	 * @return {Object} A DOMParser object.
 	 */
 	const getSvgDoc = ( svgData ) => {
 		const parser = new window.DOMParser();
@@ -131,9 +150,11 @@ export const Edit = ( props ) => {
 	};
 
 	/**
-	 * Returns string from HtmlElement
+	 * It takes an SVG document and returns a string representation of it
 	 *
-	 * @param {Node} svgDoc
+	 * @param {Node} svgDoc - The SVG document that you want to convert to a string.
+	 * @return {string} A string of the svgDoc.
+	 *
 	 */
 	const getSvgString = ( svgDoc ) => {
 		const serializer = new window.XMLSerializer();
@@ -143,9 +164,12 @@ export const Edit = ( props ) => {
 	/**
 	 * Collect the colors used into the svg
 	 *
-	 * @param {string} fileContent
+	 * It takes a string of text and returns an array of unique colors found in that string
+	 *
+	 * @param {string} fileContent - The content of the file that you want to extract colors from.
+	 * @return {Array} An array of unique colors.
 	 */
-	const collectColors = ( fileContent ) => {
+	function collectColors( fileContent ) {
 		const colorCollection = [];
 		if ( fileContent ) {
 			const colorRegexp =
@@ -287,7 +311,7 @@ export const Edit = ( props ) => {
 	 * Loads the file with FileReader and then passes the result
 	 * to the function that cleans/parses in its contents
 	 *
-	 * @param {HTMLInputElement} files
+	 * @param {Array} files
 	 */
 	const onImageSelect = ( files ) => {
 		files.forEach( ( file ) => {
@@ -341,7 +365,10 @@ export const Edit = ( props ) => {
 	}
 
 	/**
-	 * @return {Component} the SvgDropZone component
+	 * `<DropZone />` is a component that accepts a function as a prop called `onFilesDrop`.
+	 * When a file is dropped into the drop zone, the `onFilesDrop` function is called with the dropped file as an argument
+	 *
+	 * @return {Component} A function that returns a div with a DropZone component.
 	 */
 	const SvgDropZone = () => {
 		return (
@@ -683,3 +710,5 @@ export const Edit = ( props ) => {
 		</div>
 	);
 };
+
+export default Edit;

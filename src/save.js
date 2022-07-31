@@ -2,7 +2,7 @@ import DOMPurify from 'dompurify';
 import { useBlockProps } from '@wordpress/block-editor';
 import { blockStyle } from './index';
 
-export const Save = ( { attributes } ) => {
+const Save = ( { attributes } ) => {
 	function createMarkup() {
 		return {
 			__html: DOMPurify.sanitize( attributes.svg ),
@@ -28,3 +28,5 @@ export const Save = ( { attributes } ) => {
 		/>
 	);
 };
+
+export default Save;
