@@ -148,18 +148,19 @@ export const Edit = ( props ) => {
 	const collectColors = ( fileContent ) => {
 		const colorCollection = [];
 		if ( fileContent ) {
-			const matchedColors = fileContent.matchAll(
-				/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}|rgb\((?:\s*\d+\s*,){2}\s*\d+\)|rgba\((\s*\d+\s*,){3}[\d.]+\)/g
-			);
+			const colorRegexp =
+				/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}|rgb\((?:\s*\d+\s*,){2}\s*\d+\)|rgba\((\s*\d+\s*,){3}[\d.]+\)/g;
+			const matchedColors = fileContent.matchAll( colorRegexp );
 			for ( const match of matchedColors ) {
 				if ( match[ 0 ] ) {
 					colorCollection.push( match[ 0 ] );
-					if ( colorCollection.length > 10 ) return;
+					if ( colorCollection.length > 20 )
+						return [ ...new Set( colorCollection ) ];
 				}
 			}
 		}
 		return [ ...new Set( colorCollection ) ] || [];
-	};
+	}
 
 	/**
 	 * Whenever the svg is changed it collects the colors used in the image
