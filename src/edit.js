@@ -37,17 +37,25 @@ const Edit = ( props ) => {
 	/**
 	 * The edit View
 	 *
-	 * @param    {Object} props       - the svg edit properties
-	 * @property {string} rel         - stores whether the link opens into a new window
-	 * @property {string} url         - the target of the hyperlink
-	 * @property {number} height      - the Svg image height
-	 * @property {number} width       - the Svg image width
-	 * @property {number} rotation    - the Svg image rotation
-	 * @property {number} svg         - the Svg image markup
-	 * @property {number} originalSvg - the original Svg before changes
-	 * @property {Array}  colors      - the collection of the color used in the Svg
+	 * @typedef  {Object} props       - the svg edit properties
+	 * @typedef {Object} attributes - The block attributes
+	 * @property {string} rel             - stores whether the link opens into a new window
+	 * @property {string} url             - the target of the hyperlink
+	 * @property {number} height          - the Svg image height
+	 * @property {number} width           - the Svg image width
+	 * @property {number} rotation        - the Svg image rotation
+	 * @property {number} svg             - the Svg image markup
+	 * @property {number} originalSvg     - the original Svg before changes
+	 * @property {Array}  colors          - the collection of the color used in the Svg
 	 *
-	 * @return {Component}            - the edit view
+	 * @callback  setAttributes  - Setter for the block attributes
+	 *
+	 * @property {Object} isSelected      - if the block is selected
+	 * @property {Object} toggleSelection - handle checkbox state
+	 *
+	 * @return {JSX}
+	 * @typedef {Component} Edit - the edit view
+	 *
 	 */
 	const {
 		attributes: {
@@ -70,10 +78,18 @@ const Edit = ( props ) => {
 
 	// LINK toolbar stuff
 	const ref = useRef();
+	/** @callback setIsEditingURL */
 	const [ isEditingURL, setIsEditingURL ] = useState( false );
 	const isURLSet = !! url;
 	const opensInNewTab = linkTarget === '_blank';
 
+	/**
+	 * Checking if the block is selected. If it is not selected, it sets the isEditingURL state to false.
+	 *
+	 * @type {setIsEditingURL}
+	 * @property {boolean} isSelected - if the svg is selected
+	 *
+	 */
 	useEffect( () => {
 		if ( ! isSelected ) {
 			setIsEditingURL( false );
@@ -81,6 +97,7 @@ const Edit = ( props ) => {
 	}, [ isSelected ] );
 
 	/**
+	 * Handle the checkbox state for "Open in new tab"
 	 * If the user has checked the "Open in new tab" checkbox, then set the linkTarget attribute to "_blank" and the rel attribute to "noreferrer noopener".
 	 * If the user has unchecked the "Open in new tab" checkbox, then set the linkTarget attribute to undefined and the rel attribute to undefined
 	 *
@@ -200,10 +217,11 @@ const Edit = ( props ) => {
 	}, [ svg ] );
 
 	/**
-	 * This function is launched when an SVG file is read,
-	 * sequentially first cleans up the markup,
+	 * This function is launched when an SVG file is read.
+	 * Sequentially:
+	 * first cleans up the markup,
 	 * tries to figure out the size of the image if is possible,
-	 * and then replaces the current svg (if any with the new one
+	 * and then replaces the current svg
 	 *
 	 * @param {string} res - The string that was read into the file that is supposed to be an svg
 	 */
@@ -234,7 +252,7 @@ const Edit = ( props ) => {
 	};
 
 	/**
-	 * Replace a color of the svg with another color
+	 * Replace a color used in the svg image with another color
 	 *
 	 * @param {string} newColor
 	 * @param {string} color
@@ -267,8 +285,8 @@ const Edit = ( props ) => {
 	};
 
 	/**
-	 * Parse in svg content to look for viewbox first and,
-	 * if not found, height and width properties
+	 * Parse the svg content to get the size of the svg image
+	 * look first for viewbox and if not found, the height and width xml properties
 	 *
 	 * @param {string} fileContent
 	 */
@@ -340,15 +358,20 @@ const Edit = ( props ) => {
 	 * The SVG Component
 	 * (prints the svg)
 	 *
-	 *  @typedef {Object} Props
+	 * @typedef {Object} Props
 	 * @property {number} width    - the svg width
 	 * @property {number} height   - the svg height
 	 * @property {number} rotation - the svg rotation
 	 *
-	 * @return {Component} The SVG
+	 * @return {Component} The SVG markup
 	 */
 	class SVG extends Component {
 		render() {
+			/**
+			 * It takes the SVG string, sanitizes it, and returns it as html
+			 *
+			 * @return {Object} The sanitized SVG markup
+			 */
 			function createMarkup() {
 				return {
 					__html: DOMPurify.sanitize( svg ),
@@ -365,6 +388,7 @@ const Edit = ( props ) => {
 	}
 
 	/**
+	 * The SvgDropZone component
 	 * `<DropZone />` is a component that accepts a function as a prop called `onFilesDrop`.
 	 * When a file is dropped into the drop zone, the `onFilesDrop` function is called with the dropped file as an argument
 	 *

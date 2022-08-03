@@ -1,0 +1,20 @@
+{
+  "tags": {
+	"allowUnknownTags": true,
+	"dictionaries": ["jsdoc", "closure"]
+  },
+  "source": {
+	"include": ["src"],
+	"includePattern": ".+\\.js(doc|x)?$",
+	"excludePattern": "(^|\\/|\\\\)_"
+  },
+  "templates": {
+	"better-docs": {
+	  "name": "OH-MY-SVG Wordpress Block"
+	}
+  },
+  "opts": {
+	"destination": "docs",
+	"recurse": true
+  }
+}

@@ -2,10 +2,17 @@
  * WordPress dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
+
+/**
+ * Plugin dependencies
+ */
 import Edit from './edit';
 import Save from './save';
-const blockConfig = require( './block.json' ); // The block configuration
 
+/** Import the block default configuration */
+const blockConfig = require( './block.json' );
+
+/** The block icon */
 export const svgIcon = (
 	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
 		<path d="M245.2 153.5a36 36 0 0 0-32-60.7 36 36 0 0 0-20.3-65.6 36 36 0 0 0-29.7 15.7 36 36 0 0 0-60.7-32.1 36 36 0 0 0-9.9 32.1 36 36 0 0 0-65.7 20.2 36 36 0 0 0 15.7 29.7 36.5 36.5 0 0 0-6.7-.6 35.7 35.7 0 0 0-35.9 36A35.7 35.7 0 0 0 36 164c2.2 0 4.5-.3 6.6-.7A36 36 0 0 0 63 229.1a36 36 0 0 0 29.7-15.8 36 36 0 0 0 60.7 32.2 36 36 0 0 0 9.9-32.2 36 36 0 0 0 65.6-20.2 36 36 0 0 0-15.7-29.7 36.4 36.4 0 0 0 32.1-9.9" />
@@ -17,11 +24,21 @@ export const svgIcon = (
 );
 
 /**
- * Build the block style with stored props
+ * A snippet used to generate the svg block css style
  *
- * @param {number} width
- * @param {number} height
- * @param {number} rotation
+ * Returns the css style of the svg block using the stored props
+ *
+ * @typedef {Object} blockStyle - the block style
+ * @param    {number} width
+ * @property {number} width    - The width of the block.
+ * @param    {number} height
+ * @property {number} height   - The height of the block.
+ * @param    {number} rotation
+ * @property {number} rotation - The rotation of the block in degrees.
+ * @property {string} display - CSS block property
+ * @property {string} margin - CSS margin property
+ *
+ * @return   {Object}   			 An object with css style
  */
 export const blockStyle = ( width, height, rotation ) => {
 	return {
@@ -34,12 +51,11 @@ export const blockStyle = ( width, height, rotation ) => {
 };
 
 /**
- * Register the block
- * https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/
+ * Register OH-MY-SVG block
  *
- * @function Object() { [native code] }
- * @module Edit - the edit function
- * @module Save - the save function
+ * @typedef WPBlockSelection
+ * @type {Edit}
+ * @type {Save}
  */
 registerBlockType( blockConfig.name, {
 	...blockConfig,
