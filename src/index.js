@@ -29,14 +29,15 @@ export const svgIcon = (
  * Returns the css style of the svg block using the stored props
  *
  * @typedef {Object} blockStyle - the block style
- * @param    {number} width
  * @property {number} width    - The width of the block.
- * @param    {number} height
  * @property {number} height   - The height of the block.
- * @param    {number} rotation
  * @property {number} rotation - The rotation of the block in degrees.
- * @property {string} display - CSS block property
- * @property {string} margin - CSS margin property
+ * @property {string} display  - CSS block property
+ * @property {string} margin   - CSS margin property
+ *
+ * @param    {number} width
+ * @param    {number} height
+ * @param    {number} rotation
  *
  * @return   {Object}   			 An object with css style
  */
@@ -53,7 +54,14 @@ export const blockStyle = ( width, height, rotation ) => {
 /**
  * Register OH-MY-SVG block
  *
+ * @file index.js
+ * @name OH-MY-SVG
+ * @description A Simple plugin that adds the SVG Block to your Gutenberg block editor.
+ * @author codekraft
+ *
  * @typedef WPBlockSelection
+ * @property {Object} supports - the block enabled features - https://developer.wordpress.org/block-editor/how-to-guides/block-tutorial/block-supports-in-static-blocks/
+ *
  * @type {Edit}
  * @type {Save}
  */

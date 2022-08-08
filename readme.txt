@@ -12,24 +12,26 @@ Add any svg to your website with the superpowers of the block editor. Out-of-the
 
 == Description ==
 
-This plugin provides the SVG Block to your block editor, this can be used with any svg icon or image (or even with a html snippet).
-Some key features are provided like automatic markup sanitation, optimization (svgo), and small utility to change the color and the markup that will be very useful for you to create variations of your image.
-This block has the same controls as the images, but actually the content is xml markup, and you can change it as you like!
-This allows thousands of possibilities... You will be able to use css animations or js scripts to animate it, change the inner text of the svg, create variations of the same svg.
+This plugin provides the SVG Block to your block editor, this can be used with any svg icon or image (or even with a html snippet).Some key features are provided like automatic markup sanitation, optimization (svgo), and small utility to change the color and the markup that will be very useful for you to create variations of your image.
+
+This block has the same controls as the images, but actually the content is xml markup, and you can change it as you like! This allows thousands of possibilities... You will be able to use css animations or js scripts to animate it, change the inner text of the svg, create variations of the same svg.
+
 From a performance standpoint, know that the image will not be included as an external resource, but will instead be within the markup of the page, thus making svg even faster than it already is.
 
 = Security =
 
-Since this plugin doesn't enable uploads of svg images into media library could be considered safer than all the others that enable the upload.
-As if that wasn't enough svg's will be cleaned with DOMpurify which indeed is a first class js purifier, those used in php try to mimic how it works.
+Since this plugin doesn't enable uploads of svg images into media library could be considered safer than all the others that enable the upload. As if that wasn't enough svg's will be cleaned with DOMpurify which indeed is a first class js purifier, those used in php try to mimic how it works.
+
 Svgs will be included inside pages as xml fragment, sp aren't going to be processed by imagemagick and no one other than the user (with the block editor permission) will have the permission to "upload" (or better include) them.
 
 = Inspirations, links =
 
 [Mario Heiderich the-image-that-called-me](https://www.slideshare.net/x00mario/the-image-that-called-me)
+
 [Fortinet - Anatomy of Scalable Vector Graphics (SVG) Attack Surface on the Web](https://www.fortinet.com/blog/threat-research/scalable-vector-graphics-attack-surface-anatomy)
 
 == Installation ==
+
 This plugin can be installed directly from your WordPress site.
 
 1. Log in to your WordPress site and navigate to **Plugins &rarr; Add New**.
@@ -48,14 +50,18 @@ It can also be installed manually using a zip file.
 == Changelog ==
 
 = 0.1.1 - 2022-08-03 =
+
 * Provides some additional control (like rotation)
 * Enhanced color gathering
 * A better original svg image handling (the image is stored each time it is loaded or replaced)
+* Adds developer docs
 
 = 0.1.0 - 2022-07-25 =
+
 * Initial Release.
 
 = Contribute =
+
 We love your input! We want to make contributing to this project as easy and transparent as possible, whether it's:
 
 * Reporting a bug
