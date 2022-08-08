@@ -32,7 +32,7 @@ export const svgIcon = (
  * @property {number} width    - The width of the block.
  * @property {number} height   - The height of the block.
  * @property {number} rotation - The rotation of the block in degrees.
- * @property {string} display  - CSS block property
+ * @property {string} display  - CSS display property
  * @property {string} margin   - CSS margin property
  *
  * @param    {number} width

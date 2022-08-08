@@ -16,7 +16,7 @@
         "format": "wp-scripts format",
         "lint:css": "wp-scripts lint-style",
         "lint:js": "wp-scripts lint-js",
-        "docGen": "jsdoc -c jsdoc.conf.json -R readme.txt",
+        "docGen": "jsdoc -c jsdoc.conf.json",
         "packages-update": "wp-scripts packages-update",
         "plugin-zip": "wp-scripts plugin-zip"
     },

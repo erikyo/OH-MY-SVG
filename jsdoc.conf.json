@@ -14,9 +14,21 @@
 	}
   },
   "opts": {
+	"encoding": "utf8",
 	"template": "node_modules/clean-jsdoc-theme",
+	"readme": "./readme.txt",
 	"destination": "docs",
 	"recurse": true,
-	"sort": true
+	"sort": true,
+	"theme_opts": {
+	  "menu" : [
+		{
+		  "title": "OH-MY-SVG",
+		  "link": "https://github.com/erikyo/OH-MY-SVG/"
+		}
+	  ],
+	  "favicon": "../assets/icon.svg",
+	  "create_style": ".type-signature { color: #6314d1 }; a, a:active { color: #9ac122 }"
+	}
   }
 }
