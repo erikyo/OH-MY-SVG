@@ -60,6 +60,11 @@ It can also be installed manually using a zip file.
 
 * Initial Release.
 
+== Resources ==
+
+* dompurify © 2015 Mario Heiderich, [Apache License Version 2.0](https://raw.githubusercontent.com/cure53/DOMPurify/main/LICENSE)
+* svgo © 2021 Kir Belevich, [MIT License](https://raw.githubusercontent.com/svg/svgo/main/LICENSE)
+
 = Contribute =
 
 We love your input! We want to make contributing to this project as easy and transparent as possible, whether it's:
@@ -71,4 +76,9 @@ We love your input! We want to make contributing to this project as easy and tra
 We use GitHub to host code, to track issues and feature requests, as well as accept pull requests.
 By contributing, you agree that your contributions will be licensed under its GPLv3 License.
 
+= Downloads =
+
 [GitHub Repository](https://github.com/erikyo/svgb)
+[Developer resources](https://erikyo.github.io/OH-MY-SVG/)
+[WordPress directory](https://wordpress.org/plugins/oh-my-svg/)
+
