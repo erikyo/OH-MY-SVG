@@ -76,6 +76,11 @@ We love your input! We want to make contributing to this project as easy and tra
 We use GitHub to host code, to track issues and feature requests, as well as accept pull requests.
 By contributing, you agree that your contributions will be licensed under its GPLv3 License.
 
+== Screenshots ==
+
+1. Svg edit capabilities
+2. Svg as icon (link, alignment)
+
 = Downloads =
 
 [GitHub Repository](https://github.com/erikyo/svgb)
