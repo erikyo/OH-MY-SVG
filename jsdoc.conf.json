@@ -3,6 +3,7 @@
 	"allowUnknownTags": true,
 	"dictionaries": ["jsdoc", "closure"]
   },
+  "plugins": ["plugins/markdown"],
   "source": {
 	"include": ["src"],
 	"includePattern": ".+\\.js(doc|x)?$",
@@ -30,5 +31,9 @@
 	  "favicon": "../assets/icon.svg",
 	  "create_style": ".type-signature { color: #6314d1 }; a, a:active { color: #9ac122 }"
 	}
+  },
+  "markdown": {
+	"hardwrap": false,
+	"idInHeadings": true
   }
 }
