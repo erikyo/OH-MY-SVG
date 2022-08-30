@@ -31,17 +31,18 @@ const Save = ( { attributes } ) => {
 		attributes.rotation
 	);
 
+	const blockProps = useBlockProps.save( {
+		style: customStyle,
+	} );
+
 	return attributes.url ? (
 		<a
-			{ ...useBlockProps.save( { style: customStyle } ) }
+			{ ...blockProps }
 			href={ attributes.url }
 			dangerouslySetInnerHTML={ createMarkup() }
 		/>
 	) : (
-		<div
-			{ ...useBlockProps.save( { style: customStyle } ) }
-			dangerouslySetInnerHTML={ createMarkup() }
-		/>
+		<div { ...blockProps } dangerouslySetInnerHTML={ createMarkup() } />
 	);
 };
 

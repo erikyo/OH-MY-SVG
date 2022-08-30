@@ -46,8 +46,7 @@ export const blockStyle = ( width, height, rotation ) => {
 		width: width || null,
 		height: height || null,
 		transform: rotation ? 'rotate(' + rotation + 'deg)' : null,
-		display: 'flex',
-		margin: 'auto',
+		maxHeight: '100%',
 	};
 };
 
@@ -89,6 +88,7 @@ registerBlockType( blockConfig.name, {
 	attributes: {
 		style: {
 			type: 'object',
+			default: {},
 		},
 		svg: {
 			type: 'string',

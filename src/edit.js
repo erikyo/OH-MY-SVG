@@ -62,6 +62,7 @@ const Edit = ( props ) => {
 	 * @property {string}   attributes.rel         - stores whether the link opens into a new window
 	 */
 	const {
+		style,
 		attributes: {
 			linkTarget,
 			rel,
@@ -251,7 +252,7 @@ const Edit = ( props ) => {
 	 * Whenever the svg is changed it collects the colors used in the image
 	 *
 	 * @type {useEffect}
-	 * @property {attributes.colors}
+	 * @property {attributes.colors} colors - the svg color array
 	 */
 	useEffect( () => {
 		const colorCollection = collectColors( svg );
@@ -532,7 +533,7 @@ const Edit = ( props ) => {
 				</Panel>
 
 				<Panel title="editor">
-					<PanelBody title="Editor" initialOpen={ false }>
+					<PanelBody title="Editor" initialOpen={ true }>
 						<PanelRow>
 							<p>SVGO</p>
 							<Button
@@ -712,7 +713,7 @@ const Edit = ( props ) => {
 			) }
 			{ svg && isSelected ? (
 				<ResizableBox
-					style={ { margin: 'auto' } }
+					style={ { margin: 0, ...style } }
 					size={ {
 						width: width ?? 'auto',
 						height: height ?? 'auto',
@@ -737,7 +738,7 @@ const Edit = ( props ) => {
 						toggleSelection( false );
 					} }
 				>
-					<SVG height={ height } width={ height } />
+					<SVG />
 				</ResizableBox>
 			) : (
 				<SVG />
