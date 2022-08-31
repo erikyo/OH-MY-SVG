@@ -15,12 +15,14 @@ Add any svg to your website with the superpowers of the block editor. Out-of-the
 This plugin provides the SVG Block to your block editor, this can be used with any svg icon or image (or even with a html snippet).Some key features are provided like automatic markup sanitation, optimization (svgo), and small utility to change the color and the markup that will be very useful for you to create variations of your image.
 
 This block has the same controls as the images, but actually the content is xml markup, and you can change it as you like! This allows thousands of possibilities... You will be able to use css animations or js scripts to animate it, change the inner text of the svg, create variations of the same svg.
+However, this has the disadvantage that the svg will not be copied into the media library, so if you plan to use the same svg several times (buttons, icons, etc.) you are better off creating a reusable block
 
-From a performance standpoint, know that the image will not be included as an external resource, but will instead be within the markup of the page, thus making svg even faster than it already is.
+From a performance point of view, be aware that the image will not be included as an external resource, but will instead be within the markup of the page, thus making svg even faster than it already is.
 
 = Security =
 
-Since this plugin doesn't enable uploads of svg images into media library could be considered safer than all the others that enable the upload. As if that wasn't enough svg's will be cleaned with DOMpurify which indeed is a first class js purifier, those used in php try to mimic how it works.
+Since this plugin doesn't enable uploads of svg images into media library could be considered safer than all the others that enable the upload.
+As if that wasn't enough svg's will be cleaned with DOMpurify which indeed is a first class js purifier, those used in php try to mimic how it works.
 
 Svgs will be included inside pages as xml fragment, sp aren't going to be processed by imagemagick and no one other than the user (with the block editor permission) will have the permission to "upload" (or better include) them.
 
