@@ -468,7 +468,7 @@ const Edit = ( props ) => {
 	};
 
 	return (
-		<div>
+		<div { ...useBlockProps() }>
 			<InspectorControls key="settings">
 				<Panel header="Settings">
 					<PanelBody>

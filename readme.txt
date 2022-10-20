@@ -1,9 +1,9 @@
 === OH MY SVG ===
 Contributors:      codekraft
-Tags:              svg, block, vector, icon, upload, sanitize, link, image, file, graphic, media, svgo
+Tags:              svg, blocks, vector, icon, upload, sanitize
 Requires at least: 5.7
 Tested up to:      6.0
-Stable tag:        0.1.1
+Stable tag:        0.1.2
 Requires PHP:      7.1
 License:           GPLv3 or later
 License URI:       http://www.gnu.org/licenses/gpl-3.0.html
@@ -12,7 +12,7 @@ Add any svg to your website with the superpowers of the block editor. Out-of-the
 
 == Description ==
 
-This plugin provides the SVG Block to your block editor, this can be used with any svg icon or image (or even with a html snippet).Some key features are provided like automatic markup sanitation, optimization (svgo), and small utility to change the color and the markup that will be very useful for you to create variations of your image.
+This plugin provides an SVG Block to your block editor, this can be used with any svg icon or image (or even a html snippet). Some key features are provided like automatic markup sanitation, optimization (svgo), and small utility to change the color and the markup that will be very useful for you to create variations of your image.
 
 This block has the same controls as the images, but actually the content is xml markup, and you can change it as you like! This allows thousands of possibilities... You will be able to use css animations or js scripts to animate it, change the inner text of the svg, create variations of the same svg.
 However, this has the disadvantage that the svg will not be copied into the media library, so if you plan to use the same svg several times (buttons, icons, etc.) you are better off creating a reusable block
@@ -22,9 +22,9 @@ From a performance point of view, be aware that the image will not be included a
 = Security =
 
 Since this plugin doesn't enable uploads of svg images into media library could be considered safer than all the others that enable the upload.
-As if that wasn't enough svg's will be cleaned with DOMpurify which indeed is a first class js purifier, those used in php try to mimic how it works.
+As if that wasn't enough SVG's will be cleaned with DOM purify which indeed is a first class js purifier, those used in php try to mimic how it works.
 
-Svgs will be included inside pages as xml fragment, sp aren't going to be processed by imagemagick and no one other than the user (with the block editor permission) will have the permission to "upload" (or better include) them.
+Svg will be included within the pages as xml fragments, so they will not be processed by imagemagick and cannot be uploaded by anyone from website "side". Only those with permissions to use the editor will be allowed to 'upload' (or rather include) them.
 
 = Inspirations, links =
 
@@ -50,6 +50,11 @@ It can also be installed manually using a zip file.
 5. Click the **Activate Plugin** button.
 
 == Changelog ==
+
+= 0.1.2 - 2022-10-22 =
+
+* Fixes an issue with selection container in WordPress 6.0.3
+* Updated dependencies
 
 = 0.1.1 - 2022-08-03 =
 
