@@ -11,8 +11,11 @@ module.exports = {
 	},
 	resolve: {
 		fallback: {
-			stream: require.resolve( 'stream-browserify' ),
-			path: require.resolve( 'path-browserify' ),
+			url: false,
+			stream: false,
+			path: false,
+			os: false,
+			fs: false,
 		},
 	},
 };
