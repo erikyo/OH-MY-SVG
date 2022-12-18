@@ -1,5 +1,4 @@
-import { Component, useEffect, useRef, useState } from '@wordpress/element';
-import optimize from 'svgo-browser/lib/optimize';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import DOMPurify from 'dompurify';
 import {
 	Button,
@@ -21,14 +20,22 @@ import {
 import {
 	BlockControls,
 	InspectorControls,
+	__experimentalLinkControl as LinkControl,
 	MediaUpload,
 	MediaUploadCheck,
 	useBlockProps,
-	__experimentalLinkControl as LinkControl,
 } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import { blockStyle } from './index';
 import { link as linkIcon, linkOff } from '@wordpress/icons';
+import SVG from './Svg';
+import {
+	collectColors,
+	optimizeSvg,
+	getSvgSize,
+	svgRemoveFill,
+	svgAddPathStroke,
+} from './utils';
+import { ErrorSvg } from './icons';
 
 const ALLOWED_MEDIA_TYPES = [ 'image/svg+xml' ];
 const NEW_TAB_REL = 'noreferrer noopener';
@@ -42,7 +49,7 @@ const NEW_TAB_REL = 'noreferrer noopener';
  *
  * @return {JSX.Element} - the Block editor view
  */
-const Edit = ( props ) => {
+export const Edit = ( props ) => {
 	/**
 	 * @property {boolean}  isSelected             - if the block is selected
 	 * @property {Function} setAttributes          - Setter for the block attributes
@@ -64,6 +71,7 @@ const Edit = ( props ) => {
 	const {
 		style,
 		attributes: {
+			align,
 			linkTarget,
 			rel,
 			url,
@@ -74,6 +82,7 @@ const Edit = ( props ) => {
 			originalSvg,
 			colors,
 		},
+		classes,
 		isSelected,
 		setAttributes,
 		toggleSelection,
@@ -166,6 +175,7 @@ const Edit = ( props ) => {
 
 	/**
 	 * @function unlink
+	 *
 	 * @description It sets the attributes of the block to undefined, and then sets the state of the block to not editing the URL
 	 */
 	function unlink() {
@@ -178,86 +188,14 @@ const Edit = ( props ) => {
 	}
 
 	/**
-	 * @function optimizeSvg
-	 * @description - SVGO Optimizations
-	 *
-	 * It takes the SVG string, optimizes it, and then sets the `svg` attribute to the optimized SVG string
-	 *
-	 * @type {setAttributes}
-	 * @property {attributes.svg} svg - waits SVGO to optimize the svg then return the markup
-	 */
-	const optimizeSvg = () => {
-		optimize( svg ).then( ( el ) => {
-			setAttributes( {
-				svg: el,
-			} );
-		} );
-	};
-
-	/**
-	 * @function getSvgDoc
-	 *
-	 * @description It takes a string of SVG markup and returns a document object
-	 *
-	 * @param {string} svgData - The SVG data that you want to convert to a PNG.
-	 * @return {Object} A DOMParser object.
-	 */
-	const getSvgDoc = ( svgData ) => {
-		const parser = new window.DOMParser();
-		return parser.parseFromString( svgData, 'image/svg+xml' );
-	};
-
-	/**
-	 * @function getSvgString
-	 *
-	 * @description It takes an SVG document and returns a string representation of it
-	 *
-	 * @param {Node} svgDoc - The SVG document that you want to convert to a string.
-	 *
-	 * @return {string} A uncleaned string of the svgDoc.
-	 *
-	 */
-	const getSvgString = ( svgDoc ) => {
-		const serializer = new window.XMLSerializer();
-		return serializer.serializeToString( svgDoc );
-	};
-
-	/**
-	 * @function collectColors
-	 *
-	 * @description Collect the colors used into the svg. It takes a string of text and returns an array of unique colors found in that string
-	 *
-	 * @param {attributes.svg} fileContent - The content of the file that you want to extract colors from.
-	 *
-	 * @return {attributes.colors} An array of unique colors.
-	 */
-	function collectColors( fileContent ) {
-		const colorCollection = [];
-		if ( fileContent ) {
-			const colorRegexp =
-				/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}|rgb\((?:\s*\d+\s*,){2}\s*\d+\)|rgba\((\s*\d+\s*,){3}[\d.]+\)/g;
-			const matchedColors = fileContent.matchAll( colorRegexp );
-			for ( const match of matchedColors ) {
-				if ( match[ 0 ] ) {
-					colorCollection.push( match[ 0 ] );
-					if ( colorCollection.length > 20 )
-						return [ ...new Set( colorCollection ) ];
-				}
-			}
-		}
-		return [ ...new Set( colorCollection ) ] || [];
-	}
-
-	/**
 	 * Whenever the svg is changed it collects the colors used in the image
 	 *
 	 * @type {useEffect}
 	 * @property {attributes.colors} colors - the svg color array
 	 */
 	useEffect( () => {
-		const colorCollection = collectColors( svg );
 		setAttributes( {
-			colors: colorCollection,
+			colors: collectColors( svg ),
 		} );
 	}, [ svg ] );
 
@@ -267,32 +205,16 @@ const Edit = ( props ) => {
 	 * Sequentially: first cleans up the markup, tries to figure out the size of the image if is possible,
 	 * and then replaces the current svg
 	 *
-	 * @param {attributes.svg} res - The string that was read into the file that is supposed to be a svg
+	 * @param {attributes.svg|ArrayBuffer} res - The string that was read into the file that is supposed to be a svg
 	 */
 	const loadSvg = ( res ) => {
 		const svgMarkup = DOMPurify.sanitize( res );
-		getSvgSize( svgMarkup );
+		const { parsedWidth, parsedHeight } = getSvgSize( svgMarkup );
 		setAttributes( {
+			width: parsedWidth || width,
+			height: parsedHeight || height,
 			originalSvg: svgMarkup || originalSvg || '',
-			svg: svgMarkup || '😓 error!',
-		} );
-	};
-
-	/**
-	 * @function svgAddPathStroke
-	 *
-	 * @description Add a stroke around path, circle, rect this for example is useful if you want to animate the svg line
-	 */
-	const svgAddPathStroke = () => {
-		// TODO: attributes {el: [path, circle, rect], borderWidth: 2, borderColor: 'hex' }
-		const svgDoc = getSvgDoc( svg );
-		svgDoc.querySelectorAll( 'path, circle, rect' ).forEach( ( item ) => {
-			item.setAttribute( 'stroke-width', pathStrokeWith + 'px' );
-			item.setAttribute( 'stroke', '#20FF12' );
-		} );
-		const svgString = getSvgString( svgDoc );
-		setAttributes( {
-			svg: DOMPurify.sanitize( svgString ),
+			svg: svgMarkup || ErrorSvg( __( '😓 Error!' ) ),
 		} );
 	};
 
@@ -308,70 +230,13 @@ const Edit = ( props ) => {
 		// updates the colors array
 		const newSvg = svg.replaceAll( color, newColor );
 
-		const colorCollection = collectColors( svg ) || [];
+		/* TODO: i'm lazy but it would be better to replace only the color */
+		const colorCollection = collectColors( newSvg ) || [];
 
 		setAttributes( {
 			colors: colorCollection,
 			svg: newSvg,
 		} );
-	};
-
-	/**
-	 * @function svgRemoveFill
-	 *
-	 * @description Adds the "fill:transparent" property to the current svg (basically makes it transparent apart from the borders)
-	 */
-	const svgRemoveFill = () => {
-		const svgDoc = getSvgDoc( svg );
-		svgDoc.querySelectorAll( 'path, circle, rect' ).forEach( ( item ) => {
-			item.setAttribute( 'fill', 'transparent' );
-			if ( item.style.fill ) item.style.fill = 'transparent';
-		} );
-		const svgString = getSvgString( svgDoc );
-		setAttributes( {
-			svg: DOMPurify.sanitize( svgString ),
-		} );
-	};
-
-	/**
-	 * @function getSvgSize
-	 *
-	 * @description Parse the svg content to get the size of the svg image look first for viewbox and if not found, the height and width xml properties
-	 *
-	 * @param {string} fileContent
-	 */
-	const getSvgSize = ( fileContent ) => {
-		const parsedData = {};
-		if ( fileContent ) {
-			// then get the image size data
-			const viewBox = fileContent.match( /viewBox=["']([^\\"']*)/ );
-			if ( viewBox ) {
-				const svgDataRaw = viewBox[ 1 ].split( ' ' );
-				parsedData.width = parseInt( svgDataRaw[ 2 ], 10 );
-				parsedData.height = parseInt( svgDataRaw[ 3 ], 10 );
-			} else {
-				const sizes = [
-					...fileContent.matchAll( /(height|width)=["']([^\\"']*)/g ),
-				];
-				sizes.forEach( ( size ) => {
-					switch ( size[ 1 ] ) {
-						case 'width':
-						case 'height':
-							return ( parsedData[ size[ 1 ] ] = parseInt(
-								size[ 2 ],
-								10
-							) );
-					}
-				} );
-			}
-
-			setAttributes( {
-				height: parsedData.height || height,
-				width: parsedData.width || width,
-			} );
-
-			return parsedData;
-		}
 	};
 
 	/**
@@ -407,53 +272,13 @@ const Edit = ( props ) => {
 	};
 
 	/**
-	 * @class SVG
-	 * @function Object() { [native code] }
-	 * @public
-	 * @description The SVG Component
-	 *
-	 * @typedef {Object} Props
-	 * @property {number} width    - the svg width
-	 * @property {number} height   - the svg height
-	 * @property {number} rotation - the svg rotation
-	 *
-	 * @return {Component} The SVG markup
-	 */
-	class SVG extends Component {
-		/**
-		 * @function render
-		 * @return {JSX.Element} - the svg
-		 */
-		render() {
-			/**
-			 * @function createMarkup
-			 * @description It takes the SVG string, sanitizes it, and returns it as html
-			 *
-			 * @return {Object} The sanitized SVG markup
-			 */
-			function createMarkup() {
-				return {
-					__html: DOMPurify.sanitize( svg ),
-				};
-			}
-
-			return (
-				<div
-					style={ blockStyle( width, height, rotation ) }
-					dangerouslySetInnerHTML={ createMarkup() }
-				/>
-			);
-		}
-	}
-
-	/**
 	 * @function SvgDropZone
 	 * @description The SvgDropZone component
 	 *
 	 * `<DropZone />` is a component that accepts a function as a prop called `onFilesDrop`.
 	 * When a file is dropped into the drop zone, the `onFilesDrop` function is called with the dropped file as an argument
 	 *
-	 * @return {Component} DropZone - returns a div with a DropZone component.
+	 * @return {JSX.Element} DropZone - returns a div with a DropZone component.
 	 */
 	const SvgDropZone = () => {
 		return (
@@ -467,11 +292,20 @@ const Edit = ( props ) => {
 		);
 	};
 
+	const blockProps = useBlockProps( {
+		style: {
+			display: align === 'center' ? 'table' : null,
+			maxWidth: align === 'full' ? 'none' : null,
+		},
+		ref,
+		className: classes,
+	} );
+
 	return (
-		<div { ...useBlockProps() }>
+		<div { ...blockProps }>
 			<InspectorControls key="settings">
 				<Panel header="Settings">
-					<PanelBody>
+					<PanelBody title="Settings">
 						<RangeControl
 							label={ __( 'Width' ) }
 							type={ 'number' }
@@ -539,7 +373,11 @@ const Edit = ( props ) => {
 							<Button
 								isSmall={ true }
 								variant={ 'primary' }
-								onClick={ () => optimizeSvg() }
+								onClick={ async () =>
+									setAttributes( {
+										svg: optimizeSvg( svg ),
+									} )
+								}
 							>
 								{ __( 'Optimize' ) }
 							</Button>
@@ -566,7 +404,11 @@ const Edit = ( props ) => {
 							<Button
 								isSmall={ true }
 								variant={ 'primary' }
-								onClick={ ( e ) => svgRemoveFill( e ) }
+								onClick={ () =>
+									setAttributes( {
+										svg: svgRemoveFill( svg ),
+									} )
+								}
 							>
 								{ __( 'Remove Fill' ) }
 							</Button>
@@ -577,7 +419,14 @@ const Edit = ( props ) => {
 							<Button
 								isSmall={ true }
 								variant={ 'primary' }
-								onClick={ ( e ) => svgAddPathStroke( e ) }
+								onClick={ () =>
+									setAttributes( {
+										svg: svgAddPathStroke( {
+											svg,
+											pathStrokeWith,
+										} ),
+									} )
+								}
 							>
 								{ __( 'Add Stroke' ) }
 							</Button>
@@ -713,13 +562,14 @@ const Edit = ( props ) => {
 			) }
 			{ svg && isSelected ? (
 				<ResizableBox
-					style={ { margin: 0, ...style } }
 					size={ {
 						width: width ?? 'auto',
 						height: height ?? 'auto',
 					} }
-					minHeight="50"
-					minWidth="50"
+					showHandle={ isSelected }
+					minHeight="10"
+					minWidth="10"
+					maxWidth="100%"
 					lockAspectRatio
 					enable={ {
 						top: false,
@@ -729,8 +579,8 @@ const Edit = ( props ) => {
 					} }
 					onResizeStop={ ( event, direction, elt, delta ) => {
 						setAttributes( {
-							height: parseInt( height + delta.height, 10 ),
-							width: parseInt( width + delta.width, 10 ),
+							height: height + delta.height,
+							width: width + delta.width,
 						} );
 						toggleSelection( true );
 					} }
@@ -738,10 +588,20 @@ const Edit = ( props ) => {
 						toggleSelection( false );
 					} }
 				>
-					<SVG />
+					<SVG
+						markup={ svg }
+						width={ width }
+						height={ height }
+						rotation={ rotation }
+					/>
 				</ResizableBox>
 			) : (
-				<SVG />
+				<SVG
+					markup={ svg }
+					width={ width }
+					height={ height }
+					rotation={ rotation }
+				/>
 			) }
 			{ ! svg && (
 				<>
@@ -795,5 +655,3 @@ const Edit = ( props ) => {
 		</div>
 	);
 };
-
-export default Edit;

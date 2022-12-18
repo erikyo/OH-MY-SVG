@@ -1,6 +1,5 @@
-import DOMPurify from 'dompurify';
+import SVG from './Svg';
 import { useBlockProps } from '@wordpress/block-editor';
-import { blockStyle } from './index';
 
 /**
  * @module Save
@@ -12,38 +11,23 @@ import { blockStyle } from './index';
  *
  * @return {JSX.Element} - the cleaned and optimized svg
  */
-const Save = ( { attributes } ) => {
-	/**
-	 * It returns an object with the svg markup,
-	 * which is the value of the SVG markup that's been sanitized by the DOMPurify library
-	 *
-	 * @return { {__html: string} } - the svg markup sanitized
-	 */
-	function createMarkup() {
-		return {
-			__html: DOMPurify.sanitize( attributes.svg ) || '',
-		};
-	}
-
-	const customStyle = blockStyle(
-		attributes.width,
-		attributes.height,
-		attributes.rotation
-	);
+export const Save = ( { attributes } ) => {
+	const { svg, url, rotation } = attributes;
 
 	const blockProps = useBlockProps.save( {
-		style: customStyle,
+		style: {
+			// width: width || null,
+			// height: height || null,
+			transform: rotation ? 'rotate(' + rotation + 'deg)' : null,
+			display: 'table',
+		},
 	} );
 
-	return attributes.url ? (
-		<a
-			{ ...blockProps }
-			href={ attributes.url }
-			dangerouslySetInnerHTML={ createMarkup() }
-		/>
+	return url ? (
+		<a href={ url } { ...blockProps }>
+			<SVG { ...attributes } markup={ svg } />
+		</a>
 	) : (
-		<div { ...blockProps } dangerouslySetInnerHTML={ createMarkup() } />
+		<SVG { ...attributes } { ...blockProps } markup={ svg } />
 	);
 };
-
-export default Save;
