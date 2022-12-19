@@ -5,25 +5,27 @@ import {
 	ColorIndicator,
 	ColorPicker,
 	Dropdown,
-	DropZone,
 	FormFileUpload,
 	Panel,
 	PanelBody,
 	PanelRow,
 	Popover,
+	Placeholder,
 	RangeControl,
 	ResizableBox,
 	TextareaControl,
 	ToolbarButton,
 	ToolbarGroup,
+	TextControl,
+	DropZone,
 } from '@wordpress/components';
 import {
 	BlockControls,
 	InspectorControls,
 	__experimentalLinkControl as LinkControl,
-	MediaUpload,
-	MediaUploadCheck,
 	useBlockProps,
+	MediaPlaceholder,
+	BlockIcon,
 } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { link as linkIcon, linkOff } from '@wordpress/icons';
@@ -34,10 +36,12 @@ import {
 	getSvgSize,
 	svgRemoveFill,
 	svgAddPathStroke,
+	hasFullOrWideWidth,
+	hasAlign,
 } from './utils';
-import { ErrorSvg } from './icons';
+import { ErrorSvg, svgIcon } from './icons';
 
-const ALLOWED_MEDIA_TYPES = [ 'image/svg+xml' ];
+const ALLOWED_MEDIA_TYPES = [ 'image/*' ];
 const NEW_TAB_REL = 'noreferrer noopener';
 
 /**
@@ -69,7 +73,6 @@ export const Edit = ( props ) => {
 	 * @property {string}   attributes.rel         - stores whether the link opens into a new window
 	 */
 	const {
-		style,
 		attributes: {
 			align,
 			linkTarget,
@@ -93,6 +96,26 @@ export const Edit = ( props ) => {
 	 * @callback setPathStrokeWith
 	 */
 	const [ pathStrokeWith, setPathStrokeWith ] = useState( 1.0 );
+
+	/* used for rotation range in order to provide a better ux for standard rotations like 90 180 270 */
+	const rangePresets = [
+		{
+			value: 0,
+			label: '0',
+		},
+		{
+			value: 90,
+			label: '90',
+		},
+		{
+			value: 180,
+			label: '180',
+		},
+		{
+			value: 270,
+			label: '270',
+		},
+	];
 
 	/**
 	 * @function useRef
@@ -126,7 +149,7 @@ export const Edit = ( props ) => {
 	 * @property {boolean} isSelected - if the svg has been selected
 	 */
 	useEffect( () => {
-		if ( isSelected ) {
+		if ( ! isSelected ) {
 			setIsEditingURL( false );
 		}
 	}, [ isSelected ] );
@@ -210,6 +233,11 @@ export const Edit = ( props ) => {
 	const loadSvg = ( res ) => {
 		const svgMarkup = DOMPurify.sanitize( res );
 		const { parsedWidth, parsedHeight } = getSvgSize( svgMarkup );
+
+		if ( ! parsedWidth && ! parsedHeight && svgMarkup.length < 10 ) {
+			return null;
+		}
+
 		setAttributes( {
 			width: parsedWidth || width,
 			height: parsedHeight || height,
@@ -230,12 +258,18 @@ export const Edit = ( props ) => {
 		// updates the colors array
 		const newSvg = svg.replaceAll( color, newColor );
 
-		/* TODO: i'm lazy but it would be better to replace only the color */
+		/* TODO: i'm lazy but it would be better to replace only the color replaced */
 		const colorCollection = collectColors( newSvg ) || [];
 
 		setAttributes( {
 			colors: colorCollection,
 			svg: newSvg,
+		} );
+	};
+
+	const onSvgError = ( err ) => {
+		throw new Error( 'Failed to read the given file', {
+			cause: err,
 		} );
 	};
 
@@ -248,7 +282,7 @@ export const Edit = ( props ) => {
 	 *
 	 * @param {Array} files
 	 */
-	const onImageSelect = ( files ) => {
+	const onSvgSelect = ( files ) => {
 		files.forEach( ( file ) => {
 			const reader = new window.FileReader();
 			reader.onload = () => {
@@ -264,12 +298,14 @@ export const Edit = ( props ) => {
 			try {
 				reader.readAsText( file );
 			} catch ( err ) {
-				throw new Error( 'Failed to read the given file', {
-					cause: err,
-				} );
+				onSvgError( err );
 			}
 		} );
 	};
+
+	const mediaPreview = () => (
+		<SVG markup={ svgIcon } width={ 1000 } height={ 1000 } />
+	);
 
 	/**
 	 * @function SvgDropZone
@@ -282,20 +318,40 @@ export const Edit = ( props ) => {
 	 */
 	const SvgDropZone = () => {
 		return (
-			<div>
-				<DropZone
-					onFilesDrop={ ( files ) => {
-						onImageSelect( files );
-					} }
-				/>
-			</div>
+			<DropZone
+				onFilesDrop={ ( files ) => {
+					onSvgSelect( files );
+				} }
+			/>
+		);
+	};
+
+	/**
+	 * The placeholder component that contains the button and the textarea input
+	 *
+	 * @param {JSX.Element} content the svg upload placeholder
+	 */
+	const placeholder = ( content ) => {
+		return (
+			<Placeholder
+				className="block-editor-media-placeholder"
+				withIllustration={ ! isSelected }
+				icon={ svgIcon }
+				label={ __( 'SVG' ) }
+				instructions={ __(
+					'Drop here your Svg, select one from your computer or copy and paste the svg markup in the textarea below'
+				) }
+			>
+				{ content }
+			</Placeholder>
 		);
 	};
 
 	const blockProps = useBlockProps( {
 		style: {
-			display: align === 'center' ? 'table' : null,
-			maxWidth: align === 'full' ? 'none' : null,
+			display: hasAlign( align, [ 'center' ] ) ? 'table' : null,
+			maxWidth: hasAlign( align, 'full' ) ? 'none' : null,
+			width: hasAlign( align, [ 'full', 'wide' ] ) ? '100%' : null,
 		},
 		ref,
 		className: classes,
@@ -338,24 +394,7 @@ export const Edit = ( props ) => {
 							value={ rotation }
 							min={ 0 }
 							max={ 359 }
-							marks={ [
-								{
-									value: 0,
-									label: '0',
-								},
-								{
-									value: 90,
-									label: '90',
-								},
-								{
-									value: 180,
-									label: '180',
-								},
-								{
-									value: 270,
-									label: '270',
-								},
-							] }
+							marks={ rangePresets }
 							step={ 1 }
 							onChange={ ( ev ) => {
 								setAttributes( {
@@ -382,6 +421,7 @@ export const Edit = ( props ) => {
 								{ __( 'Optimize' ) }
 							</Button>
 						</PanelRow>
+
 						<PanelRow>
 							<p>{ __( 'Restore Original' ) }</p>
 							<Button
@@ -498,6 +538,7 @@ export const Edit = ( props ) => {
 					</PanelBody>
 				</Panel>
 			</InspectorControls>
+
 			{ svg && (
 				<BlockControls group="block">
 					<ToolbarGroup>
@@ -524,9 +565,7 @@ export const Edit = ( props ) => {
 							label={ __( 'Replace SVG' ) }
 							accept={ ALLOWED_MEDIA_TYPES }
 							onChange={ ( ev ) => {
-								onImageSelect(
-									Object.values( ev.target.files )
-								);
+								onSvgSelect( Object.values( ev.target.files ) );
 							} }
 						>
 							Replace
@@ -534,18 +573,19 @@ export const Edit = ( props ) => {
 					</ToolbarGroup>
 				</BlockControls>
 			) }
+
 			{ isSelected && isEditingURL && (
 				<Popover
 					position="bottom center"
 					onClose={ () => {
 						setIsEditingURL( false );
 					} }
-					anchorRef={ ref.current }
+					anchor={ ref.current }
 					focusOnMount={ isEditingURL ? 'firstElement' : false }
 				>
 					<LinkControl
 						className="wp-block-navigation-link__inline-link-input"
-						value={ { url } }
+						value={ { svg, opensInNewTab } }
 						onChange={ ( {
 							url: newURL = '',
 							opensInNewTab: newOpensInNewTab,
@@ -556,27 +596,36 @@ export const Edit = ( props ) => {
 								onToggleOpenInNewTab( newOpensInNewTab );
 							}
 						} }
+						onRemove={ () => {
+							unlink();
+						} }
 						forceIsEditingLink={ isEditingURL }
 					/>
 				</Popover>
 			) }
+
 			{ svg && isSelected ? (
 				<ResizableBox
 					size={ {
-						width: width ?? 'auto',
-						height: height ?? 'auto',
+						width: hasAlign( align, [ 'full', 'wide' ] )
+							? '100%'
+							: width,
+						height: hasAlign( align, [ 'full', 'wide' ] )
+							? 'auto'
+							: height,
 					} }
-					showHandle={ isSelected }
+					showHandle={ isSelected && align !== 'full' }
 					minHeight="10"
 					minWidth="10"
-					maxWidth="100%"
 					lockAspectRatio
-					enable={ {
-						top: false,
-						right: true,
-						bottom: true,
-						left: true,
-					} }
+					enable={
+						! hasAlign( align, [ 'full', 'wide' ] ) && {
+							top: false,
+							right: ! hasAlign( align, 'right' ),
+							bottom: true,
+							left: ! hasAlign( align, 'left' ),
+						}
+					}
 					onResizeStop={ ( event, direction, elt, delta ) => {
 						setAttributes( {
 							height: height + delta.height,
@@ -590,66 +639,77 @@ export const Edit = ( props ) => {
 				>
 					<SVG
 						markup={ svg }
-						width={ width }
-						height={ height }
+						width={
+							! hasAlign( align, [ 'full', 'wide' ] )
+								? width
+								: false
+						}
+						height={
+							! hasAlign( align, [ 'full', 'wide' ] )
+								? height
+								: false
+						}
 						rotation={ rotation }
 					/>
 				</ResizableBox>
 			) : (
 				<SVG
 					markup={ svg }
-					width={ width }
-					height={ height }
+					width={
+						! hasAlign( align, [ 'full', 'wide' ] ) ? width : false
+					}
+					height={
+						! hasAlign( align, [ 'full', 'wide' ] ) ? height : false
+					}
 					rotation={ rotation }
 				/>
 			) }
+
 			{ ! svg && (
 				<>
-					<div
-						className="svg-preview-container"
-						style={ {
-							backgroundColor: '#fff',
-							border: '2px dashed #2271b1',
-							padding: '24px',
-							borderRadius: '8px',
-							textAlign: 'center',
-						} }
-					>
-						<SvgDropZone />
-						<p>
-							{ __(
-								'Drop here your Svg or select one from your computer'
-							) }
-						</p>
-						<MediaUploadCheck>
-							<MediaUpload
-								type="image"
-								allowedTypes={ ALLOWED_MEDIA_TYPES }
-								value={ svg }
-								render={ () => (
-									<FormFileUpload
-										accept={ ALLOWED_MEDIA_TYPES }
-										onChange={ ( ev ) => {
-											onImageSelect(
-												Object.values( ev.target.files )
-											);
-										} }
-										variant={ 'secondary' }
-									>
-										{ svg
-											? __( 'Replace Object' )
-											: __( 'Select Object' ) }
-									</FormFileUpload>
-								) }
-							/>
-						</MediaUploadCheck>
-						<p style={ { marginTop: '16px' } }>
-							{ __( 'or copy and paste the svg markup here:' ) }
-						</p>
-						<TextareaControl
-							onChange={ ( e ) => loadSvg( e ) }
-						></TextareaControl>
-					</div>
+					<MediaPlaceholder
+						icon={ <BlockIcon icon={ svgIcon } /> }
+						type="image"
+						multiple={ false }
+						mediaPreview={ mediaPreview }
+						allowedTypes={ ALLOWED_MEDIA_TYPES }
+						value={ svg }
+						disableMediaButtons={ url }
+						placeholder={ () =>
+							placeholder(
+								<>
+									<SvgDropZone />
+									<div style={ { display: 'flex' } }>
+										<FormFileUpload
+											className={ 'components-button' }
+											accept={ ALLOWED_MEDIA_TYPES }
+											onChange={ ( ev ) => {
+												onSvgSelect(
+													Object.values(
+														ev.target.files
+													)
+												);
+											} }
+											onError={ ( error ) => {
+												onSvgError( error );
+											} }
+											variant={ 'secondary' }
+										>
+											{ __( 'Select a Svg image' ) }
+										</FormFileUpload>
+										<TextControl
+											className={ 'components-button' }
+											placeholder={ __(
+												'Paste here your SVG markup'
+											) }
+											value={ svg }
+											onChange={ ( e ) => loadSvg( e ) }
+										></TextControl>
+									</div>
+								</>
+							)
+						}
+					/>
 				</>
 			) }
 		</div>
