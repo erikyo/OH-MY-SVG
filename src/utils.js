@@ -1,9 +1,10 @@
-const { optimize } = require( 'svgo' );
+import DOMPurify from 'dompurify';
+import { optimize } from 'svgo';
 
 /**
  * It takes an SVG document and returns a string representation of it
  *
- * @param {Document} svgDoc - The SVG document that you want to convert to a string.
+ * @param {SVGSVGElement} svgDoc - The SVG document that you want to convert to a string.
  *
  * @return {string} A uncleaned string of the svgDoc.
  *
@@ -23,23 +24,6 @@ export const getSvgDoc = ( svgData ) => {
 	const parser = new window.DOMParser();
 	return parser.parseFromString( svgData, 'image/svg+xml' );
 };
-
-/**
- * update a property of the root svg tag
- *
- * @param {string} source
- * @param {string} prop
- * @param {string} value
- *
- * @return {string} the svg with the updated property
- */
-export function updateSvgProps( source, prop, value ) {
-	const svgDoc = getSvgDoc( source );
-	svgDoc.querySelectorAll( 'svg' ).forEach( ( item ) => {
-		item.setAttribute( prop, value + 'px' );
-	} );
-	return getSvgString( svgDoc );
-}
 
 /**
  * @function collectColors
@@ -112,7 +96,7 @@ export const getSvgSize = ( fileContent ) => {
  * @param {string} svg
  * @param {string} pathStrokeColor
  * @param {number} pathStrokeWith
- * @param {array} pathStrokeEl
+ * @param {Array}  pathStrokeEl
  */
 export const svgAddPathStroke = ( {
 	svg,
@@ -164,3 +148,42 @@ export function optimizeSvg( svgString ) {
 	} );
 	return result.data;
 }
+
+export function hasAlign( currentAlign, alignmentCheck ) {
+	if ( typeof alignmentCheck === 'object' ) {
+		return (
+			alignmentCheck.filter( ( type ) => currentAlign === type ).length > 0
+		);
+	}
+	return currentAlign === alignmentCheck;
+}
+
+/**
+ * update a property of the root svg tag
+ *
+ * @param {string}            prop
+ * @param {string|false|null} value
+ *
+ * @return {string} the svg with the updated property
+ */
+String.prototype.updateSvgProps = function ( prop, value ) {
+	const doc = getSvgDoc( this ).querySelector( 'svg' );
+	if ( value ) {
+		doc.setAttribute( prop, value );
+	} else {
+		doc.removeAttribute( prop );
+	}
+	return getSvgString( doc );
+};
+
+/**
+ * @function createMarkup
+ * @description It takes the SVG string, sanitizes it, and returns it as html
+ *
+ * @return {Object} The sanitized SVG markup
+ */
+String.prototype.cleanMarkup = function () {
+	return {
+		__html: DOMPurify.sanitize( this ),
+	};
+};
