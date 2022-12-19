@@ -1,27 +1,25 @@
-import DOMPurify from 'dompurify';
-import { updateSvgProps } from './utils';
-
-const SVG = ( { markup, width, height, rotation } ) => {
-	/**
-	 * @function createMarkup
-	 * @description It takes the SVG string, sanitizes it, and returns it as html
-	 *
-	 * @return {Object} The sanitized SVG markup
-	 */
-	function cleanMarkup() {
-		markup = updateSvgProps( markup, 'width', width );
-		markup = updateSvgProps( markup, 'height', height );
-		return {
-			__html: DOMPurify.sanitize( markup ),
-		};
-	}
-
+/**
+ * Svg component - it can be used to render SVG files
+ *
+ * @param {Object}              SVG
+ * @param {string}              SVG.markup
+ * @param {number|string|false} SVG.width
+ * @param {number|string|false} SVG.height
+ * @param {number|string|false} SVG.rotation
+ *
+ * @return {JSX.Element|null} the SVG component
+ */
+const SVG = ( { markup, width, height, rotation, className } ) => {
 	return markup ? (
 		<div
+			className={ className }
 			style={ {
-				transform: `rotate(${ rotation }deg)`
+				transform: rotation ? `rotate(${ rotation }deg)` : null,
 			} }
-			dangerouslySetInnerHTML={ cleanMarkup() }
+			dangerouslySetInnerHTML={ markup
+				.updateSvgProps( 'width', width || '100%' )
+				.updateSvgProps( 'height', height || false )
+				.cleanMarkup() }
 		/>
 	) : null;
 };

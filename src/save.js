@@ -1,5 +1,6 @@
 import SVG from './Svg';
 import { useBlockProps } from '@wordpress/block-editor';
+import { hasAlign } from './utils';
 
 /**
  * @module Save
@@ -12,22 +13,24 @@ import { useBlockProps } from '@wordpress/block-editor';
  * @return {JSX.Element} - the cleaned and optimized svg
  */
 export const Save = ( { attributes } ) => {
-	const { svg, url, rotation } = attributes;
+	const { svg, url, width, height, rotation, align, className } = attributes;
 
 	const blockProps = useBlockProps.save( {
+		className,
+		rotation,
 		style: {
-			// width: width || null,
-			// height: height || null,
-			transform: rotation ? 'rotate(' + rotation + 'deg)' : null,
-			display: 'table',
+			width: hasAlign( align, [ 'full', 'wide' ] ) ? '100%' : null,
+			display: hasAlign( align, 'center' ) ? 'table' : null,
 		},
+		width: ! hasAlign( align, [ 'full', 'wide' ] ) ? width : false,
+		height: ! hasAlign( align, [ 'full', 'wide' ] ) ? height : false,
 	} );
 
 	return url ? (
-		<a href={ url } { ...blockProps }>
-			<SVG { ...attributes } markup={ svg } />
+		<a href={ url }>
+			<SVG { ...blockProps } markup={ svg } />
 		</a>
 	) : (
-		<SVG { ...attributes } { ...blockProps } markup={ svg } />
+		<SVG { ...blockProps } markup={ svg } />
 	);
 };
