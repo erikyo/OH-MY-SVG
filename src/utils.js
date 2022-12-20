@@ -151,9 +151,7 @@ export function optimizeSvg( svgString ) {
 
 export function hasAlign( currentAlign, alignmentCheck ) {
 	if ( typeof alignmentCheck === 'object' ) {
-		return (
-			alignmentCheck.filter( ( type ) => currentAlign === type ).length > 0
-		);
+		alignmentCheck.includes( currentAlign );
 	}
 	return currentAlign === alignmentCheck;
 }

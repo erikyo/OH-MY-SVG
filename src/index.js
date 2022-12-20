@@ -2,12 +2,15 @@
  * WordPress dependencies
  */
 import { registerBlockType, registerBlockVariation } from '@wordpress/blocks';
-import { svgIcon as icon } from './icons';
+import { addFilter } from '@wordpress/hooks';
+
 /**
  * Plugin dependencies
  */
+import { svgIcon as icon } from './icons';
 import { Edit as edit } from './edit';
 import { Save as save } from './save';
+import {svgImgEdit, svgImgSave} from './variation';
 
 /** Import the block default configuration */
 const blockConfig = require( './block.json' );
@@ -82,3 +85,29 @@ registerBlockType( blockConfig.name, {
 		},
 	},
 } );
+
+export const SVG_VARIATION_NAMESPACE = 'my-plugin/books-list';
+
+/**
+ * Register SVG image block
+ */
+registerBlockVariation( 'core/image', {
+	name: SVG_VARIATION_NAMESPACE,
+	title: 'SVG (as image)',
+	description: 'Add as image the svg',
+	icon,
+	attributes: {
+		namespace: SVG_VARIATION_NAMESPACE,
+		svg: {
+			svgImage: '<svg>svg</svg>',
+		},
+		className: 'oh-my-imgsvg',
+	},
+	scope: [ 'inserter' ],
+	isActive: ( { namespace } ) => {
+		return namespace === SVG_VARIATION_NAMESPACE;
+	},
+} );
+
+addFilter( 'editor.BlockEdit', 'codekraft/oh-my-svg-as-img', svgImgEdit );
+addFilter( 'editor.BlockEdit', 'codekraft/oh-my-svg-as-img', svgImgSave );
