@@ -10,7 +10,7 @@ import { addFilter } from '@wordpress/hooks';
 import { svgIcon as icon } from './icons';
 import { Edit as edit } from './edit';
 import { Save as save } from './save';
-import {svgImgEdit, svgImgSave} from './variation';
+import { svgImgEdit } from './variation';
 
 /** Import the block default configuration */
 const blockConfig = require( './block.json' );
@@ -86,7 +86,7 @@ registerBlockType( blockConfig.name, {
 	},
 } );
 
-export const SVG_VARIATION_NAMESPACE = 'my-plugin/books-list';
+export const SVG_VARIATION_NAMESPACE = 'codekraft/oh-my-svg-as-img';
 
 /**
  * Register SVG image block
@@ -98,16 +98,13 @@ registerBlockVariation( 'core/image', {
 	icon,
 	attributes: {
 		namespace: SVG_VARIATION_NAMESPACE,
-		svg: {
-			svgImage: '<svg>svg</svg>',
-		},
+		svgImage: '',
 		className: 'oh-my-imgsvg',
 	},
-	scope: [ 'inserter' ],
+	scope: [ 'block', 'inserter', 'transform' ],
 	isActive: ( { namespace } ) => {
 		return namespace === SVG_VARIATION_NAMESPACE;
 	},
 } );
 
 addFilter( 'editor.BlockEdit', 'codekraft/oh-my-svg-as-img', svgImgEdit );
-addFilter( 'editor.BlockEdit', 'codekraft/oh-my-svg-as-img', svgImgSave );
