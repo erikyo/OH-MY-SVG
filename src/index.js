@@ -15,6 +15,8 @@ import { svgImgEdit } from './variation';
 /** Import the block default configuration */
 const blockConfig = require( './block.json' );
 
+export const ALLOWED_MEDIA_TYPES = [ 'image/svg+xml' ];
+
 /**
  * Register OH-MY-SVG block
  *

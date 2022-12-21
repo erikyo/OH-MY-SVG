@@ -1,23 +1,14 @@
 import { createHigherOrderComponent } from '@wordpress/compose';
-import {
-	InspectorControls,
-	useBlockProps,
-	store as blockEditorStore,
-	MediaPlaceholder,
-	mediaUpload,
-	BlockIcon,
-} from '@wordpress/block-editor';
-import { PanelBody, TextareaControl } from '@wordpress/components';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { isBlobURL } from '@wordpress/blob';
+import {InspectorControls, MediaPlaceholder} from '@wordpress/block-editor';
+import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
 
-import { svgIcon } from './icons';
-import SVG_VARIATION_NAMESPACE from './index';
-
-const ALLOW_SVG = [ 'image/svg+xml' ];
+import { ErrorSvg, svgIcon } from './icons';
+import {DropZone, FormFileUpload, PanelBody, Placeholder} from '@wordpress/components';
+import { ALLOWED_MEDIA_TYPES } from './index';
+import { getSvgSize, onSvgSelect } from './utils';
+import DOMPurify from 'dompurify';
 
 /**
  * infiniteLoop block Editor scripts
@@ -31,81 +22,110 @@ export const svgImgEdit = createHigherOrderComponent( ( BlockEdit ) => {
 			return <BlockEdit { ...props } />;
 		}
 
-		const { name, attributes, onSelectImage, clientId } = props;
+		const {
+			name,
+			attributes: { width, height },
+			setAttributes,
+			onSelectImage,
+			clientId,
+			isSelected,
+		} = props;
 
 		const { createErrorNotice, createSuccessNotice } =
 			useDispatch( noticesStore );
 
-		const { imageSizes, maxWidth, mediaUpload } = useSelect(
-			( select ) => {
-				const { getSettings } = select( blockEditorStore );
-
-				const settings = Object.fromEntries(
-					Object.entries( getSettings() ).filter( ( [ key ] ) =>
-						[
-							'imageEditing',
-							'imageDimensions',
-							'imageSizes',
-							'maxWidth',
-							'mediaUpload',
-						].includes( key )
-					)
-				);
-
-				return { ...settings };
-			},
-			[ clientId ]
-		);
-
-		const selectSVG = ( event ) => {
-			event.preventDefault();
-			const file = event.target.files[ 0 ];
-			const reader = new FileReader();
-			reader.onload = () => {
-				const { setAttributes } = props;
-				setAttributes( {
-					url: reader.result,
-					alt: file.name,
-				} );
-			};
-			reader.readAsDataURL( file );
+		const placeholder = ( content ) => {
+			return (
+				<Placeholder
+					className="block-editor-media-placeholder"
+					withIllustration={ ! isSelected }
+					icon={ svgIcon }
+					label={ __( 'Add a SVG (as image)' ) }
+					instructions={ __(
+						'Drop here your Svg, select one from your computer or copy and paste the svg markup in the textarea below'
+					) }
+				>
+					{ content }
+				</Placeholder>
+			);
 		};
 
-		const openModal = ( event ) => {
-			event.preventDefault();
-			const { setAttributes } = props;
-			mediaUpload( {
-				allowedTypes: [ 'image/svg+xml' ],
-				onFileChange: ( media ) => {
-					const { url, alt } = media[ 0 ];
-					setAttributes( { url, alt } );
-				},
+		const loadSvg = ( { markup, file } ) => {
+			const svgMarkup = DOMPurify.sanitize( markup );
+			const { parsedWidth, parsedHeight } = getSvgSize( svgMarkup );
+
+			if ( ! parsedWidth && ! parsedHeight && svgMarkup.length < 10 ) {
+				return null;
+			}
+
+			setAttributes( {
+				width: parsedWidth || width,
+				height: parsedHeight || height,
+				// originalSvg: svgMarkup || originalSvg || '',
+				svg: svgMarkup || ErrorSvg( __( '😓 Error!' ) ),
+				url: `data:image/svg+xml;base64,${ btoa( svgMarkup ) }`,
+				name: file.name,
+				alt: 'the name of the image is ' + file.name,
+				lastModified: file.lastModified,
+				size: file.size,
+				type: file.type,
 			} );
 		};
 
 		return (
 			<>
+				<InspectorControls>
+					<PanelBody>
+						<p>text</p>
+					</PanelBody>
+				</InspectorControls>
 				{ ! props.attributes.url && (
 					<MediaPlaceholder
 						onSelect={ onSelectImage }
-						allowedTypes={ [ 'image/svg+xml' ] }
-						labels={ {
-							title: __( 'Add SVG' ),
-							instructions: __(
-								'Upload an SVG file or select one from your media library.'
-							),
-						} }
+						allowedTypes={ ALLOWED_MEDIA_TYPES }
+						placeholder={ () =>
+							placeholder(
+								<>
+									<DropZone
+										onFilesDrop={ ( files ) => {
+											onSvgSelect( files[ 0 ] ).then(
+												( result ) =>
+													loadSvg( {
+														markup: result,
+														file: files[ 0 ],
+													} )
+											);
+										} }
+									/>
+									<div style={ { display: 'flex' } }>
+										<FormFileUpload
+											className={ 'components-button' }
+											accept={ ALLOWED_MEDIA_TYPES }
+											onChange={ ( ev ) => {
+												onSvgSelect(
+													ev.target.files[ 0 ]
+												).then( ( result ) => {
+													loadSvg( {
+														markup: result,
+														file: ev.target
+															.files[ 0 ],
+													} );
+												} );
+											} }
+											onError={ ( error ) => {
+												createErrorNotice( error );
+											} }
+											variant={ 'secondary' }
+										>
+											{ __( 'Select a Svg image' ) }
+										</FormFileUpload>
+									</div>
+								</>
+							)
+						}
 					/>
 				) }
 				{ props.attributes.url && <BlockEdit { ...props } /> }
-				<input
-					type="file"
-					accept="image/svg+xml"
-					onChange={ selectSVG }
-					style={ { display: 'none' } }
-					ref={ ( input ) => input && input.click() }
-				/>
-				<button onClick={ openModal }>{ __( 'Upload SVG' ) }</button>
 			</>
 		);
 	};
