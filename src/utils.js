@@ -1,5 +1,7 @@
 import DOMPurify from 'dompurify';
 import { optimize } from 'svgo';
+import { ErrorSvg } from './icons';
+import { __ } from '@wordpress/i18n';
 
 /**
  * It takes an SVG document and returns a string representation of it
@@ -35,7 +37,7 @@ export const getSvgDoc = ( svgData ) => {
  *
  * @return {Promise} the file reader promise
  */
-export const onSvgSelect = async ( file) => {
+export const onSvgSelect = async ( file ) => {
 	return new Promise( ( resolve, reject ) => {
 		const reader = new window.FileReader();
 		reader.onload = () => {
@@ -51,7 +53,7 @@ export const onSvgSelect = async ( file) => {
 		try {
 			reader.readAsText( file );
 		} catch ( err ) {
-			console.log( err );
+			reject( err );
 		}
 	} );
 };
@@ -81,6 +83,60 @@ export function collectColors( fileContent ) {
 	}
 	return [ ...new Set( colorCollection ) ] || [];
 }
+
+export function scaleProportionally(
+	originalWidth,
+	originalHeight,
+	contentWidth
+) {
+	return {
+		parsedHeight: ( contentWidth / originalWidth ) * originalHeight,
+		parsedWidth: contentWidth,
+	};
+}
+
+/**
+ * @function loadSvg
+ * @description This function is launched when an SVG file is read.
+ * Sequentially: first cleans up the markup, tries to figure out the size of the image if is possible,
+ * and then replaces the current svg
+ *
+ * @param {attributes.svg} res - The string that was read into the file that is supposed to be a svg
+ */
+export const loadSvg = ( { markup, file, contentSize, ...props } ) => {
+	const cleanMarkup = DOMPurify.sanitize( markup );
+	let { parsedWidth, parsedHeight } = getSvgSize( cleanMarkup );
+
+	if ( ! parsedWidth && ! parsedHeight && cleanMarkup.length < 10 ) {
+		return null;
+	}
+
+	const contentWidth = parseInt( contentSize ) || 0;
+
+	if ( parsedWidth >= contentWidth ) {
+		[ parsedHeight, parsedWidth ] = scaleProportionally(
+			parsedWidth,
+			parsedHeight,
+			contentWidth
+		);
+	}
+
+	const filename = file.name || 'svg with no name';
+
+	return {
+		...props,
+		width: parsedWidth || props.width,
+		height: parsedHeight || props.height,
+		originalSvg: cleanMarkup || props.originalSvg || '',
+		svg: cleanMarkup || ErrorSvg( __( '😓 Error!' ) ),
+		imgSrc: `data:image/svg+xml;base64,${ btoa( cleanMarkup ) }`,
+		alt: __( 'The name of the image is ' ) + filename,
+		name: filename,
+		size: file.size || cleanMarkup.length,
+		type: file.type || 'image/svg+xml',
+		lastModified: file.lastModified,
+	};
+};
 
 /**
  * @function getSvgSize
@@ -124,10 +180,10 @@ export const getSvgSize = ( fileContent ) => {
 /**
  *  Add a stroke around path, circle, rect this for example is useful if you want to animate the svg line
  *
- * @param {string} svg
- * @param {string} pathStrokeColor
- * @param {number} pathStrokeWith
- * @param {Array}  pathStrokeEl
+ * @param {string} x.svg
+ * @param {string} x.pathStrokeColor
+ * @param {number} x.pathStrokeWith
+ * @param {Array}  x.pathStrokeEl
  */
 export const svgAddPathStroke = ( {
 	svg,
@@ -216,3 +272,37 @@ String.prototype.cleanMarkup = function () {
 		__html: DOMPurify.sanitize( this ),
 	};
 };
+
+/**
+ * Convert byte to human-readable format
+ *
+ * @property {number} this - the number of char of the string
+ */
+Number.prototype.humanFileSize = function () {
+	const i =
+		this === 0 ? 0 : Math.floor( Math.log( this ) / Math.log( 1024 ) );
+	return (
+		( this / Math.pow( 1024, i ) ).toFixed( 2 ) * 1 +
+		[ 'B', 'kB', 'MB', 'GB', 'TB' ][ i ]
+	);
+};
+
+/* used for rotation range in order to provide a better ux for standard rotations like 90 180 270 */
+export const rotationRangePresets = [
+	{
+		value: 0,
+		label: '0',
+	},
+	{
+		value: 90,
+		label: '90',
+	},
+	{
+		value: 180,
+		label: '180',
+	},
+	{
+		value: 270,
+		label: '270',
+	},
+];

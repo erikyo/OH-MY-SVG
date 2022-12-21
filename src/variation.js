@@ -1,14 +1,26 @@
 import { createHigherOrderComponent } from '@wordpress/compose';
-import {InspectorControls, MediaPlaceholder} from '@wordpress/block-editor';
+import {
+	InspectorControls,
+	MediaPlaceholder,
+	useSetting,
+} from '@wordpress/block-editor';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import { __ } from '@wordpress/i18n';
 
 import { ErrorSvg, svgIcon } from './icons';
-import {DropZone, FormFileUpload, PanelBody, Placeholder} from '@wordpress/components';
+import {
+	Button,
+	DropZone,
+	FormFileUpload,
+	PanelBody,
+	PanelRow,
+	Placeholder,
+	TextareaControl,
+} from '@wordpress/components';
 import { ALLOWED_MEDIA_TYPES } from './index';
-import { getSvgSize, onSvgSelect } from './utils';
-import DOMPurify from 'dompurify';
+import { loadSvg, onSvgSelect, optimizeSvg } from './utils';
+import { SvgoStats } from './components';
 
 /**
  * infiniteLoop block Editor scripts
@@ -24,7 +36,7 @@ export const svgImgEdit = createHigherOrderComponent( ( BlockEdit ) => {
 
 		const {
 			name,
-			attributes: { width, height },
+			attributes: { svg, originalSvg },
 			setAttributes,
 			onSelectImage,
 			clientId,
@@ -50,36 +62,51 @@ export const svgImgEdit = createHigherOrderComponent( ( BlockEdit ) => {
 			);
 		};
 
-		const loadSvg = ( { markup, file } ) => {
-			const svgMarkup = DOMPurify.sanitize( markup );
-			const { parsedWidth, parsedHeight } = getSvgSize( svgMarkup );
+		const defaultLayout = useSetting( 'layout' ) || {};
 
-			if ( ! parsedWidth && ! parsedHeight && svgMarkup.length < 10 ) {
-				return null;
-			}
-
+		const applySVGO = async () => {
 			setAttributes( {
-				width: parsedWidth || width,
-				height: parsedHeight || height,
-				// originalSvg: svgMarkup || originalSvg || '',
-				svg: svgMarkup || ErrorSvg( __( '😓 Error!' ) ),
-				url: `data:image/svg+xml;base64,${ btoa( svgMarkup ) }`,
-				name: file.name,
-				alt: 'the name of the image is ' + file.name,
-				lastModified: file.lastModified,
-				size: file.size,
-				type: file.type,
+				svg: optimizeSvg( svg ),
+				imgSrc: `data:image/svg+xml;base64,${ btoa( svg ) }`,
 			} );
 		};
 
 		return (
 			<>
 				<InspectorControls>
+					<PanelBody title="Editor" initialOpen={ true }>
+						<PanelRow>
+							<p>
+								SVGO
+								<SvgoStats
+									original={ originalSvg }
+									compressed={ svg }
+								/>
+							</p>
+							<Button
+								isSmall={ true }
+								variant={ 'primary' }
+								onClick={ applySVGO }
+							>
+								{ __( 'Optimize' ) }
+							</Button>
+						</PanelRow>
+
+						<hr />
+
+						<TextareaControl
+							label={ __( 'SVG Markup Editor' ) }
+							value={ svg || '' }
+							onChange={ ( ev ) => {
+								setAttributes( { svg: ev } );
+							} }
+						/>
+					</PanelBody>
 					<PanelBody>
 						<p>text</p>
 					</PanelBody>
 				</InspectorControls>
-				{ ! props.attributes.url && (
+				{ isSelected && ! props.attributes.imgSrc && (
 					<MediaPlaceholder
 						onSelect={ onSelectImage }
 						allowedTypes={ ALLOWED_MEDIA_TYPES }
@@ -90,10 +117,15 @@ export const svgImgEdit = createHigherOrderComponent( ( BlockEdit ) => {
 										onFilesDrop={ ( files ) => {
 											onSvgSelect( files[ 0 ] ).then(
 												( result ) =>
-													loadSvg( {
-														markup: result,
-														file: files[ 0 ],
-													} )
+													setAttributes(
+														loadSvg( {
+															markup: result,
+															file: files[ 0 ],
+															contentSize:
+																defaultLayout.contentSize,
+															...props.attributes,
+														} )
+													)
 											);
 										} }
 									/>
@@ -105,11 +137,16 @@ export const svgImgEdit = createHigherOrderComponent( ( BlockEdit ) => {
 												onSvgSelect(
 													ev.target.files[ 0 ]
 												).then( ( result ) => {
-													loadSvg( {
-														markup: result,
-														file: ev.target
-															.files[ 0 ],
-													} );
+													setAttributes(
+														loadSvg( {
+															markup: result,
+															file: ev.target
+																.files[ 0 ],
+															contentSize:
+																defaultLayout.contentSize,
+															...props.attributes,
+														} )
+													);
 												} );
 											} }
 											onError={ ( error ) => {
@@ -125,7 +162,7 @@ export const svgImgEdit = createHigherOrderComponent( ( BlockEdit ) => {
 						}
 					/>
 				) }
-				{ props.attributes.url && <BlockEdit { ...props } /> }
+				{ props.attributes.imgSrc && <BlockEdit { ...props } /> }
 			</>
 		);
 	};

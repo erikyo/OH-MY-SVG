@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from '@wordpress/element';
-import DOMPurify from 'dompurify';
 import {
 	Button,
 	ColorIndicator,
@@ -26,6 +25,7 @@ import {
 	useBlockProps,
 	MediaPlaceholder,
 	BlockIcon,
+	useSetting,
 } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { link as linkIcon, linkOff } from '@wordpress/icons';
@@ -33,14 +33,17 @@ import SVG from './Svg';
 import {
 	collectColors,
 	optimizeSvg,
-	getSvgSize,
 	svgRemoveFill,
 	svgAddPathStroke,
 	hasAlign,
 	onSvgSelect,
+	loadSvg,
+	rotationRangePresets,
+	humanFileSize,
 } from './utils';
-import { ErrorSvg, svgIcon } from './icons';
+import { svgIcon } from './icons';
 import { ALLOWED_MEDIA_TYPES } from './index';
+import {SvgoStats} from "./components";
 
 export const NEW_TAB_REL = 'noreferrer noopener';
 
@@ -97,26 +100,6 @@ export const Edit = ( props ) => {
 	 */
 	const [ pathStrokeWith, setPathStrokeWith ] = useState( 1.0 );
 
-	/* used for rotation range in order to provide a better ux for standard rotations like 90 180 270 */
-	const rangePresets = [
-		{
-			value: 0,
-			label: '0',
-		},
-		{
-			value: 90,
-			label: '90',
-		},
-		{
-			value: 180,
-			label: '180',
-		},
-		{
-			value: 270,
-			label: '270',
-		},
-	];
-
 	/**
 	 * @function useRef
 	 * @description get the reference to the link
@@ -140,6 +123,10 @@ export const Edit = ( props ) => {
 	 * @callback setIsEditingURL
 	 */
 	const [ isEditingURL, setIsEditingURL ] = useState( false );
+	const [ maxWidth, setMaxWidth ] = useState( '100%' );
+
+	/* the block editor sizes */
+	const defaultLayout = useSetting( 'layout' ) || {};
 
 	/**
 	 * Checking if the block is selected.
@@ -223,28 +210,22 @@ export const Edit = ( props ) => {
 	}, [ svg ] );
 
 	/**
-	 * @function loadSvg
-	 * @description This function is launched when an SVG file is read.
-	 * Sequentially: first cleans up the markup, tries to figure out the size of the image if is possible,
-	 * and then replaces the current svg
+	 * Whenever the alignment is changed set the max width of the current block
 	 *
-	 * @param {attributes.svg|ArrayBuffer} res - The string that was read into the file that is supposed to be a svg
+	 * @type {useEffect}
+	 * @property {attributes.colors} colors - the svg color array
 	 */
-	const loadSvg = ( res ) => {
-		const svgMarkup = DOMPurify.sanitize( res );
-		const { parsedWidth, parsedHeight } = getSvgSize( svgMarkup );
-
-		if ( ! parsedWidth && ! parsedHeight && svgMarkup.length < 10 ) {
-			return null;
-		}
-
-		setAttributes( {
-			width: parsedWidth || width,
-			height: parsedHeight || height,
-			originalSvg: svgMarkup || originalSvg || '',
-			svg: svgMarkup || ErrorSvg( __( '😓 Error!' ) ),
-		} );
-	};
+	useEffect( () => {
+		const contentMaxWidth = () => {
+			if ( align === 'wide' ) {
+				return defaultLayout.wideSize;
+			} else if ( align === 'none' ) {
+				return defaultLayout.contentSize;
+			}
+			return '100%';
+		};
+		setMaxWidth( contentMaxWidth );
+	}, [ align ] );
 
 	/**
 	 * @function updateColor
@@ -345,7 +326,7 @@ export const Edit = ( props ) => {
 							value={ rotation }
 							min={ 0 }
 							max={ 359 }
-							marks={ rangePresets }
+							marks={ rotationRangePresets }
 							step={ 1 }
 							onChange={ ( ev ) => {
 								setAttributes( {
@@ -359,7 +340,13 @@ export const Edit = ( props ) => {
 				<Panel title="editor">
 					<PanelBody title="Editor" initialOpen={ true }>
 						<PanelRow>
-							<p>SVGO</p>
+							<p>
+								SVGO
+								<SvgoStats
+									original={ originalSvg }
+									compressed={ svg }
+								/>
+							</p>
 							<Button
 								isSmall={ true }
 								variant={ 'primary' }
@@ -518,9 +505,16 @@ export const Edit = ( props ) => {
 							multiple={ false }
 							onChange={ ( ev ) => {
 								onSvgSelect( ev.target.files[ 0 ] ).then(
-									( result ) => {
-										loadSvg( result );
-									}
+									( result ) =>
+										setAttributes(
+											loadSvg( {
+												markup: result,
+												file: ev.target.files[ 0 ],
+												contentSize:
+													defaultLayout.contentSize,
+												...props.attributes,
+											} )
+										)
 								);
 							} }
 						>
@@ -573,6 +567,7 @@ export const Edit = ( props ) => {
 					showHandle={ isSelected && align !== 'full' }
 					minHeight="10"
 					minWidth="10"
+					maxWidth={ maxWidth }
 					lockAspectRatio
 					enable={
 						! hasAlign( align, [ 'full', 'wide' ] ) && {
@@ -638,7 +633,15 @@ export const Edit = ( props ) => {
 										onFilesDrop={ ( files ) => {
 											onSvgSelect( files[ 0 ] ).then(
 												( result ) => {
-													loadSvg( result );
+													setAttributes(
+														loadSvg( {
+															markup: result,
+															file: files[ 0 ],
+															contentSize:
+																defaultLayout.contentSize,
+															...props.attributes,
+														} )
+													);
 												}
 											);
 										} }
@@ -651,9 +654,18 @@ export const Edit = ( props ) => {
 											onChange={ ( ev ) => {
 												onSvgSelect(
 													ev.target.files[ 0 ]
-												).then( ( result ) => {
-													loadSvg( result );
-												} );
+												).then( ( result ) =>
+													setAttributes(
+														loadSvg( {
+															markup: result,
+															file: ev.target
+																.files[ 0 ],
+															contentSize:
+																defaultLayout.contentSize,
+															...props.attributes,
+														} )
+													)
+												);
 											} }
 											onError={ ( error ) => {
 												onSvgError( error );
@@ -668,7 +680,15 @@ export const Edit = ( props ) => {
 												'Paste here your SVG markup'
 											) }
 											value={ svg }
-											onChange={ ( e ) => loadSvg( e ) }
+											onChange={ ( result ) =>
+												loadSvg( {
+													markup: result,
+													file: false,
+													contentSize:
+														defaultLayout.contentSize,
+													...props.attributes,
+												} )
+											}
 										></TextControl>
 									</div>
 								</>

@@ -100,7 +100,8 @@ registerBlockVariation( 'core/image', {
 	icon,
 	attributes: {
 		namespace: SVG_VARIATION_NAMESPACE,
-		svgImage: '',
+		svg: false,
+		originalSvg: false,
 		className: 'oh-my-imgsvg',
 	},
 	scope: [ 'block', 'inserter', 'transform' ],
@@ -109,4 +110,4 @@ registerBlockVariation( 'core/image', {
 	},
 } );
 
-addFilter( 'editor.BlockEdit', 'codekraft/oh-my-svg-as-img', svgImgEdit );
+addFilter( 'editor.BlockEdit', SVG_VARIATION_NAMESPACE, svgImgEdit );
