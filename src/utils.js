@@ -26,6 +26,37 @@ export const getSvgDoc = ( svgData ) => {
 };
 
 /**
+ * @function onImageSelect
+ * @description Triggered when an image is selected with an input of file type
+ *
+ * Loads the file with FileReader and then passes the result to the function that cleans/parses in its contents
+ *
+ * @param {Blob} file
+ *
+ * @return {Promise} the file reader promise
+ */
+export const onSvgSelect = async ( file) => {
+	return new Promise( ( resolve, reject ) => {
+		const reader = new window.FileReader();
+		reader.onload = () => {
+			resolve( reader.result );
+		};
+		reader.onabort = () => {
+			reject( 'file reading was aborted' );
+		};
+		reader.onerror = () => {
+			reject( 'file reading has failed' );
+		};
+
+		try {
+			reader.readAsText( file );
+		} catch ( err ) {
+			console.log( err );
+		}
+	} );
+};
+
+/**
  * @function collectColors
  *
  * @description Collect the colors used into the svg. It takes a string of text and returns an array of unique colors found in that string

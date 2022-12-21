@@ -36,13 +36,13 @@ import {
 	getSvgSize,
 	svgRemoveFill,
 	svgAddPathStroke,
-	hasFullOrWideWidth,
 	hasAlign,
+	onSvgSelect,
 } from './utils';
 import { ErrorSvg, svgIcon } from './icons';
+import { ALLOWED_MEDIA_TYPES } from './index';
 
-const ALLOWED_MEDIA_TYPES = [ 'image/*' ];
-const NEW_TAB_REL = 'noreferrer noopener';
+export const NEW_TAB_REL = 'noreferrer noopener';
 
 /**
  * @module Edit
@@ -273,58 +273,9 @@ export const Edit = ( props ) => {
 		} );
 	};
 
-	/**
-	 * @function onImageSelect
-	 *
-	 * @description Triggered when an image is selected with an input of file type
-	 *
-	 * Loads the file with FileReader and then passes the result to the function that cleans/parses in its contents
-	 *
-	 * @param {Array} files
-	 */
-	const onSvgSelect = ( files ) => {
-		files.forEach( ( file ) => {
-			const reader = new window.FileReader();
-			reader.onload = () => {
-				loadSvg( reader.result );
-			};
-			reader.onabort = () => {
-				throw new Error( 'file reading was aborted' );
-			};
-			reader.onerror = () => {
-				throw new Error( 'file reading has failed' );
-			};
-
-			try {
-				reader.readAsText( file );
-			} catch ( err ) {
-				onSvgError( err );
-			}
-		} );
-	};
-
 	const mediaPreview = () => (
 		<SVG markup={ svgIcon } width={ 1000 } height={ 1000 } />
 	);
-
-	/**
-	 * @function SvgDropZone
-	 * @description The SvgDropZone component
-	 *
-	 * `<DropZone />` is a component that accepts a function as a prop called `onFilesDrop`.
-	 * When a file is dropped into the drop zone, the `onFilesDrop` function is called with the dropped file as an argument
-	 *
-	 * @return {JSX.Element} DropZone - returns a div with a DropZone component.
-	 */
-	const SvgDropZone = () => {
-		return (
-			<DropZone
-				onFilesDrop={ ( files ) => {
-					onSvgSelect( files );
-				} }
-			/>
-		);
-	};
 
 	/**
 	 * The placeholder component that contains the button and the textarea input
@@ -564,8 +515,13 @@ export const Edit = ( props ) => {
 							type={ 'file' }
 							label={ __( 'Replace SVG' ) }
 							accept={ ALLOWED_MEDIA_TYPES }
+							multiple={ false }
 							onChange={ ( ev ) => {
-								onSvgSelect( Object.values( ev.target.files ) );
+								onSvgSelect( ev.target.files[ 0 ] ).then(
+									( result ) => {
+										loadSvg( result );
+									}
+								);
 							} }
 						>
 							Replace
@@ -678,17 +634,26 @@ export const Edit = ( props ) => {
 						placeholder={ () =>
 							placeholder(
 								<>
-									<SvgDropZone />
+									<DropZone
+										onFilesDrop={ ( files ) => {
+											onSvgSelect( files[ 0 ] ).then(
+												( result ) => {
+													loadSvg( result );
+												}
+											);
+										} }
+									/>
 									<div style={ { display: 'flex' } }>
 										<FormFileUpload
 											className={ 'components-button' }
 											accept={ ALLOWED_MEDIA_TYPES }
+											multiple={ false }
 											onChange={ ( ev ) => {
 												onSvgSelect(
-													Object.values(
-														ev.target.files
-													)
-												);
+													ev.target.files[ 0 ]
+												).then( ( result ) => {
+													loadSvg( result );
+												} );
 											} }
 											onError={ ( error ) => {
 												onSvgError( error );
