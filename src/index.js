@@ -101,17 +101,33 @@ registerBlockVariation( 'core/image', {
 	isDefault: false,
 	attributes: {
 		namespace: SVG_VARIATION_NAMESPACE,
-		svg: {
-			type: 'string',
-			default: 'not undefined',
-		},
-		originalSvg: '',
 		className: 'oh-my-imgsvg',
 	},
-
 	scope: [ 'block', 'inserter', 'transform' ],
 	isActive: [ 'namespace' ],
 } );
+
+addFilter(
+	'blocks.registerBlockType',
+	SVG_VARIATION_NAMESPACE,
+	( settings ) => {
+		const { attributes } = settings;
+		return {
+			...settings,
+			attributes: {
+				...attributes,
+				svg: {
+					default: false,
+					type: 'string',
+				},
+				originalSvg: {
+					default: false,
+					type: 'string',
+				},
+			},
+		};
+	}
+);
 
 /**
  * Register SVG image block
