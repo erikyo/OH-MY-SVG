@@ -2,6 +2,7 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 import {
 	InspectorControls,
 	MediaPlaceholder,
+	useBlockProps,
 	useSetting,
 } from '@wordpress/block-editor';
 import { useDispatch } from '@wordpress/data';
@@ -22,10 +23,12 @@ import { ALLOWED_MEDIA_TYPES } from './index';
 import { loadSvg, onSvgSelect, optimizeSvg } from './utils';
 import { SvgoStats } from './components';
 
+export const SVGBASE64 = 'data:image/svg+xml;base64,';
+
 /**
  * infiniteLoop block Editor scripts
  */
-export const svgImgEdit = createHigherOrderComponent( ( BlockEdit ) => {
+export const withOhMySvgImg = createHigherOrderComponent( ( BlockEdit ) => {
 	return ( props ) => {
 		if (
 			props.attributes.className !== 'oh-my-imgsvg' ||
@@ -36,7 +39,7 @@ export const svgImgEdit = createHigherOrderComponent( ( BlockEdit ) => {
 
 		const {
 			name,
-			attributes: { svg, originalSvg },
+			attributes: { url, svg, originalSvg },
 			setAttributes,
 			onSelectImage,
 			clientId,
@@ -64,12 +67,15 @@ export const svgImgEdit = createHigherOrderComponent( ( BlockEdit ) => {
 
 		const defaultLayout = useSetting( 'layout' ) || {};
 
-		const applySVGO = async () => {
+		const applySVGO = () => {
 			setAttributes( {
 				svg: optimizeSvg( svg ),
-				imgSrc: `data:image/svg+xml;base64,${ btoa( svg ) }`,
 			} );
 		};
+
+		function encodeSvg( svgMarkup ) {
+			return SVGBASE64 + btoa( svgMarkup );
+		}
 
 		return (
 			<>
@@ -106,7 +112,7 @@ export const svgImgEdit = createHigherOrderComponent( ( BlockEdit ) => {
 						<p>text</p>
 					</PanelBody>
 				</InspectorControls>
-				{ isSelected && ! props.attributes.imgSrc && (
+				{ isSelected && ! url && (
 					<MediaPlaceholder
 						onSelect={ onSelectImage }
 						allowedTypes={ ALLOWED_MEDIA_TYPES }
@@ -123,6 +129,9 @@ export const svgImgEdit = createHigherOrderComponent( ( BlockEdit ) => {
 															file: files[ 0 ],
 															contentSize:
 																defaultLayout.contentSize,
+															url: encodeSvg(
+																result
+															),
 															...props.attributes,
 														} )
 													)
@@ -144,6 +153,9 @@ export const svgImgEdit = createHigherOrderComponent( ( BlockEdit ) => {
 																.files[ 0 ],
 															contentSize:
 																defaultLayout.contentSize,
+															url: encodeSvg(
+																result
+															),
 															...props.attributes,
 														} )
 													);
@@ -162,8 +174,8 @@ export const svgImgEdit = createHigherOrderComponent( ( BlockEdit ) => {
 						}
 					/>
 				) }
-				{ props.attributes.imgSrc && <BlockEdit { ...props } /> }
+				{ url && <BlockEdit { ...props } /> }
 			</>
 		);
 	};
-}, 'svgImgEdit' );
+}, 'withOhMySvgImg' );

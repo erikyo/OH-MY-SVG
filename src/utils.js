@@ -129,7 +129,6 @@ export const loadSvg = ( { markup, file, contentSize, ...props } ) => {
 		height: parsedHeight || props.height,
 		originalSvg: cleanMarkup || props.originalSvg || '',
 		svg: cleanMarkup || ErrorSvg( __( '😓 Error!' ) ),
-		imgSrc: `data:image/svg+xml;base64,${ btoa( cleanMarkup ) }`,
 		alt: __( 'The name of the image is ' ) + filename,
 		name: filename,
 		size: file.size || cleanMarkup.length,

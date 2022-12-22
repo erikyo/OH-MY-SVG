@@ -43,7 +43,7 @@ import {
 } from './utils';
 import { svgIcon } from './icons';
 import { ALLOWED_MEDIA_TYPES } from './index';
-import {SvgoStats} from "./components";
+import { SvgoStats } from './components';
 
 export const NEW_TAB_REL = 'noreferrer noopener';
 
@@ -341,8 +341,7 @@ export const Edit = ( props ) => {
 					<PanelBody title="Editor" initialOpen={ true }>
 						<PanelRow>
 							<p>
-								SVGO
-								<SvgoStats
+								SVGO <SvgoStats
 									original={ originalSvg }
 									compressed={ svg }
 								/>
@@ -508,11 +507,11 @@ export const Edit = ( props ) => {
 									( result ) =>
 										setAttributes(
 											loadSvg( {
+												...props.attributes,
 												markup: result,
 												file: ev.target.files[ 0 ],
 												contentSize:
 													defaultLayout.contentSize,
-												...props.attributes,
 											} )
 										)
 								);

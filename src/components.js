@@ -1,6 +1,7 @@
 export const SvgoStats = ( { original, compressed } ) => {
-	const sizeOriginal = original.length;
-	const sizeCompressed = compressed.length;
+	if ( ! original ) return null;
+	const sizeOriginal = original?.length || 1;
+	const sizeCompressed = compressed?.length || 1;
 
 	// get the percentage of file size
 	const percentOriginal =
@@ -12,8 +13,7 @@ export const SvgoStats = ( { original, compressed } ) => {
 				color: 'var(--wp--preset--color--cyan-bluish-gray)',
 			} }
 		>
-			({ sizeCompressed.humanFileSize() }/
-			{ sizeOriginal.humanFileSize() }{ ' ' }
+			({ sizeCompressed.humanFileSize() }/{ sizeOriginal.humanFileSize() }{ ' ' }
 			{ percentOriginal.toFixed( 2 ) }%)
 		</i>
 	);

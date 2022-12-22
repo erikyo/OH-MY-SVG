@@ -13,10 +13,9 @@ import { hasAlign } from './utils';
  * @return {JSX.Element} - the cleaned and optimized svg
  */
 export const Save = ( { attributes } ) => {
-	const { svg, url, width, height, rotation, align, className } = attributes;
+	const { svg, url, width, height, rotation, align } = attributes;
 
 	const blockProps = useBlockProps.save( {
-		className,
 		rotation,
 		style: {
 			width: hasAlign( align, [ 'full', 'wide' ] ) ? '100%' : null,
