@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from '@wordpress/element';
 import {
 	Button,
-	ColorIndicator,
-	ColorPicker,
-	Dropdown,
 	FormFileUpload,
 	Panel,
 	PanelBody,
@@ -17,35 +14,39 @@ import {
 	ToolbarGroup,
 	TextControl,
 	DropZone,
+	ColorPalette,
+	PanelHeader,
 } from '@wordpress/components';
 import {
 	BlockControls,
 	InspectorControls,
+	__experimentalUseBorderProps as useBorderProps,
 	__experimentalLinkControl as LinkControl,
+	__experimentalImageSizeControl as ImageSizeControl,
 	useBlockProps,
 	MediaPlaceholder,
 	BlockIcon,
 	useSetting,
 } from '@wordpress/block-editor';
+
+import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { link as linkIcon, linkOff } from '@wordpress/icons';
 import SVG from './Svg';
 import {
+	updateColor,
 	collectColors,
 	optimizeSvg,
 	svgRemoveFill,
 	svgAddPathStroke,
-	hasAlign,
-	onSvgSelect,
 	loadSvg,
-	rotationRangePresets,
-	humanFileSize,
-} from './utils';
-import { svgIcon } from './icons';
-import { ALLOWED_MEDIA_TYPES } from './index';
-import { SvgoStats } from './components';
-
-export const NEW_TAB_REL = 'noreferrer noopener';
+	readSvg,
+} from './utils/svgTools';
+import { hasAlign, onSvgReadError, scaleProportionally } from './utils/fn';
+import { rotationRangePresets } from './utils/presets';
+import { svgIcon } from './utils/icons';
+import { ALLOWED_MEDIA_TYPES, NEW_TAB_REL, SVG_PLUGIN_COLOR } from './index';
+import { mediaPreview, SvgoStats } from './utils/components';
 
 /**
  * @module Edit
@@ -75,30 +76,20 @@ export const Edit = ( props ) => {
 	 * @property {string}   attributes.url         - the target of the svg hyperlink
 	 * @property {string}   attributes.rel         - stores whether the link opens into a new window
 	 */
-	const {
-		attributes: {
-			align,
-			linkTarget,
-			rel,
-			url,
-			height,
-			width,
-			rotation,
-			svg,
-			originalSvg,
-			colors,
-		},
-		classes,
-		isSelected,
-		setAttributes,
-		toggleSelection,
-	} = props;
+	const { attributes, classes, isSelected, setAttributes, toggleSelection } =
+		props;
 
-	/**
-	 * @property {number} pathStrokeWith - the width of the border / stroke
-	 * @callback setPathStrokeWith
-	 */
-	const [ pathStrokeWith, setPathStrokeWith ] = useState( 1.0 );
+	const {
+		align,
+		linkTarget,
+		rel,
+		url,
+		height,
+		width,
+		rotation,
+		svg,
+		originalSvg,
+	} = attributes;
 
 	/**
 	 * @function useRef
@@ -123,10 +114,33 @@ export const Edit = ( props ) => {
 	 * @callback setIsEditingURL
 	 */
 	const [ isEditingURL, setIsEditingURL ] = useState( false );
-	const [ maxWidth, setMaxWidth ] = useState( '100%' );
+	const [ maxWidth, setMaxWidth ] = useState( null );
+
+	/**
+	 * @property {number} pathStrokeWith - the width of the border / stroke
+	 * @callback setPathStrokeWith
+	 */
+	const [ colors, setColors ] = useState( [] );
+	const [ currentColor, setColor ] = useState( '' );
+	const [ pathStrokeWith, setPathStrokeWith ] = useState( 1.0 );
+	const [ originalSize, setOriginalSize ] = useState( {
+		width: false,
+		height: false,
+	} );
 
 	/* the block editor sizes */
 	const defaultLayout = useSetting( 'layout' ) || {};
+	const contentWidth = parseInt( defaultLayout.contentSize );
+
+	useEffect( () => {
+		// on load collect colors
+		if ( svg ) setColors( collectColors( svg ) );
+	}, [] );
+
+	useEffect( () => {
+		// then set the first color detected as the default color
+		if ( colors.length > 0 ) setColor( colors[ 0 ]?.color || false );
+	}, [ colors ] );
 
 	/**
 	 * Checking if the block is selected.
@@ -140,6 +154,53 @@ export const Edit = ( props ) => {
 			setIsEditingURL( false );
 		}
 	}, [ isSelected ] );
+
+	/**
+	 * Whenever the svg is changed it collects the colors used in the image and resize the image accordingly to its container
+	 *
+	 * @type {useEffect}
+	 */
+	useEffect( () => {
+		let size = {};
+
+		/* If the svg is new, it also stores the size of the image and if it is larger than the content, it resizes it. */
+		if ( ! svg.originalSvg ) {
+			setOriginalSize( {
+				width,
+				height,
+			} );
+
+			/* if the svg with is bigger than the content width rescale it */
+			if ( width >= contentWidth ) {
+				size = {
+					width: contentWidth,
+					height: scaleProportionally( width, height, contentWidth ),
+				};
+			}
+		}
+
+		setColors( collectColors( svg ) );
+
+		setAttributes( {
+			size,
+		} );
+	}, [ svg ] );
+
+	/**
+	 * Whenever the alignment is changed set the max width of the current block
+	 *
+	 * @type {useEffect}
+	 * @property {attributes.colors} colors - the svg color array
+	 */
+	useEffect( () => {
+		function contentMaxWidth() {
+			if ( [ 'wide' ].includes( align ) ) {
+				return defaultLayout.wideSize;
+			}
+			return undefined;
+		}
+		setMaxWidth( contentMaxWidth() );
+	}, [ align ] );
 
 	/**
 	 * Handle the checkbox state for "Open in new tab"
@@ -198,65 +259,23 @@ export const Edit = ( props ) => {
 	}
 
 	/**
-	 * Whenever the svg is changed it collects the colors used in the image
+	 * Since the updateSvg function is shared we need to set attributes with the result of the updateSvg function
 	 *
-	 * @type {useEffect}
-	 * @property {attributes.colors} colors - the svg color array
+	 * @param {string}         result
+	 * @param {boolean|string} file
+	 * @param                  replace
 	 */
-	useEffect( () => {
-		setAttributes( {
-			colors: collectColors( svg ),
+	const updateSvg = ( result, file = false, replace = false ) => {
+		const newSvg = loadSvg( {
+			...props.attributes,
+			markup: result,
+			file,
 		} );
-	}, [ svg ] );
-
-	/**
-	 * Whenever the alignment is changed set the max width of the current block
-	 *
-	 * @type {useEffect}
-	 * @property {attributes.colors} colors - the svg color array
-	 */
-	useEffect( () => {
-		const contentMaxWidth = () => {
-			if ( align === 'wide' ) {
-				return defaultLayout.wideSize;
-			} else if ( align === 'none' ) {
-				return defaultLayout.contentSize;
-			}
-			return '100%';
-		};
-		setMaxWidth( contentMaxWidth );
-	}, [ align ] );
-
-	/**
-	 * @function updateColor
-	 *
-	 * @description Replace a color used in the svg image with another color
-	 *
-	 * @param {string} newColor
-	 * @param {string} color
-	 */
-	const updateColor = ( newColor, color ) => {
-		// updates the colors array
-		const newSvg = svg.replaceAll( color, newColor );
-
-		/* TODO: i'm lazy but it would be better to replace only the color replaced */
-		const colorCollection = collectColors( newSvg ) || [];
-
 		setAttributes( {
-			colors: colorCollection,
-			svg: newSvg,
+			...newSvg,
+			originalSvg: replace ? newSvg : originalSvg,
 		} );
 	};
-
-	const onSvgError = ( err ) => {
-		throw new Error( 'Failed to read the given file', {
-			cause: err,
-		} );
-	};
-
-	const mediaPreview = () => (
-		<SVG markup={ svgIcon } width={ 1000 } height={ 1000 } />
-	);
 
 	/**
 	 * The placeholder component that contains the button and the textarea input
@@ -279,48 +298,38 @@ export const Edit = ( props ) => {
 		);
 	};
 
+	const borderProps = useBorderProps( attributes );
 	const blockProps = useBlockProps( {
 		style: {
+			...borderProps.style, // Border radius, width and style.
 			display: hasAlign( align, [ 'center' ] ) ? 'table' : null,
 			maxWidth: hasAlign( align, 'full' ) ? 'none' : null,
 			width: hasAlign( align, [ 'full', 'wide' ] ) ? '100%' : null,
 		},
 		ref,
-		className: classes,
+		className: classnames( classes, borderProps.className ),
 	} );
 
 	return (
 		<div { ...blockProps }>
-			<InspectorControls key="settings">
-				<Panel header="Settings">
+			<InspectorControls>
+				<Panel>
 					<PanelBody title="Settings">
-						<RangeControl
-							label={ __( 'Width' ) }
-							type={ 'number' }
-							value={ width }
-							min={ 0 }
-							max={ 2000 }
-							step={ 1 }
-							onChange={ ( ev ) => {
+						<ImageSizeControl
+							width
+							height
+							imageWidth={ originalSize.width }
+							imageHeight={ originalSize.height }
+							onChange={ ( e ) => {
 								setAttributes( {
-									width: ev,
+									width: e.width,
+									height: e.height,
 								} );
 							} }
 						/>
+
 						<RangeControl
-							label={ __( 'Height' ) }
-							type={ 'number' }
-							value={ height }
-							min={ 0 }
-							max={ 2000 }
-							step={ 1 }
-							onChange={ ( ev ) => {
-								setAttributes( {
-									height: ev,
-								} );
-							} }
-						/>
-						<RangeControl
+							__nextHasNoMarginBottom
 							label={ __( 'Rotation' ) }
 							type={ 'number' }
 							value={ rotation }
@@ -328,6 +337,7 @@ export const Edit = ( props ) => {
 							max={ 359 }
 							marks={ rotationRangePresets }
 							step={ 1 }
+							allowReset={ true }
 							onChange={ ( ev ) => {
 								setAttributes( {
 									rotation: ev,
@@ -335,13 +345,12 @@ export const Edit = ( props ) => {
 							} }
 						/>
 					</PanelBody>
-				</Panel>
 
-				<Panel title="editor">
-					<PanelBody title="Editor" initialOpen={ true }>
+					<PanelBody title="Optimization">
 						<PanelRow>
 							<p>
-								SVGO <SvgoStats
+								SVGO{ ' ' }
+								<SvgoStats
 									original={ originalSvg }
 									compressed={ svg }
 								/>
@@ -376,6 +385,16 @@ export const Edit = ( props ) => {
 
 						<hr />
 
+						<TextareaControl
+							label={ __( 'SVG Markup Editor' ) }
+							value={ svg || '' }
+							onChange={ ( newSvg ) => {
+								setAttributes( { svg: newSvg } );
+							} }
+						/>
+					</PanelBody>
+
+					<PanelBody title={ 'Tools' } initialOpen={ false }>
 						<PanelRow>
 							<p>{ __( 'Fill' ) }</p>
 							<Button
@@ -401,6 +420,8 @@ export const Edit = ( props ) => {
 										svg: svgAddPathStroke( {
 											svg,
 											pathStrokeWith,
+											pathStrokeColor:
+												currentColor || undefined,
 										} ),
 									} )
 								}
@@ -417,61 +438,43 @@ export const Edit = ( props ) => {
 							max={ 20 }
 							step={ 0.1 }
 						/>
+					</PanelBody>
 
-						<hr />
+					<PanelBody title="Editor">
+						<h2
+							className={ 'block-editor-image-size-control__row' }
+						>
+							SVG Colors
+						</h2>
 
-						<TextareaControl
-							label={ __( 'SVG Markup Editor' ) }
-							value={ svg || '' }
-							onChange={ ( ev ) => {
-								setAttributes( { svg: ev } );
+						<ColorPalette
+							enablealpha={ true }
+							clearable={ false }
+							colors={ colors }
+							value={ currentColor }
+							onChange={ ( newColor ) => {
+								if ( newColor ) {
+									if (
+										colors
+											.map( ( c ) => c.color )
+											.includes( newColor )
+									) {
+										console.log(
+											`new color ${ newColor } already exists`
+										);
+									} else {
+										setAttributes( {
+											svg: updateColor(
+												svg,
+												newColor,
+												currentColor
+											),
+										} );
+									}
+									setColor( newColor );
+								}
 							} }
 						/>
-					</PanelBody>
-				</Panel>
-
-				<Panel title="colors">
-					<PanelBody
-						title={ __( 'Colors' ) }
-						initialOpen={ true }
-						style={ { display: 'flex', flexDirection: 'column' } }
-					>
-						{ colors &&
-							colors.map( ( color, index ) => (
-								<div
-									key={ index }
-									style={ {
-										minWidth: '100%',
-										borderBottom: '1px solid #f3f3f3',
-									} }
-								>
-									<Dropdown
-										renderToggle={ ( { onToggle } ) => (
-											<Button onClick={ onToggle }>
-												<ColorIndicator
-													colorValue={ color }
-												/>
-												<span
-													style={ {
-														marginLeft: '8px',
-													} }
-												>
-													{ color }
-												</span>
-											</Button>
-										) }
-										renderContent={ () => (
-											<ColorPicker
-												color={ color }
-												onChange={ ( e ) =>
-													updateColor( e, color )
-												}
-												defaultValue={ color }
-											/>
-										) }
-									></Dropdown>
-								</div>
-							) ) }
 					</PanelBody>
 				</Panel>
 			</InspectorControls>
@@ -503,16 +506,12 @@ export const Edit = ( props ) => {
 							accept={ ALLOWED_MEDIA_TYPES }
 							multiple={ false }
 							onChange={ ( ev ) => {
-								onSvgSelect( ev.target.files[ 0 ] ).then(
-									( result ) =>
-										setAttributes(
-											loadSvg( {
-												...props.attributes,
-												markup: result,
-												file: ev.target.files[ 0 ],
-												contentSize:
-													defaultLayout.contentSize,
-											} )
+								readSvg( ev.target.files[ 0 ] ).then(
+									( newSvg ) =>
+										updateSvg(
+											newSvg,
+											ev.target.files[ 0 ],
+											true
 										)
 								);
 							} }
@@ -540,7 +539,6 @@ export const Edit = ( props ) => {
 							opensInNewTab: newOpensInNewTab,
 						} ) => {
 							setAttributes( { url: newURL } );
-
 							if ( opensInNewTab !== newOpensInNewTab ) {
 								onToggleOpenInNewTab( newOpensInNewTab );
 							}
@@ -588,6 +586,7 @@ export const Edit = ( props ) => {
 					} }
 				>
 					<SVG
+						{ ...borderProps }
 						markup={ svg }
 						width={
 							! hasAlign( align, [ 'full', 'wide' ] )
@@ -604,6 +603,7 @@ export const Edit = ( props ) => {
 				</ResizableBox>
 			) : (
 				<SVG
+					{ ...borderProps }
 					markup={ svg }
 					width={
 						! hasAlign( align, [ 'full', 'wide' ] ) ? width : false
@@ -630,18 +630,13 @@ export const Edit = ( props ) => {
 								<>
 									<DropZone
 										onFilesDrop={ ( files ) => {
-											onSvgSelect( files[ 0 ] ).then(
-												( result ) => {
-													setAttributes(
-														loadSvg( {
-															markup: result,
-															file: files[ 0 ],
-															contentSize:
-																defaultLayout.contentSize,
-															...props.attributes,
-														} )
-													);
-												}
+											readSvg( files[ 0 ] ).then(
+												( newSvg ) =>
+													updateSvg(
+														newSvg,
+														files[ 0 ],
+														true
+													)
 											);
 										} }
 									/>
@@ -651,24 +646,16 @@ export const Edit = ( props ) => {
 											accept={ ALLOWED_MEDIA_TYPES }
 											multiple={ false }
 											onChange={ ( ev ) => {
-												onSvgSelect(
+												readSvg(
 													ev.target.files[ 0 ]
-												).then( ( result ) =>
-													setAttributes(
-														loadSvg( {
-															markup: result,
-															file: ev.target
-																.files[ 0 ],
-															contentSize:
-																defaultLayout.contentSize,
-															...props.attributes,
-														} )
+												).then( ( newSvg ) =>
+													updateSvg(
+														newSvg,
+														ev.target.files[ 0 ]
 													)
 												);
 											} }
-											onError={ ( error ) => {
-												onSvgError( error );
-											} }
+											onError={ onSvgReadError }
 											variant={ 'secondary' }
 										>
 											{ __( 'Select a Svg image' ) }
@@ -679,14 +666,8 @@ export const Edit = ( props ) => {
 												'Paste here your SVG markup'
 											) }
 											value={ svg }
-											onChange={ ( result ) =>
-												loadSvg( {
-													markup: result,
-													file: false,
-													contentSize:
-														defaultLayout.contentSize,
-													...props.attributes,
-												} )
+											onChange={ ( newSvg ) =>
+												updateSvg( newSvg )
 											}
 										></TextControl>
 									</div>

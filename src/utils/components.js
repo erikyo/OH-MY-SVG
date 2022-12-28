@@ -1,3 +1,7 @@
+import SVG from '../Svg';
+import { svgIcon } from './icons';
+import { humanFileSize } from './common';
+
 export const SvgoStats = ( { original, compressed } ) => {
 	if ( ! original ) return null;
 	const sizeOriginal = original?.length || 1;
@@ -13,8 +17,12 @@ export const SvgoStats = ( { original, compressed } ) => {
 				color: 'var(--wp--preset--color--cyan-bluish-gray)',
 			} }
 		>
-			({ sizeCompressed.humanFileSize() }/{ sizeOriginal.humanFileSize() }{ ' ' }
-			{ percentOriginal.toFixed( 2 ) }%)
+			({ humanFileSize( sizeCompressed ) }/
+			{ humanFileSize( sizeOriginal ) } { percentOriginal.toFixed( 2 ) }%)
 		</i>
 	);
 };
+
+export const mediaPreview = () => (
+	<SVG markup={ svgIcon } width={ 1000 } height={ 1000 } />
+);

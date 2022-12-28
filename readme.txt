@@ -19,6 +19,15 @@ However, this has the disadvantage that the svg will not be copied into the medi
 
 From a performance point of view, be aware that the image will not be included as an external resource, but will instead be within the markup of the page, thus making svg even faster than it already is.
 
+== SVG are cool because: ==
+
+- they are always super sharp!
+- they don't require any resize (you only need one source for all screen sizes and resolutions) so the load on server is very
+- they are super lightweight
+- They increase page performance: Using inline SVGs saves a lot of requests to the server.
+- animations with svg are super smooth and light (and awesome)
+- they are highly customizable
+
 = Security =
 
 Since this plugin doesn't enable uploads of svg images into media library could be considered safer than all the others that enable the upload.

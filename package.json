@@ -1,7 +1,7 @@
 {
     "name": "oh-my-svg",
     "version": "1.0.0",
-    "author": "Erik",
+    "author": "Erik <erik@codekraft.it>",
     "license": "GPL-2.0-or-later",
     "main": "build/oh-my-svg-editor.js",
     "files": [
@@ -25,23 +25,20 @@
         "@babel/core": "^7.20.5",
         "@wordpress/babel-preset-default": "^7.7.0",
         "@wordpress/block-editor": "^11.0.0",
+        "@wordpress/block-library": "^8.0.0",
         "@wordpress/blocks": "^12.0.0",
         "@wordpress/components": "^23.0.0",
-        "@wordpress/element": "^5.0.0",
-        "@wordpress/i18n": "^4.23.0",
-        "@wordpress/icons": "^9.14.0",
-        "@wordpress/scripts": "^25.0.0",
-        "clean-jsdoc-theme": "^4.1.7",
-        "dompurify": "^2.3.9",
-        "jsdoc": "^3.6.11",
-        "path-browserify": "^1.0.1",
-        "stream-browserify": "^3.0.0",
-        "svgo": "^3.0.2",
-        "@wordpress/blob": "^3.23.0",
         "@wordpress/compose": "^6.0.0",
         "@wordpress/data": "^8.0.0",
+        "@wordpress/element": "^5.0.0",
+        "@wordpress/hooks": "^3.23.0",
+        "@wordpress/i18n": "^4.23.0",
+        "@wordpress/icons": "^9.14.0",
         "@wordpress/notices": "^3.23.0",
-        "@wordpress/block-library": "7.18.0"
+        "@wordpress/scripts": "^25.0.0",
+        "clean-jsdoc-theme": "^4.1.7",
+        "jsdoc": "^3.6.11",
+        "classnames": "^2.3.2"
     },
     "engines": {
         "node": ">=14.0.0",
@@ -54,5 +51,10 @@
     },
     "browserslist": [
         "extends @wordpress/browserslist-config"
-    ]
+    ],
+    "dependencies": {
+        "color2name": "^0.9.0",
+        "dompurify": "^2.3.9",
+        "svgo": "^3.0.2"
+    }
 }
