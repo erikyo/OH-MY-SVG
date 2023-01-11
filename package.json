@@ -4,6 +4,7 @@
     "author": "Erik <erik@codekraft.it>",
     "license": "GPL-2.0-or-later",
     "main": "build/oh-my-svg-editor.js",
+    "typings": "dist/index",
     "files": [
         "build/*",
         "svg-block.php",
@@ -12,21 +13,28 @@
     ],
     "scripts": {
         "wp-env": "wp-env start",
-        "build": "wp-scripts build",
+        "build:js": "wp-scripts build",
+        "build:types": "tsc --project tsconfig.types.json",
+        "build": "npm run build:js && npm run build:types",
         "start": "wp-scripts start",
         "format": "wp-scripts format",
         "lint:css": "wp-scripts lint-style",
         "lint:js": "wp-scripts lint-js",
         "docGen": "jsdoc -c jsdoc.conf.json",
         "packages-update": "wp-scripts packages-update",
-        "plugin-zip": "wp-scripts plugin-zip"
+        "plugin-zip": "wp-scripts plugin-zip",
+        "test:unit": "wp-scripts test-unit-js"
     },
     "devDependencies": {
         "@babel/core": "^7.20.5",
+        "@babel/preset-typescript": "^7.18.6",
+        "@types/dompurify": "^2.4.0",
+        "@types/jest": "^29.2.5",
+        "@types/wordpress__block-editor": "^11.0.1",
         "@wordpress/babel-preset-default": "^7.7.0",
         "@wordpress/block-editor": "^11.0.0",
         "@wordpress/block-library": "^8.0.0",
-        "@wordpress/blocks": "^12.0.0",
+        "@wordpress/blocks": "^12.1.0",
         "@wordpress/components": "^23.0.0",
         "@wordpress/compose": "^6.0.0",
         "@wordpress/data": "^8.0.0",
@@ -34,11 +42,13 @@
         "@wordpress/hooks": "^3.23.0",
         "@wordpress/i18n": "^4.23.0",
         "@wordpress/icons": "^9.14.0",
+        "@wordpress/jest-preset-default": "^10.5.0",
         "@wordpress/notices": "^3.23.0",
         "@wordpress/scripts": "^25.0.0",
+        "classnames": "^2.3.2",
         "clean-jsdoc-theme": "^4.1.7",
-        "jsdoc": "^3.6.11",
-        "classnames": "^2.3.2"
+        "jest": "^29.3.1",
+        "jsdoc": "^3.6.1"
     },
     "engines": {
         "node": ">=14.0.0",
@@ -53,8 +63,8 @@
         "extends @wordpress/browserslist-config"
     ],
     "dependencies": {
-        "color2name": "^0.9.0",
-        "dompurify": "^2.3.9",
+        "color-2-name": "^1.1.0",
+        "dompurify": "^2.4.3",
         "svgo": "^3.0.2"
     }
 }

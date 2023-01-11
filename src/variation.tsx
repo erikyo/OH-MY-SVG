@@ -22,7 +22,7 @@ import {
 	Placeholder,
 	TextareaControl,
 } from '@wordpress/components';
-import { ALLOWED_MEDIA_TYPES } from './index';
+import { ALLOWED_MEDIA_TYPES } from './constants';
 import {
 	loadSvg,
 	readSvg,
@@ -31,6 +31,7 @@ import {
 	convertSvgToBitmap,
 } from './utils/svgTools';
 import { SvgoStats } from './utils/components';
+import { svgAttributesDef } from './types';
 
 /**
  * infiniteLoop block Editor scripts
@@ -56,7 +57,9 @@ export const withOhMySvgImg = createHigherOrderComponent( ( BlockEdit ) => {
 		const { createErrorNotice, createSuccessNotice } =
 			useDispatch( noticesStore );
 
-		const placeholder = ( content ) => {
+		const placeholder = (
+			content: JSX.Element | React.ReactNode
+		): JSX.Element => {
 			return (
 				<Placeholder
 					className="block-editor-media-placeholder"
@@ -92,41 +95,53 @@ export const withOhMySvgImg = createHigherOrderComponent( ( BlockEdit ) => {
 			} );
 		}
 
-		function onUpdateSvg( result, file ) {
-			const newSvg = loadSvg( {
+		function onUpdateSvg( result: string | ArrayBuffer, file: File ) {
+			const newSvg : svgAttributesDef | null = loadSvg( {
 				markup: result,
-				file,
-				url: encodeSvg( result ),
+				fileData: file,
+				url: encodeSvg( result.toString() ),
 				...props.attributes,
 			} );
 
-			setAttributes( {
-				svg: {
-					markup: newSvg.markup,
-				},
-			} );
+			if ( newSvg && newSvg.markup ) {
+				setAttributes( {
+					svg: {
+						markup: newSvg.markup,
+					},
+				} );
+			}
 		}
 
-		function onGenerateBitmap( svgMarkup ) {
+		function onGenerateBitmap( svgMarkup: string ) {
 			// create a webp with the svg markup using js canvas
 			convertSvgToBitmap( {
 				svgBase64: encodeSvg( svgMarkup ),
 				width,
 				height,
 			} ).then( ( rasterImage ) => {
+				// TODO: store the converted image
 				console.log( rasterImage );
+				setAttributes( {
+					svg: {
+						markup: rasterImage,
+					},
+				} );
 			} );
 		}
 
 		const controls = (
-			<BlockControls group="block" chilren={ false } components={ false }>
+			<BlockControls
+				group={ 'block' }
+				chilren={ false }
+				components={ false }
+			>
 				<BlockAlignmentControl />
 				<MediaReplaceFlow
 					mediaURL={ null }
 					allowedTypes={ ALLOWED_MEDIA_TYPES }
 					accept={ ALLOWED_MEDIA_TYPES }
 					onSelect={ readSvg }
-					onError={ ( error ) => {
+					onError={ ( error: string ) => {
 						createErrorNotice( error );
 					} }
 				>
@@ -210,17 +225,24 @@ export const withOhMySvgImg = createHigherOrderComponent( ( BlockEdit ) => {
 												}
 												accept={ ALLOWED_MEDIA_TYPES }
 												onChange={ ( ev ) => {
-													readSvg(
-														ev.target.files[ 0 ]
-													).then( ( result ) =>
-														onUpdateSvg(
-															result,
-															ev.target.files[ 0 ]
-														)
-													);
+													ev.target?.files
+														? readSvg(
+																ev.target
+																	.files[ 0 ]
+														  ).then( ( result ) =>
+																result
+																	? onUpdateSvg(
+																			result,
+																			ev
+																				.target
+																				.files[ 0 ]
+																	  )
+																	: null
+														  )
+														: null;
 												} }
-												onError={ ( error ) => {
-													createErrorNotice( error );
+												onError={ ( event ) => {
+													createErrorNotice( event );
 												} }
 												variant={ 'secondary' }
 											>

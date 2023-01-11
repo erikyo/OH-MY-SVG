@@ -11,16 +11,11 @@ import { svgIcon as icon } from './utils/icons';
 import { Edit } from './edit';
 import { Save } from './save';
 import { withOhMySvgImg } from './variation';
-import { createHigherOrderComponent } from '@wordpress/compose';
+import { withClientIdClassName } from './hoc';
 
 /** Import the block default configuration */
-const blockConfig = require( './block.json' );
-
-export const ALLOWED_MEDIA_TYPES = [ 'image/svg+xml' ];
-export const SVG_VARIATION_NAMESPACE = 'codekraft/oh-my-svg-img';
-export const NEW_TAB_REL = 'noreferrer noopener';
-export const SVGBASE64 = 'data:image/svg+xml;base64,';
-export const SVG_PLUGIN_COLOR = '#FFB13B';
+import blockConfig from './block.json';
+import { SVG_VARIATION_NAMESPACE } from './constants';
 
 /**
  * Register OH-MY-SVG block
@@ -110,7 +105,7 @@ registerBlockVariation( 'core/image', {
 	description: 'Add as image the svg',
 	icon,
 	isDefault: false,
-	keywords: 'svg',
+	keywords: [ 'svg' ],
 	attributes: {
 		namespace: SVG_VARIATION_NAMESPACE,
 		className: 'oh-my-imgsvg',
@@ -129,6 +124,8 @@ registerBlockVariation( 'core/image', {
 	isActive: [ 'namespace' ],
 } );
 
+/**
+ */
 addFilter(
 	'blocks.registerBlockType',
 	SVG_VARIATION_NAMESPACE,
@@ -157,24 +154,10 @@ addFilter(
 /**
  * Register SVG image block
  */
-addFilter( 'editor.BlockEdit', SVG_VARIATION_NAMESPACE, withOhMySvgImg );
-
-const withClientIdClassName = createHigherOrderComponent(
-	( BlockListBlock ) => {
-		return ( props ) => {
-			return (
-				<BlockListBlock
-					{ ...props }
-					className={ 'block-' + props.clientId }
-				/>
-			);
-		};
-	},
-	'withClientIdClassName'
-);
-
-addFilter(
-	'editor.BlockListBlock',
-	SVG_VARIATION_NAMESPACE,
-	withClientIdClassName
-);
+// addFilter( 'editor.BlockEdit', SVG_VARIATION_NAMESPACE, withOhMySvgImg );
+//
+// addFilter(
+// 	'editor.BlockListBlock',
+// 	SVG_VARIATION_NAMESPACE,
+// 	withClientIdClassName
+// );

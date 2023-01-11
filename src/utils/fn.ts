@@ -1,11 +1,14 @@
 /**
  * Check if the current align is the one specified
  *
- * @param {string} currentAlign - the current align
+ * @param {string}          currentAlign   - the current align
  * @param {string|string[]} alignmentCheck
  * @return {boolean} true if the alignment check contains the current alignment
  */
-export function hasAlign( currentAlign, alignmentCheck ) {
+export function hasAlign(
+	currentAlign: string,
+	alignmentCheck: string | string[]
+): boolean {
 	if ( typeof alignmentCheck === 'object' ) {
 		return alignmentCheck.includes( currentAlign );
 	}
@@ -21,12 +24,14 @@ export function hasAlign( currentAlign, alignmentCheck ) {
  * @param {number} limit
  * @return {number} the second value (the height of the image, the width is the limit size)
  */
-export function scaleProportionally( first, second, limit ) {
+export function scaleProportionally(
+	first: number,
+	second: number,
+	limit: number
+): number {
 	return ( limit / first ) * second;
 }
 
-export const onSvgReadError = ( err ) => {
-	throw new Error( 'Failed to read the given file', {
-		cause: err,
-	} );
+export const onSvgReadError = ( err: string ): Error => {
+	throw new Error( 'Failed to read the given file' + err );
 };

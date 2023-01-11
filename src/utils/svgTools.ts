@@ -1,9 +1,10 @@
 import DOMPurify from 'dompurify';
-import { SVGBASE64 } from '../index';
+import { SVG_EDITABLE_ELEMENTS, SVGBASE64, SVGO_DEFAULTS } from '../constants';
 import { optimize } from 'svgo';
-import { closest } from 'color2name';
+import { closest } from 'color-2-name';
 import { __ } from '@wordpress/i18n';
-import { ErrorSvg } from './icons';
+import { colorDef, svgAttributesDef, svgSizes } from '../types';
+import { COLORSTRING } from 'color-2-name/dist/types/types';
 
 /**
  * @function onImageSelect
@@ -15,11 +16,11 @@ import { ErrorSvg } from './icons';
  *
  * @return {Promise} the file reader promise
  */
-export const readSvg = async ( file ) => {
+export const readSvg = async ( file: Blob ): Promise< string | null > => {
 	return new Promise( ( resolve, reject ) => {
 		const reader = new window.FileReader();
 		reader.onload = () => {
-			resolve( reader.result );
+			resolve( reader.result ? reader.result.toString() : null );
 		};
 		reader.onabort = () => {
 			reject( 'file reading was aborted' );
@@ -44,31 +45,44 @@ export const readSvg = async ( file ) => {
  *
  * @param {attributes.svg} res - The string that was read into the file that is supposed to be a svg
  */
-export const loadSvg = ( { markup, file, ...props } ) => {
-	const cleanMarkup = DOMPurify.sanitize( markup );
-	const { parsedHeight, parsedWidth } = getSvgSize( cleanMarkup );
+export const loadSvg = ( {
+	markup,
+	fileData,
+	oldProps = {
+		width: 50,
+		height: 50,
+	},
+}: {
+	markup: string;
+	fileData: File;
+	oldProps: { width: number; height: number };
+} ): Object | null => {
+	const cleanSvg = DOMPurify.sanitize( markup );
+	const { height, width } = getSvgSize( cleanSvg ) as svgSizes;
 
-	if ( ! parsedWidth && ! parsedHeight && cleanMarkup.length < 10 ) {
+	if ( ! width && ! height && cleanSvg.length < 10 ) {
 		return null;
 	}
 
-	const fileData = file
+	const fileMetaData = fileData
 		? {
-				name: file.name,
-				alt: __( 'The name of the image is ' ) + file.name,
-				size: file.size || cleanMarkup.length,
-				type: file.type || 'image/svg+xml',
-				lastModified: file.lastModified,
+				name: fileData.name,
+				alt: __( 'The name of the image is ' ) + fileData.name,
+				size: fileData.size || cleanSvg.length,
+				type: fileData.type || 'image/svg+xml',
+				lastModified: fileData.lastModified,
 		  }
 		: {};
 
-	return {
-		...props,
-		...fileData,
-		width: parsedWidth || props.width,
-		height: parsedHeight || props.height,
-		svg: cleanMarkup || ErrorSvg( __( '😓 Error!' ) ),
-	};
+	if ( cleanSvg ) {
+		return {
+			fileData: fileMetaData,
+			width: width || oldProps.width,
+			height: height || oldProps.height,
+			svg: cleanSvg,
+		};
+	}
+	return null;
 };
 
 /**
@@ -77,32 +91,20 @@ export const loadSvg = ( { markup, file, ...props } ) => {
  * @param {string} svgString - waits SVGO to optimize the svg then return the markup
  * @return  {string} result
  */
-export function optimizeSvg( svgString ) {
-	const result = optimize( svgString, {
-		multipass: true,
-		plugins: [
-			{
-				name: 'removeViewBox',
-				enabled: false,
-			},
-			{
-				name: 'removeDimensions',
-				enabled: true,
-			},
-		],
-	} );
+export function optimizeSvg( svgString: string ): string {
+	const result = optimize( svgString, SVGO_DEFAULTS );
 	return result.data;
 }
 
 /**
  * It takes an SVG document and returns a string representation of it
  *
- * @param {SVGSVGElement} svgDoc - The SVG document that you want to convert to a string.
+ * @param {Document} svgDoc - The SVG document that you want to convert to a string.
  *
  * @return {string} A uncleaned string of the svgDoc.
  *
  */
-export const getSvgString = ( svgDoc ) => {
+export const getSvgString = ( svgDoc: Document ): string => {
 	const serializer = new window.XMLSerializer();
 	return serializer.serializeToString( svgDoc );
 };
@@ -111,9 +113,9 @@ export const getSvgString = ( svgDoc ) => {
  * It takes a string of SVG markup and returns a document object
  *
  * @param {string} svgData - The SVG data that you want to convert to a PNG.
- * @return {Object} A DOMParser object.
+ * @return {Document} A DOMParser object.
  */
-export const getSvgDoc = ( svgData ) => {
+export const getSvgDoc = ( svgData: string ): Document => {
 	const parser = new window.DOMParser();
 	return parser.parseFromString( svgData, 'image/svg+xml' );
 };
@@ -125,7 +127,7 @@ export const getSvgDoc = ( svgData ) => {
  *
  * @return {string} the src url of the given svg markup
  */
-export function encodeSvg( svgMarkup ) {
+export function encodeSvg( svgMarkup: string ): string {
 	return SVGBASE64 + btoa( svgMarkup );
 }
 
@@ -134,12 +136,12 @@ export function encodeSvg( svgMarkup ) {
  *
  * @description Collect the colors used into the svg. It takes a string of text and returns an array of unique colors found in that string
  *
- * @param {attributes.svg} fileContent - The content of the file that you want to extract colors from.
+ * @param  fileContent - The content of the file that you want to extract colors from.
  *
- * @return {*[]} An array of unique colors.
+ * @return An array of unique colors.
  */
-export function collectColors( fileContent ) {
-	const colorCollection = [];
+export function collectColors( fileContent: string ): colorDef[] {
+	const colorCollection: string[] = [];
 	if ( fileContent ) {
 		// find all hex, rgb and rgba colors in the target string
 		const colorRegexp =
@@ -159,7 +161,7 @@ export function collectColors( fileContent ) {
 			...colorCollection.map( ( color ) => {
 				return {
 					color,
-					name: closest( color ).name,
+					name: closest( color as COLORSTRING ).name,
 				};
 			} ),
 		] || []
@@ -175,7 +177,11 @@ export function collectColors( fileContent ) {
  * @param {string} newColor
  * @param {string} color
  */
-export const updateColor = ( svgDoc, newColor, color ) => {
+export const updateColor = (
+	svgDoc: string,
+	newColor: string,
+	color: string
+) => {
 	// updates the colors array
 	return svgDoc.replaceAll( color, newColor );
 };
@@ -187,8 +193,11 @@ export const updateColor = ( svgDoc, newColor, color ) => {
  *
  * @param {string} fileContent
  */
-export const getSvgSize = ( fileContent ) => {
-	const parsedData = {};
+export const getSvgSize = ( fileContent: string ): svgSizes => {
+	const parsedData: svgSizes = {
+		width: 0,
+		height: 0,
+	};
 	if ( fileContent ) {
 		// then get the image size data
 		const viewBox = fileContent.match( /viewBox=["']([^\\"']*)/ );
@@ -211,30 +220,32 @@ export const getSvgSize = ( fileContent ) => {
 				}
 			} );
 		}
-
-		return {
-			parsedWidth: parsedData.width,
-			parsedHeight: parsedData.height,
-		};
 	}
+
+	return parsedData;
 };
 
 /**
  *  Add a stroke around path, circle, rect this for example is useful if you want to animate the svg line
  *
  * @param {Object} stroke
- * @param {string} stroke.svg
+ * @param {string} stroke.svgMarkup
  * @param {string} stroke.pathStrokeColor
  * @param {number} stroke.pathStrokeWith
  * @param {Array}  stroke.pathStrokeEl
  */
 export const svgAddPathStroke = ( {
-	svg,
+	svgMarkup,
 	pathStrokeWith = 2,
 	pathStrokeColor,
-	pathStrokeEl = [ 'path', 'circle', 'rect' ],
+	pathStrokeEl = SVG_EDITABLE_ELEMENTS,
+}: {
+	svgMarkup: string;
+	pathStrokeColor: string;
+	pathStrokeWith: number;
+	pathStrokeEl: string[];
 } ) => {
-	const svgDoc = getSvgDoc( svg );
+	const svgDoc = getSvgDoc( svgMarkup );
 	svgDoc.querySelectorAll( pathStrokeEl.join() ).forEach( ( item ) => {
 		item.setAttribute( 'stroke', pathStrokeColor || '#20FF12' );
 		item.setAttribute( 'stroke-width', pathStrokeWith + 'px' );
@@ -245,14 +256,16 @@ export const svgAddPathStroke = ( {
 /**
  * Adds the "fill:transparent" property to the current svg (basically makes it transparent apart from the borders)
  *
- * @param {string} svg - the svg string
+ * @param {string} svgMarkup - the svg string
  */
-export const svgRemoveFill = ( svg ) => {
-	const svgDoc = getSvgDoc( svg );
-	svgDoc.querySelectorAll( 'path, circle, rect' ).forEach( ( item ) => {
-		item.setAttribute( 'fill', 'transparent' );
-		if ( item.style.fill ) item.style.fill = 'transparent';
-	} );
+export const svgRemoveFill = ( svgMarkup: string ) => {
+	const svgDoc = getSvgDoc( svgMarkup );
+	svgDoc
+		.querySelectorAll< HTMLElement >( SVG_EDITABLE_ELEMENTS.join( ', ' ) )
+		.forEach( ( item ) => {
+			item.setAttribute( 'fill', 'transparent' );
+			if ( item.style.fill ) item.style.fill = 'transparent';
+		} );
 	return getSvgString( svgDoc );
 };
 
@@ -272,11 +285,11 @@ export const svgRemoveFill = ( svg ) => {
 export const convertSvgToBitmap = async ( {
 	svgBase64,
 	sizeRatio = 1,
-	height = undefined,
-	width = undefined,
+	height = 100,
+	width = 100,
 	format = 'webp',
 	quality = 0.8,
-} ) => {
+} ): Promise< string > => {
 	// Create an image element from the SVG markup
 	const img = new window.Image();
 	img.src = svgBase64;
@@ -290,8 +303,8 @@ export const convertSvgToBitmap = async ( {
 
 	// Draw the image onto the canvas
 	const ctx = canvas.getContext( '2d' );
-	ctx.drawImage( img, 0, 0 );
 	try {
+		ctx?.drawImage( img, 0, 0 );
 		return Promise.resolve(
 			canvas.toDataURL( `image/${ format }`, quality )
 		).then( ( dataUrl ) => dataUrl );

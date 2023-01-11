@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { Component, useEffect, useRef, useState } from '@wordpress/element';
 import {
 	Button,
 	FormFileUpload,
@@ -15,7 +15,6 @@ import {
 	TextControl,
 	DropZone,
 	ColorPalette,
-	PanelHeader,
 } from '@wordpress/components';
 import {
 	BlockControls,
@@ -31,7 +30,7 @@ import {
 
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
-import { link as linkIcon, linkOff } from '@wordpress/icons';
+import { link, linkOff } from '@wordpress/icons';
 import SVG from './Svg';
 import {
 	updateColor,
@@ -44,20 +43,38 @@ import {
 } from './utils/svgTools';
 import { hasAlign, onSvgReadError, scaleProportionally } from './utils/fn';
 import { rotationRangePresets } from './utils/presets';
-import { svgIcon } from './utils/icons';
-import { ALLOWED_MEDIA_TYPES, NEW_TAB_REL, SVG_PLUGIN_COLOR } from './index';
+import { ErrorSvg, svgIcon} from './utils/icons';
+import { ALLOWED_MEDIA_TYPES, NEW_TAB_REL } from './constants';
 import { mediaPreview, SvgoStats } from './utils/components';
+import {
+	colorDef,
+	fileDef,
+	svgAttributesDef,
+	svgAttributesEditor,
+	svgSizes,
+} from './types';
+import { useDispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
 
 /**
  * @module Edit
  *
+ * @param          props.attributes
+ * @param          props.isSelected
+ * @param          props.setAttributes
+ * @param          props.toggleSelection
  * @description The edit view
  *
- * @param {Object} props - the edit view stored props
+ * @param {Object} props                 - the edit view stored props
  *
  * @return {JSX.Element} - the Block editor view
  */
-export const Edit = ( props ) => {
+export const Edit = ( props: {
+	attributes: svgAttributesDef;
+	isSelected: boolean;
+	setAttributes: any;
+	toggleSelection: any;
+} ): JSX.Element => {
 	/**
 	 * @property {boolean}  isSelected             - if the block is selected
 	 * @property {Function} setAttributes          - Setter for the block attributes
@@ -76,8 +93,7 @@ export const Edit = ( props ) => {
 	 * @property {string}   attributes.url         - the target of the svg hyperlink
 	 * @property {string}   attributes.rel         - stores whether the link opens into a new window
 	 */
-	const { attributes, classes, isSelected, setAttributes, toggleSelection } =
-		props;
+	const { attributes, isSelected, setAttributes, toggleSelection } = props;
 
 	const {
 		align,
@@ -89,7 +105,7 @@ export const Edit = ( props ) => {
 		rotation,
 		svg,
 		originalSvg,
-	} = attributes;
+	} = attributes as svgAttributesEditor;
 
 	/**
 	 * @function useRef
@@ -116,30 +132,32 @@ export const Edit = ( props ) => {
 	const [ isEditingURL, setIsEditingURL ] = useState( false );
 	const [ maxWidth, setMaxWidth ] = useState( null );
 
-	/**
-	 * @property {number} pathStrokeWith - the width of the border / stroke
-	 * @callback setPathStrokeWith
-	 */
-	const [ colors, setColors ] = useState( [] );
-	const [ currentColor, setColor ] = useState( '' );
-	const [ pathStrokeWith, setPathStrokeWith ] = useState( 1.0 );
-	const [ originalSize, setOriginalSize ] = useState( {
-		width: false,
-		height: false,
+	const [ colors, setColors ] = useState< [] | colorDef[] >( [] );
+	const [ currentColor, setColor ] = useState< string >( '' );
+	const [ pathStrokeWith, setPathStrokeWith ] = useState< number >( 1.0 );
+	const [ originalSize, setOriginalSize ] = useState< svgSizes >( {
+		width: 50,
+		height: 50,
 	} );
 
 	/* the block editor sizes */
 	const defaultLayout = useSetting( 'layout' ) || {};
 	const contentWidth = parseInt( defaultLayout.contentSize );
 
+	/* Emit notices */
+	const { createErrorNotice } = useDispatch( noticesStore );
+
 	useEffect( () => {
 		// on load collect colors
-		if ( svg ) setColors( collectColors( svg ) );
+		if ( svg ) {
+			setColors( collectColors( svg ) );
+		}
 	}, [] );
 
 	useEffect( () => {
 		// then set the first color detected as the default color
-		if ( colors.length > 0 ) setColor( colors[ 0 ]?.color || false );
+		if ( colors.length > 0 )
+			setColor( colors?.length ? colors[ 0 ].color : '' );
 	}, [ colors ] );
 
 	/**
@@ -164,7 +182,7 @@ export const Edit = ( props ) => {
 		let size = {};
 
 		/* If the svg is new, it also stores the size of the image and if it is larger than the content, it resizes it. */
-		if ( ! svg.originalSvg ) {
+		if ( ! originalSvg ) {
 			setOriginalSize( {
 				width,
 				height,
@@ -215,7 +233,7 @@ export const Edit = ( props ) => {
 	 * @property {link.linkTarget} linkTarget - the link target
 	 * @property {link.rel}        rel        - the updated link rel
 	 */
-	function onToggleOpenInNewTab( value ) {
+	function onToggleOpenInNewTab( value: boolean ) {
 		const newLinkTarget = value ? '_blank' : undefined;
 
 		let updatedRel = rel;
@@ -239,7 +257,7 @@ export const Edit = ( props ) => {
 	 *
 	 * @param {Event} event - The event object that triggered the function.
 	 */
-	function startEditing( event ) {
+	function startEditing( event: Event ) {
 		event.preventDefault();
 		setIsEditingURL( true );
 	}
@@ -259,22 +277,34 @@ export const Edit = ( props ) => {
 	}
 
 	/**
-	 * Since the updateSvg function is shared we need to set attributes with the result of the updateSvg function
+	 * Since the updateSvg function is shared we can set attributes with the result of the updateSvg function
 	 *
-	 * @param {string}         result
-	 * @param {boolean|string} file
-	 * @param                  replace
+	 * @param {string} result
+	 * @param {string} file
+	 * @param          file.name
+	 * @param          file.size
+	 * @param          file.type
+	 * @param          file.lastModified
+	 * @param          replace
 	 */
-	const updateSvg = ( result, file = false, replace = false ) => {
+	const updateSvg = (
+		result: string,
+		file: File,
+		replace: boolean = false
+	) => {
 		const newSvg = loadSvg( {
-			...props.attributes,
 			markup: result,
-			file,
+			fileData: file,
+			oldProps: props.attributes,
 		} );
-		setAttributes( {
-			...newSvg,
-			originalSvg: replace ? newSvg : originalSvg,
-		} );
+		if ( newSvg ) {
+			setAttributes( {
+				...newSvg,
+				originalSvg: replace ? newSvg : originalSvg,
+			} );
+		} else {
+			createErrorNotice( ErrorSvg( __( '😓 Error!' ) ) );
+		}
 	};
 
 	/**
@@ -282,7 +312,7 @@ export const Edit = ( props ) => {
 	 *
 	 * @param {JSX.Element} content the svg upload placeholder
 	 */
-	const placeholder = ( content ) => {
+	const placeholder = ( content: JSX.Element ) => {
 		return (
 			<Placeholder
 				className="block-editor-media-placeholder"
@@ -307,7 +337,7 @@ export const Edit = ( props ) => {
 			width: hasAlign( align, [ 'full', 'wide' ] ) ? '100%' : null,
 		},
 		ref,
-		className: classnames( classes, borderProps.className ),
+		className: classnames( borderProps.className ),
 	} );
 
 	return (
@@ -485,7 +515,7 @@ export const Edit = ( props ) => {
 						{ ! isURLSet && (
 							<ToolbarButton
 								name="link"
-								icon={ linkIcon }
+								icon={ link }
 								title={ __( 'Link' ) }
 								onClick={ startEditing }
 							/>
@@ -506,14 +536,17 @@ export const Edit = ( props ) => {
 							accept={ ALLOWED_MEDIA_TYPES }
 							multiple={ false }
 							onChange={ ( ev ) => {
-								readSvg( ev.target.files[ 0 ] ).then(
-									( newSvg ) =>
-										updateSvg(
-											newSvg,
-											ev.target.files[ 0 ],
-											true
-										)
-								);
+								const newFile: File | boolean =
+									ev.target.files !== null
+										? ev.target.files[ 0 ]
+										: false;
+								if ( newFile ) {
+									readSvg( newFile ).then( ( newSvg ) => {
+										if ( newSvg !== null ) {
+											updateSvg( newSvg, newFile, true );
+										}
+									} );
+								}
 							} }
 						>
 							Replace
@@ -631,31 +664,38 @@ export const Edit = ( props ) => {
 									<DropZone
 										onFilesDrop={ ( files ) => {
 											readSvg( files[ 0 ] ).then(
-												( newSvg ) =>
-													updateSvg(
-														newSvg,
-														files[ 0 ],
-														true
-													)
+												( newSvg ) => {
+													if ( newSvg !== null ) {
+														updateSvg(
+															newSvg,
+															files[ 0 ],
+															true
+														);
+													}
+												}
 											);
 										} }
 									/>
 									<div style={ { display: 'flex' } }>
 										<FormFileUpload
 											className={ 'components-button' }
-											accept={ ALLOWED_MEDIA_TYPES }
+											accept={ ALLOWED_MEDIA_TYPES.join() }
 											multiple={ false }
 											onChange={ ( ev ) => {
-												readSvg(
-													ev.target.files[ 0 ]
-												).then( ( newSvg ) =>
-													updateSvg(
-														newSvg,
+												if (
+													ev.target.files !== null
+												) {
+													readSvg(
 														ev.target.files[ 0 ]
-													)
-												);
+													).then( ( newSvg ) =>
+														updateSvg(
+															newSvg,
+															ev.target.files[ 0 ]
+														)
+													);
+												}
 											} }
-											onError={ onSvgReadError }
+											onError={ () => onSvgReadError }
 											variant={ 'secondary' }
 										>
 											{ __( 'Select a Svg image' ) }

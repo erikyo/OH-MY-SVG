@@ -5,23 +5,25 @@ import {
 } from '@wordpress/block-editor';
 import { hasAlign } from './utils/fn';
 import classnames from 'classnames';
+import { svgAttributesDef } from './types';
 
 /**
  * @module Save
  * @description The svg save function.
  *
- * Returns an anchor tag if the url attribute is set, otherwise it returns a div tag
+ * @param                    props
+ * @param {svgAttributesDef} props.attributes - The props to build the svg
  *
- * @param {attributes} attributes - the collection of attributes needed for saving the svg as xml markup
- *
- * @return {JSX.Element} - the cleaned and optimized svg
+ * @return {JSX.Element} - Returns an anchor tag if the url attribute is set, otherwise it returns a div tag the collection of attributes needed for saving the svg as xml markup
  */
-export const Save = ( { attributes } ) => {
+export const Save = ( props: {
+	attributes: svgAttributesDef;
+} ): JSX.Element => {
 	const { svg, url, width, height, rotation, align, style, className } =
-		attributes;
+		props.attributes;
 
-	const borderProps = getBorderClassesAndStyles( attributes );
-	const blockProps = useBlockProps.save( {
+	const borderProps = getBorderClassesAndStyles( props.attributes );
+	const blockProps: Record< string, unknown > = useBlockProps.save( {
 		rotation,
 		style: {
 			...style,
@@ -32,13 +34,14 @@ export const Save = ( { attributes } ) => {
 		width: ! hasAlign( align, [ 'full', 'wide' ] ) ? width : false,
 		height: ! hasAlign( align, [ 'full', 'wide' ] ) ? height : false,
 		className: classnames( className, borderProps.class ),
+		markup: svg,
 	} );
 
 	return url ? (
 		<a href={ url }>
-			<SVG { ...blockProps } markup={ svg } />
+			<SVG { ...blockProps as svgAttributesDef } />
 		</a>
 	) : (
-		<SVG { ...blockProps } markup={ svg } />
+		<SVG { ...blockProps as svgAttributesDef } />
 	);
 };

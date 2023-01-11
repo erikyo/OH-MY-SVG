@@ -1,8 +1,14 @@
 import SVG from '../Svg';
 import { svgIcon } from './icons';
-import { humanFileSize } from './common';
+import { cleanMarkup, humanFileSize } from './common';
 
-export const SvgoStats = ( { original, compressed } ) => {
+export const SvgoStats = ( {
+	original,
+	compressed,
+}: {
+	original: string;
+	compressed: string;
+} ): JSX.Element | null => {
 	if ( ! original ) return null;
 	const sizeOriginal = original?.length || 1;
 	const sizeCompressed = compressed?.length || 1;
@@ -23,6 +29,6 @@ export const SvgoStats = ( { original, compressed } ) => {
 	);
 };
 
-export const mediaPreview = () => (
+export const mediaPreview = (): JSX.Element => (
 	<SVG markup={ svgIcon } width={ 1000 } height={ 1000 } />
 );
