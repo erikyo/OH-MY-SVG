@@ -362,12 +362,11 @@ export const Edit = ( props: {
 							__nextHasNoMarginBottom
 							label={ __( 'Rotation' ) }
 							type={ 'number' }
-							value={ rotation }
-							min={ 0 }
-							max={ 359 }
+							value={ rotation || 0 }
+							min={ -180 }
+							max={ 180 }
 							marks={ rotationRangePresets }
 							step={ 1 }
-							allowReset={ true }
 							onChange={ ( ev ) => {
 								setAttributes( {
 									rotation: ev,
