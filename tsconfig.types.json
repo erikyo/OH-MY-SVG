@@ -1,8 +1,9 @@
 {
   "extends": "./tsconfig",
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
+	"target": "ESNext",
+	"module": "ESNext",
+	"jsx": "react-jsx",
     "outDir": "build",
     "declaration": true,
     "declarationDir": "build/types",

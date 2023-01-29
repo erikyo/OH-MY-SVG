@@ -18,14 +18,12 @@
 	"esModuleInterop": true, // Import non-ES modules as default imports.
 	"outDir": "build",
 	"rootDir": "src",
-	"typeRoots": [ "./typings", "./node_modules/@types" ],
   },
   "include": [
 	"src"
   ],
   "exclude": [
 	"coverage",
-	"build",
 	"docs",
   ]
 }

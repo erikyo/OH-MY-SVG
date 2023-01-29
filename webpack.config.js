@@ -16,9 +16,6 @@ module.exports = {
 		],
 		...defaultConfig.module,
 	},
-	output: {
-		path: path.join( __dirname, './build' ),
-	},
 	resolve: {
 		...defaultConfig.resolve,
 		fallback: {
