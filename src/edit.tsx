@@ -28,7 +28,6 @@ import {
 	useSetting,
 } from '@wordpress/block-editor';
 
-import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { link, linkOff } from '@wordpress/icons';
 import SVG from './Svg';
@@ -40,72 +39,42 @@ import {
 	svgAddPathStroke,
 	loadSvg,
 	readSvg,
+	getSvgSize,
 } from './utils/svgTools';
 import { hasAlign, onSvgReadError, scaleProportionally } from './utils/fn';
 import { rotationRangePresets } from './utils/presets';
-import { ErrorSvg, svgIcon} from './utils/icons';
+import { ErrorSvg, svgIcon } from './utils/icons';
 import { ALLOWED_MEDIA_TYPES, NEW_TAB_REL } from './constants';
-import { mediaPreview, SvgoStats } from './utils/components';
-import {
-	colorDef,
-	fileDef,
-	svgAttributesDef,
-	svgAttributesEditor,
-	svgSizes,
-} from './types';
+import { SvgoStats } from './utils/components';
+import { SvgColorDef, SvgAttributesEditor, SvgSizeDef } from './types';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
+import { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
 
 /**
  * @module Edit
- *
- * @param          props.attributes
- * @param          props.isSelected
- * @param          props.setAttributes
- * @param          props.toggleSelection
  * @description The edit view
  *
- * @param {Object} props                 - the edit view stored props
+ * @param {Object} props - the edit view stored props
  *
  * @return {JSX.Element} - the Block editor view
  */
-export const Edit = ( props: {
-	attributes: svgAttributesDef;
-	isSelected: boolean;
-	setAttributes: any;
-	toggleSelection: any;
-} ): JSX.Element => {
-	/**
-	 * @property {boolean}  isSelected             - if the block is selected
-	 * @property {Function} setAttributes          - Setter for the block attributes
-	 * @property {Function} toggleSelection        - Setter for the block attributes
-	 *
-	 * @member props.attributes
-	 * @typedef props - the edit props
-	 * @typedef attributes        			           - The block attributes
-	 * @property {Object}   attributes             - The block attributes
-	 * @property {number}   attributes.svg         - the Svg image markup
-	 * @property {number}   attributes.height      - the Svg height
-	 * @property {number}   attributes.width       - the Svg width
-	 * @property {number}   attributes.rotation    - the Svg rotation
-	 * @property {number}   attributes.originalSvg - the original Svg before changes
-	 * @property {Array}    attributes.colors      - a collection of colors used in the Svg
-	 * @property {string}   attributes.url         - the target of the svg hyperlink
-	 * @property {string}   attributes.rel         - stores whether the link opens into a new window
-	 */
-	const { attributes, isSelected, setAttributes, toggleSelection } = props;
+export const Edit = (
+	props: BlockEditProps< BlockAttributes >
+): JSX.Element => {
+	const { attributes, setAttributes, isSelected, toggleSelection } = props;
 
 	const {
 		align,
-		linkTarget,
-		rel,
-		url,
 		height,
 		width,
 		rotation,
+		href,
+		linkTarget,
+		rel,
 		svg,
 		originalSvg,
-	} = attributes as svgAttributesEditor;
+	} = attributes as SvgAttributesEditor;
 
 	/**
 	 * @function useRef
@@ -115,14 +84,14 @@ export const Edit = ( props: {
 	 *
 	 * @typedef link
 	 * @property {Object}           link            - the object that contains the data of the http link
-	 * @property {string|undefined} link.url        - the link url
+	 * @property {string|undefined} link.href       - the link href
 	 * @property {string|undefined} link.linkTarget - the link target
 	 * @property {string|undefined} link.rel        - the link rel
 	 *
 	 * @property {Function}         ref             - the reference to that dom node
 	 */
 	const ref = useRef();
-	const isURLSet = !! url;
+	const isURLSet = !! href;
 	const opensInNewTab = linkTarget === '_blank';
 
 	/**
@@ -130,14 +99,14 @@ export const Edit = ( props: {
 	 * @callback setIsEditingURL
 	 */
 	const [ isEditingURL, setIsEditingURL ] = useState( false );
-	const [ maxWidth, setMaxWidth ] = useState( null );
+	const [ maxWidth, setMaxWidth ] = useState( undefined );
 
-	const [ colors, setColors ] = useState< [] | colorDef[] >( [] );
+	let [ colors, setColors ] = useState< [] | SvgColorDef[] >( [] );
 	const [ currentColor, setColor ] = useState< string >( '' );
 	const [ pathStrokeWith, setPathStrokeWith ] = useState< number >( 1.0 );
-	const [ originalSize, setOriginalSize ] = useState< svgSizes >( {
-		width: 50,
-		height: 50,
+	const [ originalSize, setOriginalSize ] = useState< SvgSizeDef >( {
+		width: 0,
+		height: 0,
 	} );
 
 	/* the block editor sizes */
@@ -146,13 +115,6 @@ export const Edit = ( props: {
 
 	/* Emit notices */
 	const { createErrorNotice } = useDispatch( noticesStore );
-
-	useEffect( () => {
-		// on load collect colors
-		if ( svg ) {
-			setColors( collectColors( svg ) );
-		}
-	}, [] );
 
 	useEffect( () => {
 		// then set the first color detected as the default color
@@ -179,46 +141,40 @@ export const Edit = ( props: {
 	 * @type {useEffect}
 	 */
 	useEffect( () => {
-		let size = {};
-
-		/* If the svg is new, it also stores the size of the image and if it is larger than the content, it resizes it. */
-		if ( ! originalSvg ) {
-			setOriginalSize( {
-				width,
-				height,
-			} );
-
-			/* if the svg with is bigger than the content width rescale it */
-			if ( width >= contentWidth ) {
-				size = {
-					width: contentWidth,
-					height: scaleProportionally( width, height, contentWidth ),
-				};
-			}
-		}
-
 		setColors( collectColors( svg ) );
-
-		setAttributes( {
-			size,
-		} );
 	}, [ svg ] );
 
 	/**
 	 * Whenever the alignment is changed set the max width of the current block
 	 *
 	 * @type {useEffect}
-	 * @property {attributes.colors} colors - the svg color array
 	 */
 	useEffect( () => {
-		function contentMaxWidth() {
-			if ( [ 'wide' ].includes( align ) ) {
-				return defaultLayout.wideSize;
+		if ( align ) {
+			function contentMaxWidth() {
+				if ( align?.includes( 'wide' ) ) {
+					return defaultLayout.wideSize;
+				}
+				return undefined;
 			}
-			return undefined;
+
+			setMaxWidth( contentMaxWidth() );
 		}
-		setMaxWidth( contentMaxWidth() );
 	}, [ align ] );
+
+	useEffect( () => {
+		// on load collect colors
+		if ( svg ) {
+			colors = collectColors( svg );
+
+			const size: SvgSizeDef = getSvgSize( svg );
+			setOriginalSize( size );
+
+			setAttributes( {
+				originalSvg: originalSvg || svg,
+			} );
+		}
+	}, [] );
 
 	/**
 	 * Handle the checkbox state for "Open in new tab"
@@ -227,13 +183,9 @@ export const Edit = ( props: {
 	 *
 	 * @function onToggleOpenInNewTab
 	 *
-	 * @param    {boolean}         value      - The value of the checkbox.
-	 *
-	 * @type {setAttributes}
-	 * @property {link.linkTarget} linkTarget - the link target
-	 * @property {link.rel}        rel        - the updated link rel
+	 * @param {boolean} value - The value of the url edit area.
 	 */
-	function onToggleOpenInNewTab( value: boolean ) {
+	function setToggleOpenInNewTab( value: boolean ) {
 		const newLinkTarget = value ? '_blank' : undefined;
 
 		let updatedRel = rel;
@@ -243,10 +195,10 @@ export const Edit = ( props: {
 			updatedRel = undefined;
 		}
 
-		setAttributes( {
+		return {
 			linkTarget: newLinkTarget,
 			rel: updatedRel,
-		} );
+		};
 	}
 
 	/**
@@ -269,7 +221,7 @@ export const Edit = ( props: {
 	 */
 	function unlink() {
 		setAttributes( {
-			url: undefined,
+			href: undefined,
 			linkTarget: undefined,
 			rel: undefined,
 		} );
@@ -285,27 +237,46 @@ export const Edit = ( props: {
 	 * @param          file.size
 	 * @param          file.type
 	 * @param          file.lastModified
-	 * @param          replace
 	 */
-	const updateSvg = (
-		result: string,
-		file: File,
-		replace: boolean = false
-	) => {
+	const updateSvg = ( result: string, file: File | undefined ) => {
 		const newSvg = loadSvg( {
-			markup: result,
-			fileData: file,
-			oldProps: props.attributes,
+			newSvg: result,
+			fileData: file || undefined,
+			oldSvg: attributes,
 		} );
-		if ( newSvg ) {
-			setAttributes( {
-				...newSvg,
-				originalSvg: replace ? newSvg : originalSvg,
-			} );
-		} else {
-			createErrorNotice( ErrorSvg( __( '😓 Error!' ) ) );
-		}
+
+		return newSvg
+			? updateSvgData( newSvg )
+			: createErrorNotice( ErrorSvg( __( '😓 cannot update!' ) ) );
 	};
+
+	function updateSvgData( newSvg: Partial< BlockAttributes > ) {
+		const newSvgSize = {
+			width,
+			height,
+		};
+
+		setOriginalSize( newSvgSize );
+
+		/* if the svg with is bigger than the content width rescale it */
+		const size =
+			newSvg.width >= contentWidth
+				? {
+						width: contentWidth,
+						height: scaleProportionally(
+							width,
+							height,
+							contentWidth
+						),
+				  }
+				: newSvgSize;
+
+		setAttributes( {
+			...newSvg,
+			...size,
+			originalSvg: ! originalSvg ? newSvg.svg : originalSvg,
+		} );
+	}
 
 	/**
 	 * The placeholder component that contains the button and the textarea input
@@ -336,9 +307,19 @@ export const Edit = ( props: {
 			maxWidth: hasAlign( align, 'full' ) ? 'none' : null,
 			width: hasAlign( align, [ 'full', 'wide' ] ) ? '100%' : null,
 		},
+		className: borderProps.className,
 		ref,
-		className: classnames( borderProps.className ),
 	} );
+
+	const rawSvg = (
+		<SVG
+			{ ...borderProps }
+			svg={ svg }
+			width={ ! hasAlign( align, [ 'full', 'wide' ] ) ? width : false }
+			height={ ! hasAlign( align, [ 'full', 'wide' ] ) ? height : false }
+			rotation={ rotation }
+		/>
+	);
 
 	return (
 		<div { ...blockProps }>
@@ -346,11 +327,11 @@ export const Edit = ( props: {
 				<Panel>
 					<PanelBody title="Settings">
 						<ImageSizeControl
-							width
-							height
-							imageWidth={ originalSize.width }
-							imageHeight={ originalSize.height }
-							onChange={ ( e ) => {
+							width={ width }
+							height={ height }
+							imageWidth={ originalSize.width || 0 }
+							imageHeight={ originalSize.height || 0 }
+							onChange={ ( e: SvgSizeDef ) => {
 								setAttributes( {
 									width: e.width,
 									height: e.height,
@@ -400,6 +381,7 @@ export const Edit = ( props: {
 						<PanelRow>
 							<p>{ __( 'Restore Original' ) }</p>
 							<Button
+								disabled={ ! originalSvg }
 								isSmall={ true }
 								variant={ 'secondary' }
 								onClick={ () => {
@@ -447,7 +429,7 @@ export const Edit = ( props: {
 								onClick={ () =>
 									setAttributes( {
 										svg: svgAddPathStroke( {
-											svg,
+											svgMarkup: svg,
 											pathStrokeWith,
 											pathStrokeColor:
 												currentColor || undefined,
@@ -462,7 +444,11 @@ export const Edit = ( props: {
 						<RangeControl
 							label={ 'Stroke Size' }
 							value={ pathStrokeWith }
-							onChange={ ( e ) => setPathStrokeWith( e ) }
+							onChange={ ( e ) =>
+								typeof e === 'number'
+									? setPathStrokeWith( e )
+									: null
+							}
 							min={ 0 }
 							max={ 20 }
 							step={ 0.1 }
@@ -477,27 +463,25 @@ export const Edit = ( props: {
 						</h2>
 
 						<ColorPalette
-							enablealpha={ true }
+							enableAlpha={ true }
 							clearable={ false }
 							colors={ colors }
 							value={ currentColor }
 							onChange={ ( newColor ) => {
 								if ( newColor ) {
 									if (
-										colors
+										! colors
 											.map( ( c ) => c.color )
 											.includes( newColor )
 									) {
-										console.log(
-											`new color ${ newColor } already exists`
+										const newSvg = updateColor(
+											svg,
+											newColor,
+											currentColor
 										);
-									} else {
 										setAttributes( {
-											svg: updateColor(
-												svg,
-												newColor,
-												currentColor
-											),
+											...attributes,
+											svg: newSvg,
 										} );
 									}
 									setColor( newColor );
@@ -509,14 +493,14 @@ export const Edit = ( props: {
 			</InspectorControls>
 
 			{ svg && (
-				<BlockControls group="block">
+				<BlockControls>
 					<ToolbarGroup>
 						{ ! isURLSet && (
 							<ToolbarButton
 								name="link"
 								icon={ link }
 								title={ __( 'Link' ) }
-								onClick={ startEditing }
+								onClick={ ( e ) => startEditing( e ) }
 							/>
 						) }
 						{ isURLSet && (
@@ -532,7 +516,7 @@ export const Edit = ( props: {
 						<FormFileUpload
 							type={ 'file' }
 							label={ __( 'Replace SVG' ) }
-							accept={ ALLOWED_MEDIA_TYPES }
+							accept={ ALLOWED_MEDIA_TYPES[ 0 ] }
 							multiple={ false }
 							onChange={ ( ev ) => {
 								const newFile: File | boolean =
@@ -542,7 +526,7 @@ export const Edit = ( props: {
 								if ( newFile ) {
 									readSvg( newFile ).then( ( newSvg ) => {
 										if ( newSvg !== null ) {
-											updateSvg( newSvg, newFile, true );
+											updateSvg( newSvg, newFile );
 										}
 									} );
 								}
@@ -565,15 +549,19 @@ export const Edit = ( props: {
 				>
 					<LinkControl
 						className="wp-block-navigation-link__inline-link-input"
-						value={ { svg, opensInNewTab } }
+						value={ { url: href, opensInNewTab } }
 						onChange={ ( {
 							url: newURL = '',
-							opensInNewTab: newOpensInNewTab,
+							opensInNewTab: newOpensInNewTab = false,
 						} ) => {
-							setAttributes( { url: newURL } );
+							let toggleMeta;
+
 							if ( opensInNewTab !== newOpensInNewTab ) {
-								onToggleOpenInNewTab( newOpensInNewTab );
+								toggleMeta =
+									setToggleOpenInNewTab( newOpensInNewTab );
 							}
+
+							setAttributes( { ...toggleMeta, href: newURL } );
 						} }
 						onRemove={ () => {
 							unlink();
@@ -594,22 +582,24 @@ export const Edit = ( props: {
 							: height,
 					} }
 					showHandle={ isSelected && align !== 'full' }
-					minHeight="10"
-					minWidth="10"
+					minHeight={ 10 }
+					minWidth={ 10 }
 					maxWidth={ maxWidth }
 					lockAspectRatio
 					enable={
-						! hasAlign( align, [ 'full', 'wide' ] ) && {
-							top: false,
-							right: ! hasAlign( align, 'right' ),
-							bottom: true,
-							left: ! hasAlign( align, 'left' ),
-						}
+						! hasAlign( align, [ 'full', 'wide' ] )
+							? {
+									top: false,
+									right: ! hasAlign( align, 'right' ),
+									bottom: true,
+									left: ! hasAlign( align, 'left' ),
+							  }
+							: undefined
 					}
 					onResizeStop={ ( event, direction, elt, delta ) => {
 						setAttributes( {
-							height: height + delta.height,
-							width: width + delta.width,
+							height: Number( height ) + delta.height,
+							width: Number( width ) + delta.width,
 						} );
 						toggleSelection( true );
 					} }
@@ -617,46 +607,20 @@ export const Edit = ( props: {
 						toggleSelection( false );
 					} }
 				>
-					<SVG
-						{ ...borderProps }
-						markup={ svg }
-						width={
-							! hasAlign( align, [ 'full', 'wide' ] )
-								? width
-								: false
-						}
-						height={
-							! hasAlign( align, [ 'full', 'wide' ] )
-								? height
-								: false
-						}
-						rotation={ rotation }
-					/>
+					{ rawSvg }
 				</ResizableBox>
 			) : (
-				<SVG
-					{ ...borderProps }
-					markup={ svg }
-					width={
-						! hasAlign( align, [ 'full', 'wide' ] ) ? width : false
-					}
-					height={
-						! hasAlign( align, [ 'full', 'wide' ] ) ? height : false
-					}
-					rotation={ rotation }
-				/>
+				<>{ rawSvg }</>
 			) }
 
 			{ ! svg && (
 				<>
 					<MediaPlaceholder
 						icon={ <BlockIcon icon={ svgIcon } /> }
-						type="image"
 						multiple={ false }
-						mediaPreview={ mediaPreview }
+						mediaPreview={ <>mediaPreview</> }
 						allowedTypes={ ALLOWED_MEDIA_TYPES }
-						value={ svg }
-						disableMediaButtons={ url }
+						disableMediaButtons={ href }
 						placeholder={ () =>
 							placeholder(
 								<>
@@ -667,8 +631,7 @@ export const Edit = ( props: {
 													if ( newSvg !== null ) {
 														updateSvg(
 															newSvg,
-															files[ 0 ],
-															true
+															files[ 0 ]
 														);
 													}
 												}
@@ -681,16 +644,22 @@ export const Edit = ( props: {
 											accept={ ALLOWED_MEDIA_TYPES.join() }
 											multiple={ false }
 											onChange={ ( ev ) => {
-												if (
-													ev.target.files !== null
-												) {
+												if ( ev.target.files?.length ) {
 													readSvg(
 														ev.target.files[ 0 ]
 													).then( ( newSvg ) =>
-														updateSvg(
-															newSvg,
-															ev.target.files[ 0 ]
-														)
+														newSvg &&
+														ev.target.files
+															? updateSvg(
+																	newSvg,
+																	ev.target
+																		.files[ 0 ]
+															  )
+															: createErrorNotice(
+																	__(
+																		'empty file'
+																	)
+															  )
 													);
 												}
 											} }
@@ -706,7 +675,7 @@ export const Edit = ( props: {
 											) }
 											value={ svg }
 											onChange={ ( newSvg ) =>
-												updateSvg( newSvg )
+												updateSvg( newSvg, undefined )
 											}
 										></TextControl>
 									</div>
