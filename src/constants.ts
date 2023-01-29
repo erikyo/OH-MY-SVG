@@ -3,6 +3,7 @@ export const SVG_VARIATION_NAMESPACE: string = 'codekraft/oh-my-svg-img';
 export const NEW_TAB_REL: string = 'noreferrer noopener';
 export const SVGBASE64: string = 'data:image/svg+xml;base64,';
 export const SVG_PLUGIN_COLOR: string = '#FFB13B';
+export const SVG_MIN_SIZE: number = 10;
 
 export const SVGO_DEFAULTS: Object = {
 	multipass: true,
