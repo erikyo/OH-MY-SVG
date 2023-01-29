@@ -1,10 +1,22 @@
 import DOMPurify from 'dompurify';
-import { SVG_EDITABLE_ELEMENTS, SVGBASE64, SVGO_DEFAULTS } from '../constants';
+import {
+	SVG_EDITABLE_ELEMENTS,
+	SVG_MIN_SIZE,
+	SVGBASE64,
+	SVGO_DEFAULTS,
+} from '../constants';
 import { optimize } from 'svgo';
 import { closest } from 'color-2-name';
 import { __ } from '@wordpress/i18n';
-import { colorDef, svgAttributesDef, svgSizes } from '../types';
-import { COLORSTRING } from 'color-2-name/dist/types/types';
+import {
+	SvgColorDef,
+	SvgFileDef,
+	SvgStrokeDef,
+	SvgAttributesDef,
+	SvgSizeDef,
+	SvgAttributesEditor,
+} from '../types';
+import { BlockAttributes } from '@wordpress/blocks';
 
 /**
  * @function onImageSelect
@@ -43,45 +55,45 @@ export const readSvg = async ( file: Blob ): Promise< string | null > => {
  * Sequentially: first cleans up the markup, tries to figure out the size of the image if is possible,
  * and then replaces the current svg
  *
- * @param {attributes.svg} res - The string that was read into the file that is supposed to be a svg
+ * @param {SvgAttributesDef} res - The string that was read into the file that is supposed to be a svg
  */
 export const loadSvg = ( {
-	markup,
+	newSvg,
 	fileData,
-	oldProps = {
-		width: 50,
-		height: 50,
-	},
+	oldSvg,
 }: {
-	markup: string;
-	fileData: File;
-	oldProps: { width: number; height: number };
-} ): Object | null => {
-	const cleanSvg = DOMPurify.sanitize( markup );
-	const { height, width } = getSvgSize( cleanSvg ) as svgSizes;
+	newSvg: string;
+	fileData: File | undefined;
+	oldSvg: BlockAttributes;
+} ): SvgAttributesEditor | null => {
+	const cleanSvg = DOMPurify.sanitize( newSvg );
+	const newSvgSize = getSvgSize( cleanSvg ) as SvgSizeDef;
 
-	if ( ! width && ! height && cleanSvg.length < 10 ) {
+	if ( ! newSvgSize.width && ! newSvgSize.height && cleanSvg.length < 10 ) {
 		return null;
 	}
 
-	const fileMetaData = fileData
+	const fileMetaData: SvgFileDef | undefined = fileData
 		? {
 				name: fileData.name,
-				alt: __( 'The name of the image is ' ) + fileData.name,
 				size: fileData.size || cleanSvg.length,
 				type: fileData.type || 'image/svg+xml',
 				lastModified: fileData.lastModified,
 		  }
-		: {};
+		: undefined;
 
 	if ( cleanSvg ) {
 		return {
+			alt:
+				__( 'The name of the image is ' ) + fileMetaData?.name ??
+				__( 'undefined' ),
 			fileData: fileMetaData,
-			width: width || oldProps.width,
-			height: height || oldProps.height,
+			width: newSvgSize.width || oldSvg.width || SVG_MIN_SIZE * 10,
+			height: newSvgSize.height || oldSvg.height || SVG_MIN_SIZE * 10,
 			svg: cleanSvg,
 		};
 	}
+
 	return null;
 };
 
