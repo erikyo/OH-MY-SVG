@@ -37,7 +37,7 @@ export function updateHtmlProp( svg: string, props: htmlProperty[] ): string {
  *
  * @return {string} The sanitized SVG markup
  */
-export function cleanMarkup( svg: Object ): { __html: string } {
+export function cleanMarkup( svg: string ): { __html: string } {
 	return {
 		__html: DOMPurify.sanitize( svg ),
 	};

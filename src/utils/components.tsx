@@ -1,12 +1,12 @@
 import SVG from '../Svg';
 import { svgIcon } from './icons';
-import { cleanMarkup, humanFileSize } from './common';
+import { humanFileSize } from './common';
 
 export const SvgoStats = ( {
-	original,
-	compressed,
+	original = '',
+	compressed = '',
 }: {
-	original: string;
+	original: string | undefined;
 	compressed: string;
 } ): JSX.Element | null => {
 	if ( ! original ) return null;
@@ -16,6 +16,8 @@ export const SvgoStats = ( {
 	// get the percentage of file size
 	const percentOriginal =
 		( ( sizeOriginal - sizeCompressed ) / sizeOriginal ) * -100;
+
+	if ( ! original ) return null;
 
 	return (
 		<i
@@ -29,6 +31,4 @@ export const SvgoStats = ( {
 	);
 };
 
-export const mediaPreview = (): JSX.Element => (
-	<SVG markup={ svgIcon } width={ 1000 } height={ 1000 } />
-);
+export const mediaPreview = () => svgIcon;

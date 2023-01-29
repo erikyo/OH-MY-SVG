@@ -140,7 +140,7 @@ export function encodeSvg( svgMarkup: string ): string {
  *
  * @return An array of unique colors.
  */
-export function collectColors( fileContent: string ): colorDef[] {
+export function collectColors( fileContent: string ): SvgColorDef[] {
 	const colorCollection: string[] = [];
 	if ( fileContent ) {
 		// find all hex, rgb and rgba colors in the target string
@@ -161,7 +161,7 @@ export function collectColors( fileContent: string ): colorDef[] {
 			...colorCollection.map( ( color ) => {
 				return {
 					color,
-					name: closest( color as COLORSTRING ).name,
+					name: closest( color ).name,
 				};
 			} ),
 		] || []
@@ -181,7 +181,7 @@ export const updateColor = (
 	svgDoc: string,
 	newColor: string,
 	color: string
-) => {
+): string => {
 	// updates the colors array
 	return svgDoc.replaceAll( color, newColor );
 };
@@ -193,8 +193,8 @@ export const updateColor = (
  *
  * @param {string} fileContent
  */
-export const getSvgSize = ( fileContent: string ): svgSizes => {
-	const parsedData: svgSizes = {
+export function getSvgSize( fileContent: string ): SvgSizeDef {
+	const parsedData: SvgSizeDef = {
 		width: 0,
 		height: 0,
 	};
@@ -239,12 +239,7 @@ export const svgAddPathStroke = ( {
 	pathStrokeWith = 2,
 	pathStrokeColor,
 	pathStrokeEl = SVG_EDITABLE_ELEMENTS,
-}: {
-	svgMarkup: string;
-	pathStrokeColor: string;
-	pathStrokeWith: number;
-	pathStrokeEl: string[];
-} ) => {
+}: SvgStrokeDef ) => {
 	const svgDoc = getSvgDoc( svgMarkup );
 	svgDoc.querySelectorAll( pathStrokeEl.join() ).forEach( ( item ) => {
 		item.setAttribute( 'stroke', pathStrokeColor || '#20FF12' );
@@ -258,7 +253,7 @@ export const svgAddPathStroke = ( {
  *
  * @param {string} svgMarkup - the svg string
  */
-export const svgRemoveFill = ( svgMarkup: string ) => {
+export const svgRemoveFill = ( svgMarkup: string ): string => {
 	const svgDoc = getSvgDoc( svgMarkup );
 	svgDoc
 		.querySelectorAll< HTMLElement >( SVG_EDITABLE_ELEMENTS.join( ', ' ) )
@@ -283,7 +278,7 @@ export const svgRemoveFill = ( svgMarkup: string ) => {
  * @return {Promise<string>} the svg as bitmap image
  */
 export const convertSvgToBitmap = async ( {
-	svgBase64,
+	svgBase64 = '',
 	sizeRatio = 1,
 	height = 100,
 	width = 100,
@@ -292,7 +287,7 @@ export const convertSvgToBitmap = async ( {
 } ): Promise< string > => {
 	// Create an image element from the SVG markup
 	const img = new window.Image();
-	img.src = svgBase64;
+	img.src = svgBase64 as string;
 
 	// Create a canvas element
 	const canvas = document.createElement( 'canvas' );

@@ -6,7 +6,7 @@
  * @return {boolean} true if the alignment check contains the current alignment
  */
 export function hasAlign(
-	currentAlign: string,
+	currentAlign: string = '',
 	alignmentCheck: string | string[]
 ): boolean {
 	if ( typeof alignmentCheck === 'object' ) {
@@ -25,11 +25,11 @@ export function hasAlign(
  * @return {number} the second value (the height of the image, the width is the limit size)
  */
 export function scaleProportionally(
-	first: number,
-	second: number,
-	limit: number
+	first: number | string,
+	second: number | string,
+	limit: number | string
 ): number {
-	return ( limit / first ) * second;
+	return ( Number( limit ) / Number( first ) ) * Number( second );
 }
 
 export const onSvgReadError = ( err: string ): Error => {
