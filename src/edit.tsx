@@ -231,14 +231,10 @@ export const Edit = (
 	/**
 	 * Since the updateSvg function is shared we can set attributes with the result of the updateSvg function
 	 *
-	 * @param {string} result
-	 * @param {string} file
-	 * @param          file.name
-	 * @param          file.size
-	 * @param          file.type
-	 * @param          file.lastModified
+	 * @param  result
+	 * @param  file
 	 */
-	const updateSvg = ( result: string, file: File | undefined ) => {
+	function updateSvg( result: string, file: File | undefined ) {
 		const newSvg = loadSvg( {
 			newSvg: result,
 			fileData: file || undefined,
@@ -248,13 +244,10 @@ export const Edit = (
 		return newSvg
 			? updateSvgData( newSvg )
 			: createErrorNotice( ErrorSvg( __( '😓 cannot update!' ) ) );
-	};
+	}
 
 	function updateSvgData( newSvg: Partial< BlockAttributes > ) {
-		const newSvgSize = {
-			width,
-			height,
-		};
+		const newSvgSize = { width: newSvg.width, height: newSvg.height };
 
 		setOriginalSize( newSvgSize );
 
@@ -272,9 +265,9 @@ export const Edit = (
 				: newSvgSize;
 
 		setAttributes( {
+			originalSvg: newSvg.svg,
 			...newSvg,
 			...size,
-			originalSvg: ! originalSvg ? newSvg.svg : originalSvg,
 		} );
 	}
 
@@ -287,6 +280,7 @@ export const Edit = (
 		return (
 			<Placeholder
 				className="block-editor-media-placeholder"
+				// @ts-ignore
 				withIllustration={ ! isSelected }
 				icon={ svgIcon }
 				label={ __( 'SVG' ) }
@@ -302,6 +296,7 @@ export const Edit = (
 	const borderProps = useBorderProps( attributes );
 	const blockProps = useBlockProps( {
 		style: {
+			boxSizing: 'border-box',
 			...borderProps.style, // Border radius, width and style.
 			display: hasAlign( align, [ 'center' ] ) ? 'table' : null,
 			maxWidth: hasAlign( align, 'full' ) ? 'none' : null,
@@ -313,7 +308,6 @@ export const Edit = (
 
 	const rawSvg = (
 		<SVG
-			{ ...borderProps }
 			svg={ svg }
 			width={ ! hasAlign( align, [ 'full', 'wide' ] ) ? width : false }
 			height={ ! hasAlign( align, [ 'full', 'wide' ] ) ? height : false }
@@ -340,6 +334,7 @@ export const Edit = (
 						/>
 
 						<RangeControl
+							// @ts-ignore
 							__nextHasNoMarginBottom
 							label={ __( 'Rotation' ) }
 							type={ 'number' }
