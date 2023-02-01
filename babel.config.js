@@ -2,6 +2,9 @@ module.exports = ( api ) => {
 	api.cache( true );
 
 	return {
-		presets: [ '@wordpress/babel-preset-default' ],
+		presets: [
+			'@babel/preset-typescript',
+			'@wordpress/babel-preset-default',
+		],
 	};
 };

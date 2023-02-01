@@ -4,12 +4,20 @@ const path = require( 'path' );
 module.exports = {
 	...defaultConfig,
 	entry: {
-		'oh-my-svg-editor': path.resolve( process.cwd(), `src/index.js` ),
+		'oh-my-svg-editor': path.resolve( process.cwd(), `src/index.ts` ),
 	},
-	output: {
-		path: path.join( __dirname, './build' ),
+	module: {
+		rules: [
+			{
+				test: /\.[tj]sx?$/,
+				use: [ 'babel-loader' ],
+				exclude: /node_modules/,
+			},
+		],
+		...defaultConfig.module,
 	},
 	resolve: {
+		...defaultConfig.resolve,
 		fallback: {
 			url: false,
 			stream: false,
