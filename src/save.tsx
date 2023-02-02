@@ -6,8 +6,6 @@ import {
 import { hasAlign } from './utils/fn';
 import { SvgAttributesDef } from './types';
 import { NEW_TAB_REL } from './constants';
-import classnames from 'classnames';
-import getColor from 'color-2-name/dist/types/color-utils';
 import { getAlignStyle } from './utils/presets';
 
 /**
@@ -37,11 +35,10 @@ export const Save = ( props: {
 	const borderProps = getBorderClassesAndStyles( props.attributes );
 	const blockProps: Record< string, unknown > = useBlockProps.save( {
 		style: {
-			...borderProps.style, // Border radius, width and style.
+			...style,
 			width: hasAlign( align, [ 'full', 'wide' ] ) ? '100%' : undefined,
-			display: hasAlign( align, 'center' ) ? 'table' : undefined,
 		},
-		className: classnames( classNames, borderProps.className ),
+		className: borderProps.className,
 	} );
 
 	const svgTag = (
@@ -54,7 +51,7 @@ export const Save = ( props: {
 					: undefined
 			}
 			rotation={ rotation }
-			style={ { ...style, ...getAlignStyle( align ) } }
+			style={ { ...getAlignStyle( align ) } }
 		/>
 	);
 
@@ -63,6 +60,7 @@ export const Save = ( props: {
 			{ ...blockProps }
 			style={ {
 				...borderProps.style, // Border radius, width and style
+				display: hasAlign( align, 'center' ) ? 'table' : undefined,
 			} }
 		>
 			{ href ? (

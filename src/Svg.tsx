@@ -9,16 +9,18 @@ import { updateHtmlProp, cleanMarkup } from './utils/common';
 const SVG = ( attributes: any ): JSX.Element | null => {
 	const { svg, width, height, rotation, style, className } = attributes;
 
+	const svgStyle = `transform:rotate(${ rotation }deg)`;
+
 	const svgDoc = updateHtmlProp( svg, [
 		{ prop: 'width', value: width || '100%' },
 		{ prop: 'height', value: height || false },
+		{ prop: 'style', value: svgStyle || false },
 	] );
 
 	return (
 		<div
 			style={ {
 				...style,
-				transform: rotation ? `rotate(${ rotation }deg)` : undefined,
 			} }
 			className={ className }
 			dangerouslySetInnerHTML={ cleanMarkup( svgDoc ) }

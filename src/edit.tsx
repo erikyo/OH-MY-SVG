@@ -1,4 +1,4 @@
-import { Component, useEffect, useRef, useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import {
 	Button,
 	FormFileUpload,
@@ -301,7 +301,6 @@ export const Edit = (
 	const blockProps = useBlockProps( {
 		style: {
 			...borderProps.style,
-			boxSizing: 'border-box',
 			display: hasAlign( align, 'center' ) ? 'table' : undefined,
 		},
 		className: borderProps.className,
@@ -517,7 +516,7 @@ export const Edit = (
 								name="edit"
 								icon={ edit }
 								title={ __( 'Edit' ) }
-								onClick={ ( e ) => startEditing( e ) }
+								onClick={ ( e: any ) => startEditing( e ) }
 							/>
 						) }
 

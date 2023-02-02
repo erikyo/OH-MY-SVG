@@ -32,7 +32,7 @@ export const rotationRangePresets: Object[] = [
  */
 const styleCenter = () => {
 	return {
-		display: 'table',
+		width: 'inherit',
 	};
 };
 

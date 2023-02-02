@@ -75,7 +75,7 @@
         "extends @wordpress/browserslist-config"
     ],
     "dependencies": {
-        "color-2-name": "^1.1.0",
+        "color-2-name": "^1.1.1",
         "dompurify": "^2.4.3",
         "svgo": "^3.0.2"
     }

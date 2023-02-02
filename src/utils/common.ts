@@ -23,7 +23,7 @@ export function updateHtmlProp( svg: string, props: htmlProperty[] ): string {
 				doc.removeAttribute( prop );
 			}
 		} );
-		return getSvgString( doc );
+		return getSvgString( doc as any );
 	}
 	return svg;
 }
