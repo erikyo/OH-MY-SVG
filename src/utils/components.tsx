@@ -2,6 +2,7 @@ import SVG from '../Svg';
 import { svgIcon } from './icons';
 import { humanFileSize } from './common';
 
+/* A function that returns a JSX element that displays the difference of size between the old and the new image. */
 export const SvgoStats = ( {
 	original = '',
 	compressed = '',
@@ -17,7 +18,7 @@ export const SvgoStats = ( {
 	const percentOriginal =
 		( ( sizeOriginal - sizeCompressed ) / sizeOriginal ) * -100;
 
-	if ( ! original ) return null;
+	if ( ! original || sizeOriginal === sizeCompressed ) return null;
 
 	return (
 		<i

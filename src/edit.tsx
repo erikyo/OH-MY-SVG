@@ -116,8 +116,8 @@ export const Edit = (
 	/* Emit notices */
 	const { createErrorNotice } = useDispatch( noticesStore );
 
+	/* Setting the first color detected as the default color. */
 	useEffect( () => {
-		// then set the first color detected as the default color
 		if ( colors.length > 0 )
 			setColor( colors?.length ? colors[ 0 ].color : '' );
 	}, [ colors ] );
@@ -162,6 +162,11 @@ export const Edit = (
 		}
 	}, [ align ] );
 
+	/**
+	 *  Using the useEffect hook to collect the colors and size from the SVG onload
+	 *
+	 * @type {useEffect}
+	 */
 	useEffect( () => {
 		// on load collect colors
 		if ( svg ) {
@@ -180,8 +185,6 @@ export const Edit = (
 	 * Handle the checkbox state for "Open in new tab"
 	 * If the user has checked the "Open in new tab" checkbox, then set the linkTarget attribute to "_blank" and the rel attribute to "noreferrer noopener".
 	 * If the user has unchecked the "Open in new tab" checkbox, then set the linkTarget attribute to undefined and the rel attribute to undefined
-	 *
-	 * @function onToggleOpenInNewTab
 	 *
 	 * @param {boolean} value - The value of the url edit area.
 	 */
@@ -205,8 +208,6 @@ export const Edit = (
 	 * `startEditing` is a function that takes an event as an argument and prevents the default behavior of the event,
 	 * then sets the state of `isEditingURL` to true
 	 *
-	 * @function startEditing
-	 *
 	 * @param {Event} event - The event object that triggered the function.
 	 */
 	function startEditing( event: Event ) {
@@ -215,9 +216,7 @@ export const Edit = (
 	}
 
 	/**
-	 * @function unlink
-	 *
-	 * @description It sets the attributes of the block to undefined, and then sets the state of the block to not editing the URL
+	 * It sets the attributes of the block to undefined, and then sets the state of the block to not editing the URL
 	 */
 	function unlink() {
 		setAttributes( {
@@ -246,6 +245,11 @@ export const Edit = (
 			: createErrorNotice( ErrorSvg( __( '😓 cannot update!' ) ) );
 	}
 
+	/**
+	 * If the SVG width is bigger than the content width, rescale it to the content width
+	 *
+	 * @param  newSvg - Partial< BlockAttributes >
+	 */
 	function updateSvgData( newSvg: Partial< BlockAttributes > ) {
 		const newSvgSize = { width: newSvg.width, height: newSvg.height };
 

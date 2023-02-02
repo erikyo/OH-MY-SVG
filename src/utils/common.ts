@@ -7,12 +7,11 @@ interface htmlProperty {
 }
 
 /**
- * update a property of the root svg tag
+ * It takes an SVG string and an array of html properties and returns an SVG string with the properties
  *
- * @param {string}   svg
- * @param {string[]} props
- *
- * @return {string} the svg with the updated property
+ * @param {string}         svg   - the svg string
+ * @param {htmlProperty[]} props - an array of objects with two properties:
+ * @return A string
  */
 export function updateHtmlProp( svg: string, props: htmlProperty[] ): string {
 	const doc = getSvgDoc( svg ).querySelector( 'svg' );

@@ -19,8 +19,7 @@ import {
 import { BlockAttributes } from '@wordpress/blocks';
 
 /**
- * @function onImageSelect
- * @description Triggered when an image is selected with an input of file type
+ * Triggered when an image is selected with an input of file type
  *
  * Loads the file with FileReader and then passes the result to the function that cleans/parses in its contents
  *
@@ -50,8 +49,7 @@ export const readSvg = async ( file: Blob ): Promise< string | null > => {
 };
 
 /**
- * @function loadSvg
- * @description This function is launched when an SVG file is read.
+ * This function is launched when an SVG file is read.
  * Sequentially: first cleans up the markup, tries to figure out the size of the image if is possible,
  * and then replaces the current svg
  *
@@ -144,9 +142,7 @@ export function encodeSvg( svgMarkup: string ): string {
 }
 
 /**
- * @function collectColors
- *
- * @description Collect the colors used into the svg. It takes a string of text and returns an array of unique colors found in that string
+ * Collect the colors used into the svg. It takes a string of text and returns an array of unique colors found in that string
  *
  * @param  fileContent - The content of the file that you want to extract colors from.
  *
@@ -181,9 +177,7 @@ export function collectColors( fileContent: string ): SvgColorDef[] {
 }
 
 /**
- * @function updateColor
- *
- * @description Replace a color used in the svg image with another color
+ * Replaces a color used in the svg image with another color
  *
  * @param {string} svgDoc
  * @param {string} newColor
@@ -199,9 +193,7 @@ export const updateColor = (
 };
 
 /**
- * @function getSvgSize
- *
- * @description Parse the svg content to get the size of the svg image look first for viewbox and if not found, the height and width xml properties
+ * Parse the svg content to get the size of the svg image look first for viewbox and if not found, the height and width xml properties
  *
  * @param {string} fileContent
  */
@@ -235,7 +227,7 @@ export function getSvgSize( fileContent: string ): SvgSizeDef {
 	}
 
 	return parsedData;
-};
+}
 
 /**
  *  Add a stroke around path, circle, rect this for example is useful if you want to animate the svg line

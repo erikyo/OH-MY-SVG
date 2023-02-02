@@ -32,6 +32,11 @@ export function scaleProportionally(
 	return ( Number( limit ) / Number( first ) ) * Number( second );
 }
 
+/**
+ * It throws an error if the file fails to read
+ *
+ * @param {string} err - string - The error message that was thrown.
+ */
 export const onSvgReadError = ( err: string ): Error => {
 	throw new Error( 'Failed to read the given file' + err );
 };
