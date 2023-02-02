@@ -12,21 +12,19 @@ Add any svg to your website with the superpowers of the block editor. Out-of-the
 
 == Description ==
 
-This plugin provides an Svg Block to your block editor, this can be used with any svg icon or image (or even a html snippet). Some key features are provided like automatic markup sanitation, optimization (svgo), and small utility to change the color and the markup that will be very useful for you to create variations of your image.
+This plugin provides a Svg Block to your block editor, this can be used with any svg icon or image (or even a html snippet). Some key features are provided like automatic markup sanitation, optimization (svgo), and small utility to change the color and the markup that will be very useful for you to create variations of your image.
 
 This block has the same controls as the images, but actually the content is xml markup, and you can change it as you like! This allows thousands of possibilities... You will be able to use css animations or js scripts to animate it, change the inner text of the svg, create variations of the same svg.
 However, this has the disadvantage that the svg will not be copied into the media library, so if you plan to use the same svg several times (buttons, icons, etc.) you are better off creating a reusable block
 
 From a performance point of view, be aware that the image will not be included as an external resource, but will instead be within the markup of the page, thus making svg even faster than it already is.
 
-== Svg are cool because: ==
+== Svg are awesome because: ==
 
-- they are always super sharp!
-- they don't require any resize (you only need one source for all screen sizes and resolutions) so the load on server is very
-- they are super lightweight
-- They increase page performance: Using inline SVGs saves a lot of requests to the server.
-- animations with svg are super smooth and light (and awesome)
-- they are highly customizable
+- ✌️ Are always super sharp!
+- 🪶 Incredibly lightweight and doesn't require any additional resize image (you only need one source for all screen sizes and resolutions)
+- ⚡ Increased page performance! Using inline SVGs saves can save dozens of requests and save server download bandwith.
+- 🎉 highly customisable and animatable! Embedded svgs are easy to be animated, just use css!
 
 = Security =
 
