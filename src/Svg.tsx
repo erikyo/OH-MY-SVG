@@ -8,7 +8,7 @@ import classnames from 'classnames';
  * @return {JSX.Element|null} the SVG components
  */
 const SVG = ( attributes: any ): JSX.Element | null => {
-	const { svg, width, height, rotation, href, target, borderProps } =
+	const { svg, width, height, rotation, style, className } =
 		attributes;
 
 	const svgDoc = updateHtmlProp( svg, [
@@ -16,22 +16,16 @@ const SVG = ( attributes: any ): JSX.Element | null => {
 		{ prop: 'height', value: height || false },
 	] );
 
-	const svgTag = (
+	return (
 		<div
-			className={ classnames( 'block-svg', borderProps?.className ) }
 			style={ {
+				...style,
+				display: 'inline-flex',
 				transform: rotation ? `rotate(${ rotation }deg)` : undefined,
 			} }
+			className={ className }
 			dangerouslySetInnerHTML={ cleanMarkup( svgDoc ) }
 		></div>
-	);
-
-	return href ? (
-		<a href={ href } { ...target }>
-			{ svgTag }
-		</a>
-	) : (
-		svgTag
 	);
 };
 

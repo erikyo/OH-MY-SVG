@@ -1,14 +1,13 @@
 import SVG from './Svg';
 import {
 	useBlockProps,
-	__experimentalGetBorderClassesAndStyles as getBorderClassesAndStyles, getColorClassName,
+	__experimentalGetBorderClassesAndStyles as getBorderClassesAndStyles,
 } from '@wordpress/block-editor';
 import { hasAlign } from './utils/fn';
 import { SvgAttributesDef } from './types';
 import { SVG_MIN_SIZE } from './constants';
 import classnames from 'classnames';
-import getColor from "color-2-name/dist/types/color-utils";
-import {getBlockStyles} from "@wordpress/blocks/store/selectors";
+import getColor from 'color-2-name/dist/types/color-utils';
 
 /**
  * @module Save
@@ -22,9 +21,16 @@ import {getBlockStyles} from "@wordpress/blocks/store/selectors";
 export const Save = ( props: {
 	attributes: SvgAttributesDef;
 } ): JSX.Element => {
-	const { svg, href, linkTarget, width, height, rotation, align } =
-		props.attributes;
-
+	const {
+		svg,
+		href,
+		linkTarget,
+		width,
+		height,
+		rotation,
+		align,
+		classNames,
+	} = props.attributes;
 
 	const borderProps = getBorderClassesAndStyles( props.attributes );
 	const blockProps: Record< string, unknown > = useBlockProps.save( {
@@ -33,25 +39,34 @@ export const Save = ( props: {
 			width: hasAlign( align, [ 'full', 'wide' ] ) ? '100%' : null,
 			display: hasAlign( align, 'center' ) ? 'table' : undefined,
 		},
-		className: classnames( borderProps.className ),
+		className: classnames( classNames, borderProps.className ),
 	} );
 
-	const target = linkTarget ? { target: linkTarget } : '';
+	const svgTag = (
+		<SVG
+			{ ...blockProps }
+			svg={ svg }
+			width={
+				! hasAlign( align, [ 'full', 'wide' ] ) ? width : SVG_MIN_SIZE
+			}
+			height={
+				! align || ! hasAlign( align, [ 'full', 'wide' ] )
+					? height
+					: SVG_MIN_SIZE
+			}
+			rotation={ rotation }
+		/>
+	);
 
 	return (
-		<div { ...blockProps }>
-			<SVG
-				href={ href }
-				target={ target }
-				svg={ svg }
-				width={
-					! hasAlign( align, [ 'full', 'wide' ] ) ? width : SVG_MIN_SIZE
-				}
-				height={
-					! hasAlign( align, [ 'full', 'wide' ] ) ? height : SVG_MIN_SIZE
-				}
-				rotation={ rotation }
-			/>
+		<div>
+			{ href ? (
+				<a href={ href } target={ linkTarget }>
+					{ svgTag }
+				</a>
+			) : (
+				svgTag
+			) }
 		</div>
 	);
 };
