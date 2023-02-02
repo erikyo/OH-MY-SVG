@@ -20,25 +20,16 @@ import { getAlignStyle } from './utils/presets';
 export const Save = ( props: {
 	attributes: SvgAttributesDef;
 } ): JSX.Element => {
-	const {
-		svg,
-		href,
-		linkTarget,
-		width,
-		height,
-		rotation,
-		align,
-		style,
-		classNames,
-	} = props.attributes;
+	const { svg, href, linkTarget, width, height, rotation, align } =
+		props.attributes;
 
 	const borderProps = getBorderClassesAndStyles( props.attributes );
 	const blockProps: Record< string, unknown > = useBlockProps.save( {
 		style: {
-			...style,
-			width: hasAlign( align, [ 'full', 'wide' ] ) ? '100%' : undefined,
+			...borderProps.style, // Border radius, width and style
+			display: hasAlign( align, 'center' ) ? 'table' : undefined,
 		},
-		className: borderProps.className,
+		className: [ borderProps.className ],
 	} );
 
 	const svgTag = (
@@ -51,18 +42,14 @@ export const Save = ( props: {
 					: undefined
 			}
 			rotation={ rotation }
-			style={ { ...getAlignStyle( align ) } }
+			style={ {
+				...getAlignStyle( align ),
+			} }
 		/>
 	);
 
 	return (
-		<div
-			{ ...blockProps }
-			style={ {
-				...borderProps.style, // Border radius, width and style
-				display: hasAlign( align, 'center' ) ? 'table' : undefined,
-			} }
-		>
+		<div { ...blockProps }>
 			{ href ? (
 				<a
 					href={ href }
