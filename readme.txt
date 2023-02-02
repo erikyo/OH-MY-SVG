@@ -3,7 +3,7 @@ Contributors:      codekraft
 Tags:              svg, blocks, vector, icon, upload, sanitize
 Requires at least: 5.7
 Tested up to:      6.0
-Stable tag:        0.1.2
+Stable tag:        0.1.3
 Requires PHP:      7.1
 License:           GPLv3 or later
 License URI:       http://www.gnu.org/licenses/gpl-3.0.html
@@ -18,6 +18,15 @@ This block has the same controls as the images, but actually the content is xml 
 However, this has the disadvantage that the svg will not be copied into the media library, so if you plan to use the same svg several times (buttons, icons, etc.) you are better off creating a reusable block
 
 From a performance point of view, be aware that the image will not be included as an external resource, but will instead be within the markup of the page, thus making svg even faster than it already is.
+
+== SVG are cool because: ==
+
+- they are always super sharp!
+- they don't require any resize (you only need one source for all screen sizes and resolutions) so the load on server is very
+- they are super lightweight
+- They increase page performance: Using inline SVGs saves a lot of requests to the server.
+- animations with svg are super smooth and light (and awesome)
+- they are highly customizable
 
 = Security =
 

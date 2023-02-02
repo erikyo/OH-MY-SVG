@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+	"target": "ESNext",
+	"module": "ESNext",
+	"jsx": "react-jsx",
+    "outDir": "build",
+    "declaration": true,
+    "declarationDir": "build/types",
+    "declarationMap": true,
+    "isolatedModules": false,
+    "noEmit": false,
+    "allowJs": false,
+    "emitDeclarationOnly": true
+  },
+  "exclude": ["**/*.test.ts"]
+}

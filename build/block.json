@@ -1,7 +1,0 @@
-{
-  "apiVersion": 2,
-  "name": "codekraft/oh-my-svg",
-  "title": "SVG",
-  "category": "media",
-  "editorScript": "file:../build/oh-my-svg-editor.js"
-}
