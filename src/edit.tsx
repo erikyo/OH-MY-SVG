@@ -29,7 +29,7 @@ import {
 } from '@wordpress/block-editor';
 
 import { __ } from '@wordpress/i18n';
-import { link, linkOff } from '@wordpress/icons';
+import { edit, link, linkOff } from '@wordpress/icons';
 import SVG from './Svg';
 import {
 	updateColor,
@@ -42,7 +42,7 @@ import {
 	getSvgSize,
 } from './utils/svgTools';
 import { hasAlign, onSvgReadError, scaleProportionally } from './utils/fn';
-import { rotationRangePresets } from './utils/presets';
+import { getAlignStyle, rotationRangePresets } from './utils/presets';
 import { ErrorSvg, svgIcon } from './utils/icons';
 import { ALLOWED_MEDIA_TYPES, NEW_TAB_REL } from './constants';
 import { SvgoStats } from './utils/components';
@@ -298,406 +298,399 @@ export const Edit = (
 		style: {
 			...borderProps.style,
 			boxSizing: 'border-box',
-			display: hasAlign( align, [ 'center' ] ) ? 'table' : 'inline-flex',
-			maxWidth: hasAlign( align, 'full' ) ? 'none' : null,
-			width: hasAlign( align, [ 'full', 'wide' ] ) ? '100%' : null,
-			transform: rotation ? `rotate(${ rotation }deg)` : undefined,
+			display: hasAlign( align, 'center' ) ? 'table' : undefined,
 		},
 		className: borderProps.className,
+		ref,
 	} );
 
 	const rawSvg = (
 		<SVG
 			svg={ svg }
-			width={ ! hasAlign( align, [ 'full', 'wide' ] ) ? width : false }
+			width={ ! hasAlign( align, [ 'full', 'wide' ] ) ? width : '100%' }
 			height={ ! hasAlign( align, [ 'full', 'wide' ] ) ? height : false }
+			rotation={ rotation }
+			style={ {
+				...getAlignStyle( align ),
+			} }
 		/>
 	);
 
 	return (
-		<div { ...ref }>
-			<div { ...blockProps }>
-				<InspectorControls>
-					<Panel>
-						<PanelBody title="Settings">
-							<ImageSizeControl
-								width={ width }
-								height={ height }
-								imageWidth={ originalSize.width || 0 }
-								imageHeight={ originalSize.height || 0 }
-								onChange={ ( e: SvgSizeDef ) => {
-									setAttributes( {
-										width: e.width,
-										height: e.height,
-									} );
-								} }
-							/>
-
-							<RangeControl
-								// @ts-ignore
-								__nextHasNoMarginBottom
-								label={ __( 'Rotation' ) }
-								type={ 'number' }
-								value={ rotation || 0 }
-								min={ -180 }
-								max={ 180 }
-								marks={ rotationRangePresets }
-								step={ 1 }
-								onChange={ ( ev ) => {
-									setAttributes( {
-										rotation: ev,
-									} );
-								} }
-							/>
-						</PanelBody>
-
-						<PanelBody title="Optimization">
-							<PanelRow>
-								<p>
-									SVGO{ ' ' }
-									<SvgoStats
-										original={ originalSvg }
-										compressed={ svg }
-									/>
-								</p>
-								<Button
-									isSmall={ true }
-									variant={ 'primary' }
-									onClick={ async () =>
-										setAttributes( {
-											svg: optimizeSvg( svg ),
-										} )
-									}
-								>
-									{ __( 'Optimize' ) }
-								</Button>
-							</PanelRow>
-
-							<PanelRow>
-								<p>{ __( 'Restore Original' ) }</p>
-								<Button
-									disabled={ ! originalSvg }
-									isSmall={ true }
-									variant={ 'secondary' }
-									onClick={ () => {
-										setAttributes( {
-											svg: originalSvg,
-										} );
-									} }
-								>
-									{ __( 'Reset' ) }
-								</Button>
-							</PanelRow>
-
-							<hr />
-
-							<TextareaControl
-								label={ __( 'SVG Markup Editor' ) }
-								value={ svg || '' }
-								onChange={ ( newSvg ) => {
-									setAttributes( { svg: newSvg } );
-								} }
-							/>
-						</PanelBody>
-
-						<PanelBody title={ 'Tools' } initialOpen={ false }>
-							<PanelRow>
-								<p>{ __( 'Fill' ) }</p>
-								<Button
-									isSmall={ true }
-									variant={ 'primary' }
-									onClick={ () =>
-										setAttributes( {
-											svg: svgRemoveFill( svg ),
-										} )
-									}
-								>
-									{ __( 'Remove Fill' ) }
-								</Button>
-							</PanelRow>
-
-							<PanelRow>
-								<p>{ __( 'Outline' ) }</p>
-								<Button
-									isSmall={ true }
-									variant={ 'primary' }
-									onClick={ () =>
-										setAttributes( {
-											svg: svgAddPathStroke( {
-												svgMarkup: svg,
-												pathStrokeWith,
-												pathStrokeColor:
-													currentColor || undefined,
-											} ),
-										} )
-									}
-								>
-									{ __( 'Add Stroke' ) }
-								</Button>
-							</PanelRow>
-
-							<RangeControl
-								label={ 'Stroke Size' }
-								value={ pathStrokeWith }
-								onChange={ ( e ) =>
-									typeof e === 'number'
-										? setPathStrokeWith( e )
-										: null
-								}
-								min={ 0 }
-								max={ 20 }
-								step={ 0.1 }
-							/>
-						</PanelBody>
-
-						<PanelBody title="Editor">
-							<h2
-								className={
-									'block-editor-image-size-control__row'
-								}
-							>
-								SVG Colors
-							</h2>
-
-							<ColorPalette
-								enableAlpha={ true }
-								clearable={ false }
-								colors={ colors }
-								value={ currentColor }
-								onChange={ ( newColor ) => {
-									if ( newColor ) {
-										if (
-											! colors
-												.map( ( c ) => c.color )
-												.includes( newColor )
-										) {
-											const newSvg = updateColor(
-												svg,
-												newColor,
-												currentColor
-											);
-											setAttributes( {
-												...attributes,
-												svg: newSvg,
-											} );
-										}
-										setColor( newColor );
-									}
-								} }
-							/>
-						</PanelBody>
-					</Panel>
-				</InspectorControls>
-
-				{ svg && (
-					<BlockControls>
-						<ToolbarGroup>
-							{ ! isURLSet && (
-								<ToolbarButton
-									name="link"
-									icon={ link }
-									title={ __( 'Link' ) }
-									onClick={ ( e ) => startEditing( e ) }
-								/>
-							) }
-							{ isURLSet && (
-								<ToolbarButton
-									name="link"
-									icon={ linkOff }
-									title={ __( 'Unlink' ) }
-									onClick={ unlink }
-									isActive={ true }
-								/>
-							) }
-
-							<FormFileUpload
-								type={ 'file' }
-								label={ __( 'Replace SVG' ) }
-								accept={ ALLOWED_MEDIA_TYPES[ 0 ] }
-								multiple={ false }
-								onChange={ ( ev ) => {
-									const newFile: File | boolean =
-										ev.target.files !== null
-											? ev.target.files[ 0 ]
-											: false;
-									if ( newFile ) {
-										readSvg( newFile ).then( ( newSvg ) => {
-											if ( newSvg !== null ) {
-												updateSvg( newSvg, newFile );
-											}
-										} );
-									}
-								} }
-							>
-								Replace
-							</FormFileUpload>
-						</ToolbarGroup>
-					</BlockControls>
-				) }
-
-				{ isSelected && isEditingURL && (
-					<Popover
-						position="bottom center"
-						onClose={ () => {
-							setIsEditingURL( false );
-						} }
-						anchor={ ref.current }
-						focusOnMount={ isEditingURL ? 'firstElement' : false }
-					>
-						<LinkControl
-							className="wp-block-navigation-link__inline-link-input"
-							value={ { url: href, opensInNewTab } }
-							onChange={ ( {
-								url: newURL = '',
-								opensInNewTab: newOpensInNewTab = false,
-							} ) => {
-								let toggleMeta;
-
-								if ( opensInNewTab !== newOpensInNewTab ) {
-									toggleMeta =
-										setToggleOpenInNewTab(
-											newOpensInNewTab
-										);
-								}
-
+		<div { ...blockProps }>
+			<InspectorControls>
+				<Panel>
+					<PanelBody title="Settings">
+						<ImageSizeControl
+							width={ width }
+							height={ height }
+							imageWidth={ originalSize.width || 0 }
+							imageHeight={ originalSize.height || 0 }
+							onChange={ ( e: SvgSizeDef ) => {
 								setAttributes( {
-									...toggleMeta,
-									href: newURL,
+									width: e.width,
+									height: e.height,
 								} );
 							} }
-							onRemove={ () => {
-								unlink();
-							} }
-							forceIsEditingLink={ isEditingURL }
 						/>
-					</Popover>
-				) }
 
-				{ svg && isSelected ? (
-					<ResizableBox
-						size={ {
-							width: hasAlign( align, [ 'full', 'wide' ] )
-								? '100%'
-								: width,
-							height: hasAlign( align, [ 'full', 'wide' ] )
-								? 'auto'
-								: height,
-						} }
-						showHandle={ isSelected && align !== 'full' }
-						minHeight={ 10 }
-						minWidth={ 10 }
-						maxWidth={ maxWidth }
-						lockAspectRatio
-						enable={
-							! hasAlign( align, [ 'full', 'wide' ] )
-								? {
-										top: false,
-										right: ! hasAlign( align, 'right' ),
-										bottom: true,
-										left: ! hasAlign( align, 'left' ),
-								  }
-								: undefined
-						}
-						onResizeStop={ ( event, direction, elt, delta ) => {
-							setAttributes( {
-								height: Number( height ) + delta.height,
-								width: Number( width ) + delta.width,
-							} );
-							toggleSelection( true );
-						} }
-						onResizeStart={ () => {
-							toggleSelection( false );
-						} }
-					>
-						{ rawSvg }
-					</ResizableBox>
-				) : (
-					rawSvg
-				) }
+						<RangeControl
+							// @ts-ignore
+							__nextHasNoMarginBottom
+							label={ __( 'Rotation' ) }
+							type={ 'number' }
+							value={ rotation || 0 }
+							min={ -180 }
+							max={ 180 }
+							marks={ rotationRangePresets }
+							step={ 1 }
+							onChange={ ( ev ) => {
+								setAttributes( {
+									rotation: ev,
+								} );
+							} }
+						/>
+					</PanelBody>
 
-				{ ! svg && (
-					<>
-						<MediaPlaceholder
-							icon={ <BlockIcon icon={ svgIcon } /> }
+					<PanelBody title="Optimization">
+						<PanelRow>
+							<p>
+								SVGO{ ' ' }
+								<SvgoStats
+									original={ originalSvg }
+									compressed={ svg }
+								/>
+							</p>
+							<Button
+								isSmall={ true }
+								variant={ 'primary' }
+								onClick={ async () =>
+									setAttributes( {
+										svg: optimizeSvg( svg ),
+									} )
+								}
+							>
+								{ __( 'Optimize' ) }
+							</Button>
+						</PanelRow>
+
+						<PanelRow>
+							<p>{ __( 'Restore Original' ) }</p>
+							<Button
+								disabled={ ! originalSvg }
+								isSmall={ true }
+								variant={ 'secondary' }
+								onClick={ () => {
+									setAttributes( {
+										svg: originalSvg,
+									} );
+								} }
+							>
+								{ __( 'Reset' ) }
+							</Button>
+						</PanelRow>
+
+						<hr />
+
+						<TextareaControl
+							label={ __( 'SVG Markup Editor' ) }
+							value={ svg || '' }
+							onChange={ ( newSvg ) => {
+								setAttributes( { svg: newSvg } );
+							} }
+						/>
+					</PanelBody>
+
+					<PanelBody title={ 'Tools' } initialOpen={ false }>
+						<PanelRow>
+							<p>{ __( 'Fill' ) }</p>
+							<Button
+								isSmall={ true }
+								variant={ 'primary' }
+								onClick={ () =>
+									setAttributes( {
+										svg: svgRemoveFill( svg ),
+									} )
+								}
+							>
+								{ __( 'Remove Fill' ) }
+							</Button>
+						</PanelRow>
+
+						<PanelRow>
+							<p>{ __( 'Outline' ) }</p>
+							<Button
+								isSmall={ true }
+								variant={ 'primary' }
+								onClick={ () =>
+									setAttributes( {
+										svg: svgAddPathStroke( {
+											svgMarkup: svg,
+											pathStrokeWith,
+											pathStrokeColor:
+												currentColor || undefined,
+										} ),
+									} )
+								}
+							>
+								{ __( 'Add Stroke' ) }
+							</Button>
+						</PanelRow>
+
+						<RangeControl
+							label={ 'Stroke Size' }
+							value={ pathStrokeWith }
+							onChange={ ( e ) =>
+								typeof e === 'number'
+									? setPathStrokeWith( e )
+									: null
+							}
+							min={ 0 }
+							max={ 20 }
+							step={ 0.1 }
+						/>
+					</PanelBody>
+
+					<PanelBody title="Editor">
+						<h2
+							className={ 'block-editor-image-size-control__row' }
+						>
+							SVG Colors
+						</h2>
+
+						<ColorPalette
+							enableAlpha={ true }
+							clearable={ false }
+							colors={ colors }
+							value={ currentColor }
+							onChange={ ( newColor ) => {
+								if ( newColor ) {
+									if (
+										! colors
+											.map( ( c ) => c.color )
+											.includes( newColor )
+									) {
+										const newSvg = updateColor(
+											svg,
+											newColor,
+											currentColor
+										);
+										setAttributes( {
+											...attributes,
+											svg: newSvg,
+										} );
+									}
+									setColor( newColor );
+								}
+							} }
+						/>
+					</PanelBody>
+				</Panel>
+			</InspectorControls>
+
+			{ svg && (
+				<BlockControls>
+					<ToolbarGroup>
+						{ ! isURLSet && (
+							<ToolbarButton
+								name="link"
+								icon={ link }
+								title={ __( 'Link' ) }
+								onClick={ ( e ) => startEditing( e ) }
+							/>
+						) }
+						{ isURLSet && (
+							<ToolbarButton
+								name="link"
+								icon={ linkOff }
+								title={ __( 'Unlink' ) }
+								onClick={ unlink }
+								isActive={ true }
+							/>
+						) }
+						{ isURLSet && (
+							<ToolbarButton
+								name="edit"
+								icon={ edit }
+								title={ __( 'Edit' ) }
+								onClick={ ( e ) => startEditing( e ) }
+							/>
+						) }
+
+						<FormFileUpload
+							type={ 'file' }
+							label={ __( 'Replace SVG' ) }
+							accept={ ALLOWED_MEDIA_TYPES[ 0 ] }
 							multiple={ false }
-							mediaPreview={ <>mediaPreview</> }
-							allowedTypes={ ALLOWED_MEDIA_TYPES }
-							disableMediaButtons={ href }
-							placeholder={ () =>
-								placeholder(
-									<>
-										<DropZone
-											onFilesDrop={ ( files ) => {
-												readSvg( files[ 0 ] ).then(
-													( newSvg ) => {
-														if ( newSvg !== null ) {
-															updateSvg(
-																newSvg,
-																files[ 0 ]
-															);
-														}
-													}
-												);
-											} }
-										/>
-										<div style={ { display: 'flex' } }>
-											<FormFileUpload
-												className={
-													'components-button'
-												}
-												accept={ ALLOWED_MEDIA_TYPES.join() }
-												multiple={ false }
-												onChange={ ( ev ) => {
-													if (
-														ev.target.files?.length
-													) {
-														readSvg(
-															ev.target.files[ 0 ]
-														).then( ( newSvg ) =>
-															newSvg &&
-															ev.target.files
-																? updateSvg(
-																		newSvg,
-																		ev
-																			.target
-																			.files[ 0 ]
-																  )
-																: createErrorNotice(
-																		__(
-																			'empty file'
-																		)
-																  )
+							onChange={ ( ev ) => {
+								const newFile: File | boolean =
+									ev.target.files !== null
+										? ev.target.files[ 0 ]
+										: false;
+								if ( newFile ) {
+									readSvg( newFile ).then( ( newSvg ) => {
+										if ( newSvg !== null ) {
+											updateSvg( newSvg, newFile );
+										}
+									} );
+								}
+							} }
+						>
+							Replace
+						</FormFileUpload>
+					</ToolbarGroup>
+				</BlockControls>
+			) }
+
+			{ isSelected && isEditingURL && (
+				<Popover
+					position="bottom center"
+					onClose={ () => {
+						setIsEditingURL( false );
+					} }
+					anchor={ ref.current }
+					focusOnMount={ isEditingURL ? 'firstElement' : false }
+				>
+					<LinkControl
+						className="wp-block-navigation-link__inline-link-input"
+						value={ { url: href, opensInNewTab } }
+						onChange={ ( {
+							url: newURL = '',
+							opensInNewTab: newOpensInNewTab = false,
+						} ) => {
+							let toggleMeta;
+
+							if ( opensInNewTab !== newOpensInNewTab ) {
+								toggleMeta =
+									setToggleOpenInNewTab( newOpensInNewTab );
+							}
+
+							setAttributes( {
+								...toggleMeta,
+								href: newURL,
+							} );
+						} }
+						onRemove={ () => {
+							unlink();
+						} }
+						forceIsEditingLink={ isEditingURL }
+					/>
+				</Popover>
+			) }
+
+			{ svg && isSelected ? (
+				<ResizableBox
+					size={ {
+						width: hasAlign( align, [ 'full', 'wide' ] )
+							? '100%'
+							: width,
+						height: hasAlign( align, [ 'full', 'wide' ] )
+							? 'auto'
+							: height,
+					} }
+					showHandle={ isSelected && align !== 'full' }
+					minHeight={ 10 }
+					minWidth={ 10 }
+					maxWidth={ maxWidth }
+					lockAspectRatio
+					enable={
+						! hasAlign( align, [ 'full', 'wide' ] )
+							? {
+									top: false,
+									right: ! hasAlign( align, 'right' ),
+									bottom: true,
+									left: ! hasAlign( align, 'left' ),
+							  }
+							: undefined
+					}
+					onResizeStop={ ( event, direction, elt, delta ) => {
+						setAttributes( {
+							height: Number( height ) + delta.height,
+							width: Number( width ) + delta.width,
+						} );
+						toggleSelection( true );
+					} }
+					onResizeStart={ () => {
+						toggleSelection( false );
+					} }
+				>
+					{ rawSvg }
+				</ResizableBox>
+			) : (
+				rawSvg
+			) }
+			{ ! svg && (
+				<>
+					<MediaPlaceholder
+						icon={ <BlockIcon icon={ svgIcon } /> }
+						multiple={ false }
+						mediaPreview={ <>mediaPreview</> }
+						allowedTypes={ ALLOWED_MEDIA_TYPES }
+						disableMediaButtons={ href }
+						placeholder={ () =>
+							placeholder(
+								<>
+									<DropZone
+										onFilesDrop={ ( files ) => {
+											readSvg( files[ 0 ] ).then(
+												( newSvg ) => {
+													if ( newSvg !== null ) {
+														updateSvg(
+															newSvg,
+															files[ 0 ]
 														);
 													}
-												} }
-												onError={ () => onSvgReadError }
-												variant={ 'secondary' }
-											>
-												{ __( 'Select a Svg image' ) }
-											</FormFileUpload>
-											<TextControl
-												className={
-													'components-button'
 												}
-												placeholder={ __(
-													'Paste here your SVG markup'
-												) }
-												value={ svg }
-												onChange={ ( newSvg ) =>
-													updateSvg(
-														newSvg,
-														undefined
-													)
+											);
+										} }
+									/>
+									<div style={ { display: 'flex' } }>
+										<FormFileUpload
+											className={ 'components-button' }
+											accept={ ALLOWED_MEDIA_TYPES.join() }
+											multiple={ false }
+											onChange={ ( ev ) => {
+												if ( ev.target.files?.length ) {
+													readSvg(
+														ev.target.files[ 0 ]
+													).then( ( newSvg ) =>
+														newSvg &&
+														ev.target.files
+															? updateSvg(
+																	newSvg,
+																	ev.target
+																		.files[ 0 ]
+															  )
+															: createErrorNotice(
+																	__(
+																		'empty file'
+																	)
+															  )
+													);
 												}
-											></TextControl>
-										</div>
-									</>
-								)
-							}
-						/>
-					</>
-				) }
-			</div>
+											} }
+											onError={ () => onSvgReadError }
+											variant={ 'secondary' }
+										>
+											{ __( 'Select a Svg image' ) }
+										</FormFileUpload>
+										<TextControl
+											className={ 'components-button' }
+											placeholder={ __(
+												'Paste here your SVG markup'
+											) }
+											value={ svg }
+											onChange={ ( newSvg ) =>
+												updateSvg( newSvg, undefined )
+											}
+										></TextControl>
+									</div>
+								</>
+							)
+						}
+					/>
+				</>
+			) }
 		</div>
 	);
 };

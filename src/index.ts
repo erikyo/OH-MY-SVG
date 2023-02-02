@@ -40,7 +40,6 @@ registerBlockType( blockConfig.name, {
 			background: true,
 			gradients: true,
 			text: false,
-			__experimentalDuotone: 'svg',
 		},
 		__experimentalBorder: {
 			__experimentalSkipSerialization: true,
@@ -73,7 +72,11 @@ registerBlockType( blockConfig.name, {
 		},
 		href: {
 			type: 'string',
-			default: '',
+			default: undefined,
+		},
+		linkTarget: {
+			type: 'string',
+			default: undefined,
 		},
 		height: {
 			type: 'number',

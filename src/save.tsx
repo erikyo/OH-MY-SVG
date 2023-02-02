@@ -5,9 +5,10 @@ import {
 } from '@wordpress/block-editor';
 import { hasAlign } from './utils/fn';
 import { SvgAttributesDef } from './types';
-import { SVG_MIN_SIZE } from './constants';
+import { NEW_TAB_REL } from './constants';
 import classnames from 'classnames';
 import getColor from 'color-2-name/dist/types/color-utils';
+import { getAlignStyle } from './utils/presets';
 
 /**
  * @module Save
@@ -29,6 +30,7 @@ export const Save = ( props: {
 		height,
 		rotation,
 		align,
+		style,
 		classNames,
 	} = props.attributes;
 
@@ -36,7 +38,7 @@ export const Save = ( props: {
 	const blockProps: Record< string, unknown > = useBlockProps.save( {
 		style: {
 			...borderProps.style, // Border radius, width and style.
-			width: hasAlign( align, [ 'full', 'wide' ] ) ? '100%' : null,
+			width: hasAlign( align, [ 'full', 'wide' ] ) ? '100%' : undefined,
 			display: hasAlign( align, 'center' ) ? 'table' : undefined,
 		},
 		className: classnames( classNames, borderProps.className ),
@@ -44,24 +46,31 @@ export const Save = ( props: {
 
 	const svgTag = (
 		<SVG
-			{ ...blockProps }
 			svg={ svg }
-			width={
-				! hasAlign( align, [ 'full', 'wide' ] ) ? width : SVG_MIN_SIZE
-			}
+			width={ ! hasAlign( align, [ 'full', 'wide' ] ) ? width : '100%' }
 			height={
 				! align || ! hasAlign( align, [ 'full', 'wide' ] )
 					? height
-					: SVG_MIN_SIZE
+					: undefined
 			}
 			rotation={ rotation }
+			style={ { ...style, ...getAlignStyle( align ) } }
 		/>
 	);
 
 	return (
-		<div>
+		<div
+			{ ...blockProps }
+			style={ {
+				...borderProps.style, // Border radius, width and style
+			} }
+		>
 			{ href ? (
-				<a href={ href } target={ linkTarget }>
+				<a
+					href={ href }
+					target={ linkTarget }
+					rel={ linkTarget ? NEW_TAB_REL : undefined }
+				>
 					{ svgTag }
 				</a>
 			) : (

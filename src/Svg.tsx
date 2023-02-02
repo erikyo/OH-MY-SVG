@@ -1,5 +1,4 @@
 import { updateHtmlProp, cleanMarkup } from './utils/common';
-import classnames from 'classnames';
 
 /**
  * Svg component - it can be used to render SVG files
@@ -8,8 +7,7 @@ import classnames from 'classnames';
  * @return {JSX.Element|null} the SVG components
  */
 const SVG = ( attributes: any ): JSX.Element | null => {
-	const { svg, width, height, rotation, style, className } =
-		attributes;
+	const { svg, width, height, rotation, style, className } = attributes;
 
 	const svgDoc = updateHtmlProp( svg, [
 		{ prop: 'width', value: width || '100%' },
@@ -20,7 +18,6 @@ const SVG = ( attributes: any ): JSX.Element | null => {
 		<div
 			style={ {
 				...style,
-				display: 'inline-flex',
 				transform: rotation ? `rotate(${ rotation }deg)` : undefined,
 			} }
 			className={ className }
