@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>OH-MY-SVG Save</title>
+  <title>OH-MY-SVG index.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -77,234 +79,114 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Module</p>
-                    <h1>Save</h1>
+                    <p>Source</p>
+                    <h1>index.ts</h1>
                 </header>
                 
 
 
 
-
-<section>
-
-<header>
     
-        
-            
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description"><p>The svg save function.</p></div>
-        
-
-        
-            
-
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>props</code></td>
-  
-
-  <td class="type">
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"></td>
-</tr>
-
-  
-  
-    
-<tr class="deep-level-1">
-  
-      <td class="name"><code>attributes</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type"><a href="SvgAttributesDef.html">SvgAttributesDef</a></code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>The props to build the svg</p></td>
-</tr>
-
-  
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="save.tsx.html" class="button">View Source</a>
-            <span>
-                <a href="save.tsx.html">save.tsx</a>, <a href="save.tsx.html#line9">line 9</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <div class='columns method-parameter'>
-        <div class="column is-2"><label>Returns:</label></div>
-        <div class="column is-10">
-            
-                    
-
-<div class="columns">
-    
-    <div class='param-desc column is-7'><ul>
-<li>Returns an anchor tag if the url attribute is set, otherwise it returns a div tag the collection of attributes needed for saving the svg as xml markup</li>
-</ul></div>
-    
-    
-    <div class='column is-5 has-text-left'>
-        <label>Type: </label>
-        
-<code class="param-type">JSX.Element</code>
-
-
-    </div>
-    
-</div>
-
-                
-        </div>
-    </div>
-
-
-
-
-
-        
-    
-    </div>
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * WordPress dependencies
+ */
+import { BlockAttributes, registerBlockType } from '@wordpress/blocks';
+
+/**
+ * Plugin dependencies
+ */
+import { svgIcon as icon } from './utils/icons';
+import { Edit } from './edit';
+import { Save } from './save';
+import deprecated from './deprecated';
+
+/* Block settings */
+import jsonData from '../block.json';
+const blockConfig = jsonData as BlockAttributes;
+
+export const attributes = {
+	svg: {
+		type: 'string',
+		default: '',
+	},
+	originalSvg: {
+		type: 'string',
+		default: false,
+	},
+	href: {
+		type: 'string',
+		default: undefined,
+	},
+	linkTarget: {
+		type: 'string',
+		default: undefined,
+	},
+	height: {
+		type: 'number',
+		default: false,
+	},
+	width: {
+		type: 'number',
+		default: false,
+	},
+	rotation: {
+		type: 'number',
+		default: 0,
+	},
+};
+
+export const supports = {
+	align: true,
+	anchor: true,
+	className: true,
+	color: {
+		background: true,
+		gradients: true,
+		text: false,
+	},
+	__experimentalBorder: {
+		__experimentalSkipSerialization: true,
+		radius: true,
+		width: true,
+		color: true,
+		style: true,
+		__experimentalDefaultControls: {
+			radius: true,
+		},
+	},
+	spacing: {
+		margin: true, // Enable margin UI control.
+		padding: true, // Enable padding UI control.
+		blockGap: true, // Enables block spacing UI control.
+	},
+};
+
+/**
+ * Register OH-MY-SVG block
+ *
+ * @file index.js
+ * @name OH-MY-SVG
+ * @description A Simple plugin that adds the SVG Block to your Gutenberg block editor.
+ * @author codekraft
+ *
+ */
+// @ts-ignore
+registerBlockType( blockConfig.name, {
+	...blockConfig,
+	apiVersion: 2,
+	icon,
+	edit: Edit,
+	save: Save,
+	// https://developer.wordpress.org/block-editor/reference-guides/block-api/block-supports/
+	supports,
+	attributes,
+	deprecated,
+} );
+</code></pre>
+        </article>
+    </section>
 
 
 

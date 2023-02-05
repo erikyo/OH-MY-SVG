@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>OH-MY-SVG Save</title>
+  <title>OH-MY-SVG utils/fn.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -77,234 +79,61 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Module</p>
-                    <h1>Save</h1>
+                    <p>Source</p>
+                    <h1>utils/fn.ts</h1>
                 </header>
                 
 
 
 
-
-<section>
-
-<header>
     
-        
-            
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description"><p>The svg save function.</p></div>
-        
-
-        
-            
-
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>props</code></td>
-  
-
-  <td class="type">
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"></td>
-</tr>
-
-  
-  
-    
-<tr class="deep-level-1">
-  
-      <td class="name"><code>attributes</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type"><a href="SvgAttributesDef.html">SvgAttributesDef</a></code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>The props to build the svg</p></td>
-</tr>
-
-  
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="save.tsx.html" class="button">View Source</a>
-            <span>
-                <a href="save.tsx.html">save.tsx</a>, <a href="save.tsx.html#line9">line 9</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <div class='columns method-parameter'>
-        <div class="column is-2"><label>Returns:</label></div>
-        <div class="column is-10">
-            
-                    
-
-<div class="columns">
-    
-    <div class='param-desc column is-7'><ul>
-<li>Returns an anchor tag if the url attribute is set, otherwise it returns a div tag the collection of attributes needed for saving the svg as xml markup</li>
-</ul></div>
-    
-    
-    <div class='column is-5 has-text-left'>
-        <label>Type: </label>
-        
-<code class="param-type">JSX.Element</code>
-
-
-    </div>
-    
-</div>
-
-                
-        </div>
-    </div>
-
-
-
-
-
-        
-    
-    </div>
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Check if the current align is the one specified
+ *
+ * @param {string}          currentAlign   - the current align
+ * @param {string|string[]} alignmentCheck
+ * @return {boolean} true if the alignment check contains the current alignment
+ */
+export function hasAlign(
+	currentAlign: string = '',
+	alignmentCheck: string | string[]
+): boolean {
+	if ( typeof alignmentCheck === 'object' ) {
+		return alignmentCheck.includes( currentAlign );
+	}
+	return currentAlign === alignmentCheck;
+}
+
+/**
+ * if the limit is bigger than the original values returns the proportionally scaled second value
+ * this is useful to resize an image because given the container size the image width will be of the size of the limit and the height will be proportionally scaled
+ *
+ * @param {number} first
+ * @param {number} second
+ * @param {number} limit
+ * @return {number} the second value (the height of the image, the width is the limit size)
+ */
+export function scaleProportionally(
+	first: number | string,
+	second: number | string,
+	limit: number | string
+): number {
+	return ( Number( limit ) / Number( first ) ) * Number( second );
+}
+
+/**
+ * It throws an error if the file fails to read
+ *
+ * @param {string} err - string - The error message that was thrown.
+ */
+export const onSvgReadError = ( err: string ): Error => {
+	throw new Error( 'Failed to read the given file' + err );
+};
+</code></pre>
+        </article>
+    </section>
 
 
 

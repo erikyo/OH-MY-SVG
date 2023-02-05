@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>OH-MY-SVG Save</title>
+  <title>OH-MY-SVG save.tsx</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -77,234 +79,87 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Module</p>
-                    <h1>Save</h1>
+                    <p>Source</p>
+                    <h1>save.tsx</h1>
                 </header>
                 
 
 
 
-
-<section>
-
-<header>
     
-        
-            
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description"><p>The svg save function.</p></div>
-        
-
-        
-            
-
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>props</code></td>
-  
-
-  <td class="type">
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"></td>
-</tr>
-
-  
-  
-    
-<tr class="deep-level-1">
-  
-      <td class="name"><code>attributes</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type"><a href="SvgAttributesDef.html">SvgAttributesDef</a></code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>The props to build the svg</p></td>
-</tr>
-
-  
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="save.tsx.html" class="button">View Source</a>
-            <span>
-                <a href="save.tsx.html">save.tsx</a>, <a href="save.tsx.html#line9">line 9</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <div class='columns method-parameter'>
-        <div class="column is-2"><label>Returns:</label></div>
-        <div class="column is-10">
-            
-                    
-
-<div class="columns">
-    
-    <div class='param-desc column is-7'><ul>
-<li>Returns an anchor tag if the url attribute is set, otherwise it returns a div tag the collection of attributes needed for saving the svg as xml markup</li>
-</ul></div>
-    
-    
-    <div class='column is-5 has-text-left'>
-        <label>Type: </label>
-        
-<code class="param-type">JSX.Element</code>
-
-
-    </div>
-    
-</div>
-
-                
-        </div>
-    </div>
-
-
-
-
-
-        
-    
-    </div>
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import SVG from './Svg';
+
+import {
+	useBlockProps,
+	// @ts-ignore
+	__experimentalGetBorderClassesAndStyles as getBorderClassesAndStyles,
+} from '@wordpress/block-editor';
+import { hasAlign } from './utils/fn';
+import {SvgAttributesDef, SvgAttributesSave} from './types';
+import { NEW_TAB_REL } from './constants';
+import { getAlignStyle } from './utils/presets';
+
+/**
+ * @module Save
+ * @description The svg save function.
+ *
+ * @param                    props
+ * @param {SvgAttributesDef} props.attributes - The props to build the svg
+ *
+ * @return {JSX.Element} - Returns an anchor tag if the url attribute is set, otherwise it returns a div tag the collection of attributes needed for saving the svg as xml markup
+ */
+export const Save = ( props: {
+	attributes: SvgAttributesSave;
+} ): JSX.Element => {
+	const { svg, href, linkTarget, width, height, rotation, align } =
+		props.attributes;
+
+	const borderProps = getBorderClassesAndStyles( props.attributes );
+	const blockProps: Record&lt; string, unknown > = useBlockProps.save( {
+		style: {
+			...borderProps.style, // Border radius, width and style
+			display: hasAlign( align, 'center' ) ? 'table' : undefined,
+		},
+		className: [ borderProps.className ],
+	} );
+
+	const svgTag = (
+		&lt;SVG
+			svg={ svg }
+			width={ ! hasAlign( align, [ 'full', 'wide' ] ) ? width : '100%' }
+			height={
+				! align || ! hasAlign( align, [ 'full', 'wide' ] )
+					? height
+					: undefined
+			}
+			rotation={ rotation }
+			style={ {
+				...getAlignStyle( align ),
+			} }
+		/>
+	);
+
+	return (
+		&lt;div { ...blockProps }>
+			{ href ? (
+				&lt;a
+					href={ href }
+					target={ linkTarget }
+					rel={ linkTarget ? NEW_TAB_REL : undefined }
+				>
+					{ svgTag }
+				&lt;/a>
+			) : (
+				svgTag
+			) }
+		&lt;/div>
+	);
+};
+</code></pre>
+        </article>
+    </section>
 
 
 

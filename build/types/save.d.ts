@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { SvgAttributesDef } from './types';
+import { SvgAttributesSave } from './types';
 /**
  * @module Save
  * @description The svg save function.
@@ -10,6 +10,6 @@ import { SvgAttributesDef } from './types';
  * @return {JSX.Element} - Returns an anchor tag if the url attribute is set, otherwise it returns a div tag the collection of attributes needed for saving the svg as xml markup
  */
 export declare const Save: (props: {
-    attributes: SvgAttributesDef;
+    attributes: SvgAttributesSave;
 }) => JSX.Element;
 //# sourceMappingURL=save.d.ts.map

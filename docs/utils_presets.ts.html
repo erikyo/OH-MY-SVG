@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>OH-MY-SVG Save</title>
+  <title>OH-MY-SVG utils/presets.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -77,234 +79,102 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Module</p>
-                    <h1>Save</h1>
+                    <p>Source</p>
+                    <h1>utils/presets.ts</h1>
                 </header>
                 
 
 
 
-
-<section>
-
-<header>
     
-        
-            
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description"><p>The svg save function.</p></div>
-        
-
-        
-            
-
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>props</code></td>
-  
-
-  <td class="type">
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"></td>
-</tr>
-
-  
-  
-    
-<tr class="deep-level-1">
-  
-      <td class="name"><code>attributes</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type"><a href="SvgAttributesDef.html">SvgAttributesDef</a></code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>The props to build the svg</p></td>
-</tr>
-
-  
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="save.tsx.html" class="button">View Source</a>
-            <span>
-                <a href="save.tsx.html">save.tsx</a>, <a href="save.tsx.html#line9">line 9</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <div class='columns method-parameter'>
-        <div class="column is-2"><label>Returns:</label></div>
-        <div class="column is-10">
-            
-                    
-
-<div class="columns">
-    
-    <div class='param-desc column is-7'><ul>
-<li>Returns an anchor tag if the url attribute is set, otherwise it returns a div tag the collection of attributes needed for saving the svg as xml markup</li>
-</ul></div>
-    
-    
-    <div class='column is-5 has-text-left'>
-        <label>Type: </label>
-        
-<code class="param-type">JSX.Element</code>
-
-
-    </div>
-    
-</div>
-
-                
-        </div>
-    </div>
-
-
-
-
-
-        
-    
-    </div>
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* rotation range presets in order to provide a better ux for standard rotations like 0-90-180-270 */
+import { hasAlign } from './fn';
+
+/* the array of ticks displayed below the rotation slider */
+export const rotationRangePresets: Object[] = [
+	{
+		value: -180,
+		label: '-180',
+	},
+	{
+		value: -90,
+		label: '-90',
+	},
+	{
+		value: 0,
+		label: '0',
+	},
+	{
+		value: 90,
+		label: '90',
+	},
+	{
+		value: 180,
+		label: '180',
+	},
+];
+
+/**
+ * It returns an object with the css property for the alignCenter class for the svg block container
+ *
+ * @return css props
+ */
+const styleCenter = () => {
+	return {
+		width: 'inherit',
+	};
+};
+
+/**
+ * It returns an object with the css property for the alignWide and alignFull class for the svg block container
+ *
+ * @return css props
+ */
+const styleWide = () => {
+	return {
+		display: 'table',
+		maxWidth: 'inherit',
+		width: '100%',
+	};
+};
+
+/**
+ * It returns an object with the default css property for the svg block container
+ *
+ * @return css props
+ */
+const styleDefault = () => {
+	return {};
+};
+
+/**
+ * If the block alignment is center, wide, or full, return a style object that aligns the block to the
+ * center, wide, or full, otherwise return a style object that aligns the block to the left.
+ *
+ * @param {string | undefined} blockAlignment - string | undefined
+ *
+ * @return A function that returns a style object.
+ */
+export const getAlignStyle = ( blockAlignment: string | undefined ) => {
+	switch ( blockAlignment ) {
+		case 'center':
+		case undefined:
+			// align none
+			return styleCenter();
+		case 'wide':
+		case 'full':
+			return styleWide();
+		default:
+			// align left
+			// align right
+			return styleDefault();
+	}
+};
+</code></pre>
+        </article>
+    </section>
 
 
 

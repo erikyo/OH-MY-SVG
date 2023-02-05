@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>OH-MY-SVG Save</title>
+  <title>OH-MY-SVG utils/icons.tsx</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -77,234 +79,53 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Module</p>
-                    <h1>Save</h1>
+                    <p>Source</p>
+                    <h1>utils/icons.tsx</h1>
                 </header>
                 
 
 
 
-
-<section>
-
-<header>
     
-        
-            
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description"><p>The svg save function.</p></div>
-        
-
-        
-            
-
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>props</code></td>
-  
-
-  <td class="type">
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"></td>
-</tr>
-
-  
-  
-    
-<tr class="deep-level-1">
-  
-      <td class="name"><code>attributes</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type"><a href="SvgAttributesDef.html">SvgAttributesDef</a></code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"><p>The props to build the svg</p></td>
-</tr>
-
-  
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="save.tsx.html" class="button">View Source</a>
-            <span>
-                <a href="save.tsx.html">save.tsx</a>, <a href="save.tsx.html#line9">line 9</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <div class='columns method-parameter'>
-        <div class="column is-2"><label>Returns:</label></div>
-        <div class="column is-10">
-            
-                    
-
-<div class="columns">
-    
-    <div class='param-desc column is-7'><ul>
-<li>Returns an anchor tag if the url attribute is set, otherwise it returns a div tag the collection of attributes needed for saving the svg as xml markup</li>
-</ul></div>
-    
-    
-    <div class='column is-5 has-text-left'>
-        <label>Type: </label>
-        
-<code class="param-type">JSX.Element</code>
-
-
-    </div>
-    
-</div>
-
-                
-        </div>
-    </div>
-
-
-
-
-
-        
-    
-    </div>
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * The block icon
+ *
+ * @return {JSX.Element} the icon for the svg block
+ */
+export const svgIcon: JSX.Element = (
+	&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+		&lt;path d="M245.2 153.5a36 36 0 0 0-32-60.7 36 36 0 0 0-20.3-65.6 36 36 0 0 0-29.7 15.7 36 36 0 0 0-60.7-32.1 36 36 0 0 0-9.9 32.1 36 36 0 0 0-65.7 20.2 36 36 0 0 0 15.7 29.7 36.5 36.5 0 0 0-6.7-.6 35.7 35.7 0 0 0-35.9 36A35.7 35.7 0 0 0 36 164c2.2 0 4.5-.3 6.6-.7A36 36 0 0 0 63 229.1a36 36 0 0 0 29.7-15.8 36 36 0 0 0 60.7 32.2 36 36 0 0 0 9.9-32.2 36 36 0 0 0 65.6-20.2 36 36 0 0 0-15.7-29.7 36.4 36.4 0 0 0 32.1-9.9" />
+		&lt;path
+			fill="#FFB13B"
+			d="M234.4 113.5c-8-8-21.1-8-29.2 0h-42.1l29.8-29.8a20.6 20.6 0 1 0-20.6-20.6l-29.9 29.8V50.7a20.6 20.6 0 1 0-29.1 0V93L83.5 63.1a20.6 20.6 0 1 0-20.6 20.6l29.8 29.8H50.5a20.6 20.6 0 1 0 0 29.2h42.2l-29.8 29.8a20.6 20.6 0 1 0 20.6 20.6l29.8-29.8v42.2a20.6 20.6 0 1 0 29.1 0v-42.2l29.9 29.8a20.6 20.6 0 1 0 20.6-20.6L163 142.7h42.1a20.6 20.6 0 1 0 29.2-29.2"
+		/>
+	&lt;/svg>
+);
+
+/**
+ * The error icon displayed when the svg cannot be loaded
+ *
+ * @param {string} message
+ */
+export const ErrorSvg = ( message: string ): JSX.Element => (
+	&lt;svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+		&lt;rect
+			stroke="#ccc"
+			strokeWidth="2px"
+			fill="#f3f3f3"
+			height="100%"
+			width="100%"
+		>&lt;/rect>
+		&lt;text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle">
+			{ message }
+		&lt;/text>
+	&lt;/svg>
+);
+</code></pre>
+        </article>
+    </section>
 
 
 

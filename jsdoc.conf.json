@@ -1,36 +1,40 @@
 {
   "tags": {
 	"allowUnknownTags": true,
-	"dictionaries": ["jsdoc", "closure"]
+	"dictionaries": [
+	  "jsdoc",
+	  "closure"
+	]
   },
-  "plugins": ["plugins/markdown"],
+  "plugins": [
+	"plugins/markdown",
+	"node_modules/better-docs/typescript"
+  ],
+  "typescript": {
+	"moduleRoot": "src"
+  },
   "source": {
-	"include": ["src"],
-	"includePattern": ".+\\.js(doc|x)?$",
+	"include": [
+	  "src"
+	],
+	"includePattern": "\\.(jsx|js|ts|tsx)$",
 	"excludePattern": "(^|\\/|\\\\)_"
   },
   "templates": {
+	"cleverLinks": false,
+	"monospaceLinks": false,
 	"better-docs": {
-	  "name": "OH-MY-SVG Wordpress Block"
+	  "name": "OH-MY-SVG Wordpress Block",
+	  "title": "OH-MY-SVG",
+	  "hideGenerator": true
 	}
   },
   "opts": {
 	"encoding": "utf8",
-	"template": "node_modules/clean-jsdoc-theme",
-	"readme": "./readme.txt",
 	"destination": "docs",
-	"recurse": true,
-	"sort": true,
-	"theme_opts": {
-	  "menu" : [
-		{
-		  "title": "OH-MY-SVG",
-		  "link": "https://github.com/erikyo/OH-MY-SVG/"
-		}
-	  ],
-	  "favicon": "../assets/icon.svg",
-	  "create_style": ".type-signature { color: #6314d1 }; a, a:active { color: #9ac122 }"
-	}
+	"template": "./node_modules/better-docs",
+	"readme": "./readme.txt",
+	"recurse": true
   },
   "markdown": {
 	"hardwrap": false,
