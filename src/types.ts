@@ -7,7 +7,6 @@ export interface SvgAttributesDef {
 	rotation?: number;
 	align?: string;
 	style?: {};
-	classNames?: string[];
 	linkTarget?: string;
 }
 

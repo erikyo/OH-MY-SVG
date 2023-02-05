@@ -1,10 +1,12 @@
 import SVG from './Svg';
+
 import {
 	useBlockProps,
+	// @ts-ignore
 	__experimentalGetBorderClassesAndStyles as getBorderClassesAndStyles,
 } from '@wordpress/block-editor';
 import { hasAlign } from './utils/fn';
-import { SvgAttributesDef } from './types';
+import {SvgAttributesDef, SvgAttributesSave} from './types';
 import { NEW_TAB_REL } from './constants';
 import { getAlignStyle } from './utils/presets';
 
@@ -18,7 +20,7 @@ import { getAlignStyle } from './utils/presets';
  * @return {JSX.Element} - Returns an anchor tag if the url attribute is set, otherwise it returns a div tag the collection of attributes needed for saving the svg as xml markup
  */
 export const Save = ( props: {
-	attributes: SvgAttributesDef;
+	attributes: SvgAttributesSave;
 } ): JSX.Element => {
 	const { svg, href, linkTarget, width, height, rotation, align } =
 		props.attributes;

@@ -10,10 +10,66 @@ import { svgIcon as icon } from './utils/icons';
 import { Edit } from './edit';
 import { Save } from './save';
 
-/** Import the block default configuration */
 /* Block settings */
 import jsonData from '../block.json';
 const blockConfig = jsonData as BlockAttributes;
+
+export const attributes = {
+	svg: {
+		type: 'string',
+		default: '',
+	},
+	originalSvg: {
+		type: 'string',
+		default: false,
+	},
+	href: {
+		type: 'string',
+		default: undefined,
+	},
+	linkTarget: {
+		type: 'string',
+		default: undefined,
+	},
+	height: {
+		type: 'number',
+		default: false,
+	},
+	width: {
+		type: 'number',
+		default: false,
+	},
+	rotation: {
+		type: 'number',
+		default: 0,
+	},
+};
+
+export const supports = {
+	align: true,
+	anchor: true,
+	className: true,
+	color: {
+		background: true,
+		gradients: true,
+		text: false,
+	},
+	__experimentalBorder: {
+		__experimentalSkipSerialization: true,
+		radius: true,
+		width: true,
+		color: true,
+		style: true,
+		__experimentalDefaultControls: {
+			radius: true,
+		},
+	},
+	spacing: {
+		margin: true, // Enable margin UI control.
+		padding: true, // Enable padding UI control.
+		blockGap: true, // Enables block spacing UI control.
+	},
+};
 
 /**
  * Register OH-MY-SVG block
@@ -32,63 +88,7 @@ registerBlockType( blockConfig.name, {
 	edit: Edit,
 	save: Save,
 	// https://developer.wordpress.org/block-editor/reference-guides/block-api/block-supports/
-	supports: {
-		align: true,
-		anchor: true,
-		className: true,
-		color: {
-			background: true,
-			gradients: true,
-			text: false,
-		},
-		__experimentalBorder: {
-			__experimentalSkipSerialization: true,
-			radius: true,
-			width: true,
-			color: true,
-			style: true,
-			__experimentalDefaultControls: {
-				radius: true,
-			},
-		},
-		spacing: {
-			margin: true, // Enable margin UI control.
-			padding: true, // Enable padding UI control.
-			blockGap: true, // Enables block spacing UI control.
-		},
-	},
-	attributes: {
-		style: {
-			type: 'object',
-			default: {},
-		},
-		svg: {
-			type: 'string',
-			default: '',
-		},
-		originalSvg: {
-			type: 'string',
-			default: false,
-		},
-		href: {
-			type: 'string',
-			default: undefined,
-		},
-		linkTarget: {
-			type: 'string',
-			default: undefined,
-		},
-		height: {
-			type: 'number',
-			default: false,
-		},
-		width: {
-			type: 'number',
-			default: false,
-		},
-		rotation: {
-			type: 'number',
-			default: 0,
-		},
-	},
+	supports,
+	attributes,
+	deprecated,
 } );
