@@ -9,6 +9,7 @@ import { BlockAttributes, registerBlockType } from '@wordpress/blocks';
 import { svgIcon as icon } from './utils/icons';
 import { Edit } from './edit';
 import { Save } from './save';
+import deprecated from './deprecated';
 
 /* Block settings */
 import jsonData from '../block.json';
