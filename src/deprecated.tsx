@@ -51,14 +51,14 @@ const v1 = {
 		},
 	},
 
-	migrate( attributes ) {
+	migrate( attributes: { url: any } ) {
 		return {
 			...attributes,
 			href: attributes.url,
 		};
 	},
 
-	save( props ) {
+	save( props: { attributes: any } ) {
 		const { attributes } = props;
 
 		function createMarkup() {

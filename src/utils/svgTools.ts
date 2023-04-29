@@ -144,7 +144,7 @@ export function encodeSvg( svgMarkup: string ): string {
 /**
  * Collect the colors used into the svg. It takes a string of text and returns an array of unique colors found in that string
  *
- * @param  fileContent - The content of the file that you want to extract colors from.
+ * @param fileContent - The content of the file that you want to extract colors from.
  *
  * @return An array of unique colors.
  */

@@ -1,4 +1,5 @@
 import SVG from './Svg';
+import classnames from 'classnames';
 
 import {
 	useBlockProps,
@@ -6,7 +7,7 @@ import {
 	__experimentalGetBorderClassesAndStyles as getBorderClassesAndStyles,
 } from '@wordpress/block-editor';
 import { hasAlign } from './utils/fn';
-import {SvgAttributesDef, SvgAttributesSave} from './types';
+import { SvgAttributesDef, SvgAttributesSave } from './types';
 import { NEW_TAB_REL } from './constants';
 import { getAlignStyle } from './utils/presets';
 
@@ -26,12 +27,15 @@ export const Save = ( props: {
 		props.attributes;
 
 	const borderProps = getBorderClassesAndStyles( props.attributes );
-	const blockProps: Record< string, unknown > = useBlockProps.save( {
+	const blockProps = useBlockProps.save( {
 		style: {
-			...borderProps.style, // Border radius, width and style
+			...borderProps.style,
 			display: hasAlign( align, 'center' ) ? 'table' : undefined,
 		},
-		className: [ borderProps.className ],
+		className: classnames(
+			align ? `align${ align }` : 'none',
+			borderProps.className
+		),
 	} );
 
 	const svgTag = (

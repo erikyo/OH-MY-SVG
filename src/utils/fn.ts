@@ -6,10 +6,10 @@
  * @return {boolean} true if the alignment check contains the current alignment
  */
 export function hasAlign(
-	currentAlign: string = '',
+	currentAlign: string = 'none',
 	alignmentCheck: string | string[]
 ): boolean {
-	if ( typeof alignmentCheck === 'object' ) {
+	if ( alignmentCheck instanceof Array ) {
 		return alignmentCheck.includes( currentAlign );
 	}
 	return currentAlign === alignmentCheck;

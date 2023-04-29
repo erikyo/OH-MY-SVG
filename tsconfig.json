@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-	"target": "es2021",
-	"module": "es6",
+	"target": "es2017",
+	"module": "es2015",
 	"jsx": "react-jsx",
 	"moduleResolution": "node",    // Search under node_modules for non-relative imports.
 	"allowJs": true, // Process & infer types from .js files.
@@ -17,11 +17,9 @@
 	"forceConsistentCasingInFileNames": true,
 	"esModuleInterop": true, // Import non-ES modules as default imports.
 	"outDir": "build",
-	"rootDir": "src",
+    "baseUrl": "./src"
   },
-  "include": [
-	"src"
-  ],
+  "include": [ "./src/**/*.ts", "./src/**/*.tsx" ],
   "exclude": [
 	"coverage",
 	"docs",

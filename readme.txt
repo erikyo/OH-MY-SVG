@@ -2,7 +2,7 @@
 Contributors:      codekraft
 Tags:              svg, blocks, vector, icon, upload, sanitize
 Requires at least: 5.7
-Tested up to:      6.0
+Tested up to:      6.1
 Stable tag:        0.1.3
 Requires PHP:      7.1
 License:           GPLv3 or later
@@ -62,7 +62,7 @@ It can also be installed manually using a zip file.
 
 * Updated editor controls
 * Adds border control
-* Fixes some problems with svg alignment
+* Fixes some issues with svg alignment (thanks to @vralle)
 * Link control update
 
 = 0.1.2 - 2022-10-22 =
@@ -105,6 +105,6 @@ By contributing, you agree that your contributions will be licensed under its GP
 = Downloads =
 
 [GitHub Repository](https://github.com/erikyo/svgb)
-[Developer resources](https://erikyo.github.io/OH-MY-Svg/)
+[Developer resources](https://erikyo.github.io/OH-MY-SVG/)
 [WordPress directory](https://wordpress.org/plugins/oh-my-svg/)
 

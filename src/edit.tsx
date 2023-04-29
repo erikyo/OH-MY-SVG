@@ -49,6 +49,7 @@ import { SvgoStats } from './utils/components';
 import { SvgColorDef, SvgAttributesEditor, SvgSizeDef } from './types';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
+import { store as blockEditorStore } from '@wordpress/block-editor';
 import { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
 
 /**
@@ -62,8 +63,7 @@ import { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
 export const Edit = (
 	props: BlockEditProps< BlockAttributes >
 ): JSX.Element => {
-	const { attributes, setAttributes, isSelected, toggleSelection } = props;
-
+	const { attributes, setAttributes, isSelected } = props;
 	const {
 		align,
 		height,
@@ -75,6 +75,8 @@ export const Edit = (
 		svg,
 		originalSvg,
 	} = attributes as SvgAttributesEditor;
+
+	const { toggleSelection } = useDispatch( blockEditorStore );
 
 	/**
 	 * @function useRef
@@ -90,7 +92,7 @@ export const Edit = (
 	 *
 	 * @property {Function}         ref             - the reference to that dom node
 	 */
-	const ref = useRef();
+	const ref = useRef( null );
 	const isURLSet = !! href;
 	const opensInNewTab = linkTarget === '_blank';
 
@@ -157,7 +159,7 @@ export const Edit = (
 				}
 				return undefined;
 			}
-
+			getSvgResize( ref.current ); // initial size
 			setMaxWidth( contentMaxWidth() );
 		}
 	}, [ align ] );
@@ -180,6 +182,14 @@ export const Edit = (
 			} );
 		}
 	}, [] );
+
+	const getSvgResize = ( ref ) => {
+		const rect = ref.getBoundingClientRect();
+		setAttributes( {
+			width: rect.width,
+			height: rect.height,
+		} );
+	};
 
 	/**
 	 * Handle the checkbox state for "Open in new tab"
@@ -230,8 +240,8 @@ export const Edit = (
 	/**
 	 * Since the updateSvg function is shared we can set attributes with the result of the updateSvg function
 	 *
-	 * @param  result
-	 * @param  file
+	 * @param result
+	 * @param file
 	 */
 	function updateSvg( result: string, file: File | undefined ) {
 		const newSvg = loadSvg( {
@@ -248,7 +258,7 @@ export const Edit = (
 	/**
 	 * If the SVG width is bigger than the content width, rescale it to the content width
 	 *
-	 * @param  newSvg - Partial< BlockAttributes >
+	 * @param newSvg - Partial< BlockAttributes >
 	 */
 	function updateSvgData( newSvg: Partial< BlockAttributes > ) {
 		const newSvgSize = { width: newSvg.width, height: newSvg.height };

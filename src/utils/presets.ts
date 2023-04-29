@@ -32,6 +32,7 @@ export const rotationRangePresets: Object[] = [
  */
 const styleCenter = () => {
 	return {
+		display: 'table',
 		width: 'inherit',
 	};
 };
@@ -43,7 +44,7 @@ const styleCenter = () => {
  */
 const styleWide = () => {
 	return {
-		display: 'table',
+		display: 'flex',
 		maxWidth: 'inherit',
 		width: '100%',
 	};
@@ -68,13 +69,12 @@ const styleDefault = () => {
  */
 export const getAlignStyle = ( blockAlignment: string | undefined ) => {
 	switch ( blockAlignment ) {
-		case 'center':
-		case undefined:
-			// align none
-			return styleCenter();
 		case 'wide':
 		case 'full':
 			return styleWide();
+		case 'center':
+		case undefined:
+			return styleCenter();
 		default:
 			// align left
 			// align right

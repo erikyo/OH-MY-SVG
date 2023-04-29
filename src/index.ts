@@ -54,6 +54,13 @@ export const supports = {
 		background: true,
 		gradients: true,
 		text: false,
+		__experimentalDuotone: 'svg',
+	},
+	filter: {
+		duotone: true,
+	},
+	selectors: {
+		border: 'svg',
 	},
 	__experimentalBorder: {
 		__experimentalSkipSerialization: true,
@@ -70,16 +77,20 @@ export const supports = {
 		padding: true, // Enable padding UI control.
 		blockGap: true, // Enables block spacing UI control.
 	},
+	default: {
+		align: 'none',
+		display: 'table',
+	},
 };
 
 /**
- * Register OH-MY-SVG block
+ * OH-MY-SVG
+ * This is a plugin that adds the SVG Block to your Gutenberg block editor.
  *
  * @file index.js
- * @name OH-MY-SVG
+ *
  * @description A Simple plugin that adds the SVG Block to your Gutenberg block editor.
  * @author codekraft
- *
  */
 // @ts-ignore
 registerBlockType( blockConfig.name, {
