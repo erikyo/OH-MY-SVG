@@ -44,6 +44,14 @@ export const attributes = {
 		type: 'number',
 		default: 0,
 	},
+	style: {
+		type: 'object',
+		default: {
+			color: {
+				duotone: undefined,
+			},
+		},
+	},
 };
 
 export const supports = {
@@ -54,13 +62,9 @@ export const supports = {
 		background: true,
 		gradients: true,
 		text: false,
-		__experimentalDuotone: 'svg',
 	},
 	filter: {
 		duotone: true,
-	},
-	selectors: {
-		border: 'svg',
 	},
 	__experimentalBorder: {
 		__experimentalSkipSerialization: true,
@@ -83,6 +87,13 @@ export const supports = {
 	},
 };
 
+const selectors = {
+	filter: {
+		// Apply the filter to img elements inside the image block
+		duotone: '.wp-block-codekraft-oh-my-svg svg',
+	},
+};
+
 /**
  * OH-MY-SVG
  * This is a plugin that adds the SVG Block to your Gutenberg block editor.
@@ -99,8 +110,8 @@ registerBlockType( blockConfig.name, {
 	icon,
 	edit: Edit,
 	save: Save,
-	// https://developer.wordpress.org/block-editor/reference-guides/block-api/block-supports/
 	supports,
+	selectors,
 	attributes,
 	deprecated,
 } );

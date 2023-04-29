@@ -2,7 +2,9 @@
 import { hasAlign } from './fn';
 
 /* the array of ticks displayed below the rotation slider */
-export const rotationRangePresets: Object[] = [
+export const rotationRangePresets:
+	| boolean
+	| { value: number; label?: string }[] = [
 	{
 		value: -180,
 		label: '-180',

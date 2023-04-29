@@ -183,8 +183,8 @@ export const Edit = (
 		}
 	}, [] );
 
-	const getSvgResize = ( ref ) => {
-		const rect = ref.getBoundingClientRect();
+	const getSvgResize = ( el: HTMLElement ) => {
+		const rect = el.getBoundingClientRect();
 		setAttributes( {
 			width: rect.width,
 			height: rect.height,
@@ -683,7 +683,6 @@ export const Edit = (
 												}
 											} }
 											onError={ () => onSvgReadError }
-											variant={ 'secondary' }
 										>
 											{ __( 'Select a Svg image' ) }
 										</FormFileUpload>
