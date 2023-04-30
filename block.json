@@ -2,6 +2,37 @@
 	"apiVersion": 2,
 	"name": "codekraft/oh-my-svg",
 	"title": "SVG",
+	"attributes": {
+		"svg": {
+			"type": "string",
+			"default": ""
+		},
+		"originalSvg": {
+			"type": "string",
+			"default": false
+		},
+		"href": {
+			"type": "string"
+		},
+		"linkTarget": {
+			"type": "string"
+		},
+		"height": {
+			"type": "number",
+			"default": false
+		},
+		"width": {
+			"type": "number",
+			"default": false
+		},
+		"rotation": {
+			"type": "number",
+			"default": 0
+		},
+		"style": {
+			"type": "object"
+		}
+	},
 	"supports": {
 		"align": true,
 		"anchor": true,

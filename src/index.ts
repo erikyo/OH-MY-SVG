@@ -15,45 +15,6 @@ import deprecated from './deprecated';
 import jsonData from '../block.json';
 const blockConfig = jsonData as BlockAttributes;
 
-export const attributes = {
-	svg: {
-		type: 'string',
-		default: '',
-	},
-	originalSvg: {
-		type: 'string',
-		default: false,
-	},
-	href: {
-		type: 'string',
-		default: undefined,
-	},
-	linkTarget: {
-		type: 'string',
-		default: undefined,
-	},
-	height: {
-		type: 'number',
-		default: false,
-	},
-	width: {
-		type: 'number',
-		default: false,
-	},
-	rotation: {
-		type: 'number',
-		default: 0,
-	},
-	style: {
-		type: 'object',
-		default: {
-			color: {
-				duotone: undefined,
-			},
-		},
-	},
-};
-
 /**
  * OH-MY-SVG
  * This is a plugin that adds the SVG Block to your Gutenberg block editor.
@@ -70,6 +31,5 @@ registerBlockType( blockConfig.name, {
 	icon,
 	edit: Edit,
 	save: Save,
-	attributes,
 	deprecated,
 } );
