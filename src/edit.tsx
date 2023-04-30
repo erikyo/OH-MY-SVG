@@ -159,7 +159,7 @@ export const Edit = (
 				}
 				return undefined;
 			}
-			getSvgResize( ref.current ); // initial size
+			getSvgBoundingBox( ref.current ); // initial size
 			setMaxWidth( contentMaxWidth() );
 		}
 	}, [ align ] );
@@ -183,7 +183,7 @@ export const Edit = (
 		}
 	}, [] );
 
-	const getSvgResize = ( el: HTMLElement ) => {
+	const getSvgBoundingBox = ( el: HTMLElement ) => {
 		const rect = el.getBoundingClientRect();
 		setAttributes( {
 			width: rect.width,
@@ -252,11 +252,11 @@ export const Edit = (
 
 		return newSvg
 			? updateSvgData( newSvg )
-			: createErrorNotice( ErrorSvg( __( '😓 cannot update!' ) ) );
+			: createErrorNotice( __( '😓 cannot update!' ) );
 	}
 
 	/**
-	 * If the SVG width is bigger than the content width, rescale it to the content width
+	 * This function updates the attributes of the original svg and has to be called after each update of the svg shape
 	 *
 	 * @param newSvg - Partial< BlockAttributes >
 	 */

@@ -1,7 +1,45 @@
 {
-  "apiVersion": 2,
-  "name": "codekraft/oh-my-svg",
-  "title": "SVG",
-  "category": "media",
-  "editorScript": "file:./build/oh-my-svg-editor.js"
+	"apiVersion": 2,
+	"name": "codekraft/oh-my-svg",
+	"title": "SVG",
+	"supports": {
+		"align": true,
+		"anchor": true,
+		"className": true,
+		"color": {
+			"background": true,
+			"gradients": true,
+			"text": false,
+			"__experimentalDuotone": "svg"
+		},
+		"filter": {
+			"duotone": true
+		},
+		"__experimentalBorder": {
+			"__experimentalSkipSerialization": true,
+			"radius": true,
+			"width": true,
+			"color": true,
+			"style": true,
+			"__experimentalDefaultControls": {
+				"radius": true
+			}
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true,
+			"blockGap": true
+		},
+		"default": {
+			"align": "none",
+			"display": "table"
+		}
+	},
+	"selectors": {
+		"filter": {
+			"duotone": ".wp-block-codekraft-oh-my-svg svg"
+		}
+	},
+	"category": "media",
+	"editorScript": "file:./build/oh-my-svg-editor.js"
 }

@@ -23,7 +23,7 @@ import { getAlignStyle } from './utils/presets';
 export const Save = ( props: {
 	attributes: SvgAttributesSave;
 } ): JSX.Element => {
-	const { svg, href, linkTarget, width, height, rotation, align } =
+	const { svg, href, linkTarget, width, height, rotation, align, style } =
 		props.attributes;
 
 	const borderProps = getBorderClassesAndStyles( props.attributes );

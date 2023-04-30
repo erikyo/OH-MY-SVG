@@ -54,46 +54,6 @@ export const attributes = {
 	},
 };
 
-export const supports = {
-	align: true,
-	anchor: true,
-	className: true,
-	color: {
-		background: true,
-		gradients: true,
-		text: false,
-	},
-	filter: {
-		duotone: true,
-	},
-	__experimentalBorder: {
-		__experimentalSkipSerialization: true,
-		radius: true,
-		width: true,
-		color: true,
-		style: true,
-		__experimentalDefaultControls: {
-			radius: true,
-		},
-	},
-	spacing: {
-		margin: true, // Enable margin UI control.
-		padding: true, // Enable padding UI control.
-		blockGap: true, // Enables block spacing UI control.
-	},
-	default: {
-		align: 'none',
-		display: 'table',
-	},
-};
-
-const selectors = {
-	filter: {
-		// Apply the filter to img elements inside the image block
-		duotone: '.wp-block-codekraft-oh-my-svg svg',
-	},
-};
-
 /**
  * OH-MY-SVG
  * This is a plugin that adds the SVG Block to your Gutenberg block editor.
@@ -110,8 +70,6 @@ registerBlockType( blockConfig.name, {
 	icon,
 	edit: Edit,
 	save: Save,
-	supports,
-	selectors,
 	attributes,
 	deprecated,
 } );
