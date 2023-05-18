@@ -43,7 +43,7 @@ import {
 } from './utils/svgTools';
 import { hasAlign, onSvgReadError, scaleProportionally } from './utils/fn';
 import { getAlignStyle, rotationRangePresets } from './utils/presets';
-import { ErrorSvg, svgIcon } from './utils/icons';
+import { svgIcon } from './utils/icons';
 import { ALLOWED_MEDIA_TYPES, NEW_TAB_REL } from './constants';
 import { SvgoStats } from './utils/components';
 import { SvgColorDef, SvgAttributesEditor, SvgSizeDef } from './types';
@@ -351,7 +351,6 @@ export const Edit = (
 							// @ts-ignore
 							__nextHasNoMarginBottom
 							label={ __( 'Rotation' ) }
-							type={ 'number' }
 							value={ rotation || 0 }
 							min={ -180 }
 							max={ 180 }
@@ -531,7 +530,7 @@ export const Edit = (
 						) }
 
 						<FormFileUpload
-							type={ 'file' }
+							type={ 'button' }
 							label={ __( 'Replace SVG' ) }
 							accept={ ALLOWED_MEDIA_TYPES[ 0 ] }
 							multiple={ false }

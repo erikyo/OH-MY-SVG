@@ -1,9 +1,9 @@
-=== OH MY Svg ===
+=== OH MY SVG ===
 Contributors:      codekraft
 Tags:              svg, blocks, vector, icon, upload, sanitize
 Requires at least: 5.7
-Tested up to:      6.1
-Stable tag:        0.1.3
+Tested up to:      6.2
+Stable tag:        0.1.4
 Requires PHP:      7.1
 License:           GPLv3 or later
 License URI:       http://www.gnu.org/licenses/gpl-3.0.html
@@ -12,24 +12,24 @@ Add any svg to your website with the superpowers of the block editor. Out-of-the
 
 == Description ==
 
-This plugin provides a Svg Block to your block editor, this can be used with any svg icon or image (or even a html snippet). Some key features are provided like automatic markup sanitation, optimization (svgo), and small utility to change the color and the markup that will be very useful for you to create variations of your image.
+Enhance your WordPress website with the power of SVG images using the Svg Block plugin. Easily add and manipulate SVG images with the block editor. This plugin provides an intuitive Svg Block that allows you to incorporate SVG icons, images, or HTML snippets effortlessly. Experience the convenience of automatic markup sanitation, optimization (svgo), and a range of useful utilities, such as color customization and markup modification for creating image variations.
 
-This block has the same controls as the images, but actually the content is xml markup, and you can change it as you like! This allows thousands of possibilities... You will be able to use css animations or js scripts to animate it, change the inner text of the svg, create variations of the same svg.
-However, this has the disadvantage that the svg will not be copied into the media library, so if you plan to use the same svg several times (buttons, icons, etc.) you are better off creating a reusable block
+The Svg Block offers the same controls as regular images, but with the flexibility of XML markup editing. Unleash your creativity with endless possibilities—animate SVGs using CSS animations or JavaScript, modify inner text, and create unique variations of the same SVG. Unlike traditional image formats, SVGs always render sharply and are incredibly lightweight, eliminating the need for multiple resized images for different screen sizes and resolutions.
 
-From a performance point of view, be aware that the image will not be included as an external resource, but will instead be within the markup of the page, thus making svg even faster than it already is.
+Boost your website's performance with inline SVGs, which drastically reduce page load time by minimizing server requests and conserving bandwidth. Enjoy seamless integration and customization options that embedded SVGs offer, making your website visually stunning.
 
 == Svg are awesome because: ==
 
-- ✌️ Are always super sharp!
-- 🪶 Incredibly lightweight and doesn't require any additional resize image (you only need one source for all screen sizes and resolutions)
-- ⚡ Increased page performance! Using inline SVGs saves can save dozens of requests and save server download bandwith.
-- 🎉 highly customisable and animatable! Embedded svgs are easy to be animated, just use css!
+- ✌️ SVGs render sharply and are lightweight, improving page performance.
+- 🦄 Add any SVG icon, image, or HTML snippet effortlessly.
+- 🪶 Incredibly lightweight compared to traditional images formats.
+- 🎨 Customize colors and modify markup for creating image variations.
+- ⚡ Increased page performance! Using inline SVGs saves can save dozens of requests and save server download bandwidth.
+- 🎉 Easy animation with CSS and JavaScript.
 
 = Security =
 
-Since this plugin doesn't enable uploads of svg images into media library could be considered safer than all the others that enable the upload.
-As if that wasn't enough Svg's will be cleaned with DOM purify which indeed is a first class js purifier, those used in php try to mimic how it works.
+The Svg Block plugin prioritizes security by not allowing uploads of SVG images into the media library, making it a safer option compared to other plugins that enable such uploads. SVGs used with this plugin are cleaned with DOMPurify, a robust JavaScript purifier, ensuring that only safe and validated SVGs are rendered. Unlike SVGs processed by external tools like ImageMagick, the SVGs included within your pages as XML fragments cannot be uploaded by unauthorized users from the website side. Only those with appropriate permissions to use the block editor can include SVGs.
 
 Svg will be included within the pages as xml fragments, so they will not be processed by imagemagick and cannot be uploaded by anyone from website "side". Only those with permissions to use the editor will be allowed to 'upload' (or rather include) them.
 
@@ -44,19 +44,37 @@ Svg will be included within the pages as xml fragments, so they will not be proc
 This plugin can be installed directly from your WordPress site.
 
 1. Log in to your WordPress site and navigate to **Plugins &rarr; Add New**.
-2. Type "OH MY Svg" into the Search box.
-3. Locate the OH MY Svg plugin in the list of search results and click **Install Now**.
+2. Type "OH MY SVG" into the Search box.
+3. Locate the OH MY SVG plugin in the list of search results and click **Install Now**.
 4. Once installed, click the Activate button.
 
 It can also be installed manually using a zip file.
 
-1. Download the OH MY Svg plugin from WordPress.org.
+1. Download the OH MY SVG plugin from WordPress.org.
 2. Log in to your WordPress site and navigate to **Plugins &rarr; Add New**.
 3. Click the **Upload Plugin** button.
 4. Click the **Choose File** button, select the zip file you downloaded in step 1, then click the **Install Now** button.
 5. Click the **Activate Plugin** button.
 
+== Frequently Asked Questions ==
+
+= Can I use SVGs for buttons, icons, and other elements? =
+
+Absolutely! The Svg Block allows you to use SVGs for various elements on your website, such as buttons, icons, and more. Simply create a reusable block to conveniently use the same SVG across multiple locations.
+
+= Can I animate SVGs with CSS or JavaScript? =
+
+Yes, you can easily animate SVGs using CSS or JavaScript. The Svg Block provides the flexibility to add CSS animations or implement JavaScript scripts to bring your SVGs to life.
+
 == Changelog ==
+
+= 0.1.4 - 2023-05-18 =
+
+* Added the Duotone filter for SVG images.
+* Fixed alignment issues with SVGs.
+* Improved handling of SVG size and scaling.
+* Updated plugin dependencies for enhanced compatibility.
+* Fixed package configuration for smoother installation process.
 
 = 0.1.3 - 2023-02-02 =
 
@@ -79,7 +97,12 @@ It can also be installed manually using a zip file.
 
 = 0.1.0 - 2022-07-25 =
 
-* Initial Release.
+* Initial release of the Svg Block plugin.
+* Introduced the Svg Block for seamless integration with the block editor.
+* Enabled adding and manipulating SVG icons, images, and HTML snippets.
+* Provided automatic markup sanitation and optimization features.
+* Offered utilities for color customization and markup modification.
+* Supported CSS animations and JavaScript scripts for SVG animations.
 
 == Resources ==
 
