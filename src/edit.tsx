@@ -159,7 +159,8 @@ export const Edit = (
 				}
 				return undefined;
 			}
-			getSvgBoundingBox( ref.current ); // initial size
+
+			if ( ! height && ! width ) getSvgBoundingBox( ref.current ); // initial size
 			setMaxWidth( contentMaxWidth() );
 		}
 	}, [ align ] );
@@ -311,7 +312,6 @@ export const Edit = (
 	const blockProps = useBlockProps( {
 		style: {
 			...borderProps.style,
-			display: hasAlign( align, 'center' ) ? 'table' : undefined,
 		},
 		className: borderProps.className,
 		ref,
@@ -320,6 +320,7 @@ export const Edit = (
 	const rawSvg = (
 		<SVG
 			svg={ svg }
+			display={ hasAlign( align, 'center' ) ? 'table' : undefined }
 			width={ ! hasAlign( align, [ 'full', 'wide' ] ) ? width : '100%' }
 			height={ ! hasAlign( align, [ 'full', 'wide' ] ) ? height : false }
 			rotation={ rotation }
