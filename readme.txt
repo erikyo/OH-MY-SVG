@@ -8,7 +8,7 @@ Requires PHP:      7.1
 License:           GPLv3 or later
 License URI:       http://www.gnu.org/licenses/gpl-3.0.html
 
-Add any svg to your website with the superpowers of the block editor. Out-of-the-box security and speed optimization!
+Unlock the magic of your website with the SVG block. Out-of-the-box security and turbocharged speed optimization!
 
 == Description ==
 
