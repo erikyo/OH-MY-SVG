@@ -320,12 +320,12 @@ export const Edit = (
 	const rawSvg = (
 		<SVG
 			svg={ svg }
-			display={ hasAlign( align, 'center' ) ? 'table' : undefined }
 			width={ ! hasAlign( align, [ 'full', 'wide' ] ) ? width : '100%' }
 			height={ ! hasAlign( align, [ 'full', 'wide' ] ) ? height : false }
 			rotation={ rotation }
 			style={ {
 				...getAlignStyle( align ),
+				margin: hasAlign( align, 'center' ) ? 'auto' : undefined,
 			} }
 		/>
 	);
@@ -600,6 +600,9 @@ export const Edit = (
 						height: hasAlign( align, [ 'full', 'wide' ] )
 							? 'auto'
 							: height,
+					} }
+					style={ {
+						margin: hasAlign( align, [ 'center' ] ) ? 'auto' : null,
 					} }
 					showHandle={ isSelected && align !== 'full' }
 					minHeight={ 10 }
