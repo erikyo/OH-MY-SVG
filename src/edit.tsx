@@ -51,6 +51,7 @@ import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
+import getSVG from './Svg';
 
 /**
  * @module Edit
@@ -316,19 +317,6 @@ export const Edit = (
 		className: borderProps.className,
 		ref,
 	} );
-
-	const rawSvg = (
-		<SVG
-			svg={ svg }
-			width={ ! hasAlign( align, [ 'full', 'wide' ] ) ? width : '100%' }
-			height={ ! hasAlign( align, [ 'full', 'wide' ] ) ? height : false }
-			rotation={ rotation }
-			style={ {
-				...getAlignStyle( align ),
-				margin: hasAlign( align, 'center' ) ? 'auto' : undefined,
-			} }
-		/>
-	);
 
 	return (
 		<div { ...blockProps }>
@@ -605,8 +593,8 @@ export const Edit = (
 						margin: hasAlign( align, [ 'center' ] ) ? 'auto' : null,
 					} }
 					showHandle={ isSelected && align !== 'full' }
-					minHeight={ 10 }
-					minWidth={ 10 }
+					minHeight={ 8 }
+					minWidth={ 8 }
 					maxWidth={ maxWidth }
 					lockAspectRatio
 					enable={
@@ -630,10 +618,21 @@ export const Edit = (
 						toggleSelection( false );
 					} }
 				>
-					{ rawSvg }
+					<div
+						style={ { display: 'flex' } }
+						dangerouslySetInnerHTML={ getSVG( props.attributes ) }
+					/>
 				</ResizableBox>
 			) : (
-				rawSvg
+				<div
+					style={ {
+						margin: hasAlign( align, [ 'center' ] ) ? 'auto' : null,
+						display: hasAlign( align, [ 'center' ] )
+							? 'table'
+							: 'flex',
+					} }
+					dangerouslySetInnerHTML={ getSVG( props.attributes ) }
+				/>
 			) }
 			{ ! svg && (
 				<>

@@ -2,8 +2,8 @@
 Contributors:      codekraft
 Tags:              svg, blocks, vector, icon, upload, sanitize
 Requires at least: 5.7
-Tested up to:      6.2
-Stable tag:        0.1.4
+Tested up to:      6.3
+Stable tag:        0.1.4.2
 Requires PHP:      7.1
 License:           GPLv3 or later
 License URI:       http://www.gnu.org/licenses/gpl-3.0.html
@@ -27,7 +27,7 @@ Boost your website's performance with inline SVGs, which drastically reduce page
 - ⚡ Increased page performance! Using inline SVGs saves can save dozens of requests and save server download bandwidth.
 - 🎉 Easy animation with CSS and JavaScript.
 
-= Security =
+= 🔒 Security =
 
 The Svg Block plugin prioritizes security by not allowing uploads of SVG images into the media library, making it a safer option compared to other plugins that enable such uploads. SVGs used with this plugin are cleaned with DOMPurify, a robust JavaScript purifier, ensuring that only safe and validated SVGs are rendered. Unlike SVGs processed by external tools like ImageMagick, the SVGs included within your pages as XML fragments cannot be uploaded by unauthorized users from the website side. Only those with appropriate permissions to use the block editor can include SVGs.
 

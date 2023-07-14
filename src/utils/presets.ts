@@ -58,7 +58,9 @@ const styleWide = () => {
  * @return css props
  */
 const styleDefault = () => {
-	return {};
+	return {
+		display: 'flex',
+	};
 };
 
 /**
@@ -75,8 +77,8 @@ export const getAlignStyle = ( blockAlignment: string | undefined ) => {
 		case 'full':
 			return styleWide();
 		case 'center':
-		case undefined:
 			return styleCenter();
+		case undefined:
 		default:
 			// align left
 			// align right

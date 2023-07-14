@@ -10,6 +10,7 @@ import { hasAlign } from './utils/fn';
 import { SvgAttributesDef, SvgAttributesSave } from './types';
 import { NEW_TAB_REL } from './constants';
 import { getAlignStyle } from './utils/presets';
+import getSVG from './Svg';
 
 /**
  * @module Save
@@ -30,7 +31,6 @@ export const Save = ( props: {
 	const blockProps = useBlockProps.save( {
 		style: {
 			...borderProps.style,
-			display: hasAlign( align, 'center' ) ? 'table' : undefined,
 		},
 		className: classnames(
 			align ? `align${ align }` : 'none',
@@ -38,35 +38,35 @@ export const Save = ( props: {
 		),
 	} );
 
-	const svgTag = (
-		<SVG
-			svg={ svg }
+	const SvgTag = () => (
+		<svg
+			dangerouslySetInnerHTML={ getSVG( props.attributes ) }
 			width={ ! hasAlign( align, [ 'full', 'wide' ] ) ? width : '100%' }
-			height={
-				! align || ! hasAlign( align, [ 'full', 'wide' ] )
-					? height
-					: undefined
-			}
-			rotation={ rotation }
+			height={ ! hasAlign( align, [ 'full', 'wide' ] ) ? height : null }
 			style={ {
 				...getAlignStyle( align ),
+				margin: hasAlign( align, 'center' ) ? 'auto' : undefined,
+				transform: `rotate( ${ rotation }deg )`,
 			} }
 		/>
 	);
 
 	return (
-		<div { ...blockProps }>
+		<div
+			{ ...blockProps }
+			style={ { ...getAlignStyle( align ) } }
+			dangerouslySetInnerHTML={
+				href ? undefined : getSVG( props.attributes )
+			}
+		>
 			{ href ? (
 				<a
 					href={ href }
 					target={ linkTarget }
 					rel={ linkTarget ? NEW_TAB_REL : undefined }
-				>
-					{ svgTag }
-				</a>
-			) : (
-				svgTag
-			) }
+					dangerouslySetInnerHTML={ getSVG( props.attributes ) }
+				/>
+			) : null }
 		</div>
 	);
 };
