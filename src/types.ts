@@ -21,6 +21,8 @@ export interface SvgAttributesEditor extends SvgAttributesDef {
 /** the svg component prop */
 export interface SvgAttributesSave extends SvgAttributesDef {
 	className?: string;
+	title?: string;
+	onclick?: string;
 	duotoneFilter?: string;
 }
 

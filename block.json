@@ -17,6 +17,12 @@
 		"linkTarget": {
 			"type": "string"
 		},
+		"title": {
+			"type": "string"
+		},
+		"onclick": {
+			"type": "string"
+		},
 		"height": {
 			"type": "number",
 			"default": false

@@ -24,8 +24,18 @@ import getSVG from './Svg';
 export const Save = ( props: {
 	attributes: SvgAttributesSave;
 } ): JSX.Element => {
-	const { svg, href, linkTarget, width, height, rotation, align, style } =
-		props.attributes;
+	const {
+		svg,
+		href,
+		linkTarget,
+		width,
+		height,
+		title,
+		rotation,
+		align,
+		onclick,
+		style,
+	} = props.attributes;
 
 	const borderProps = getBorderClassesAndStyles( props.attributes );
 	const blockProps = useBlockProps.save( {
@@ -33,7 +43,7 @@ export const Save = ( props: {
 			...borderProps.style,
 		},
 		className: classnames(
-			align ? `align${ align }` : 'none',
+			align ? `align${ align }` : 'alignnone',
 			borderProps.className
 		),
 	} );
@@ -45,8 +55,8 @@ export const Save = ( props: {
 			height={ ! hasAlign( align, [ 'full', 'wide' ] ) ? height : null }
 			style={ {
 				...getAlignStyle( align ),
-				margin: hasAlign( align, 'center' ) ? 'auto' : undefined,
-				transform: `rotate( ${ rotation }deg )`,
+				margin: hasAlign( align, 'center' ) ? 'auto' : null,
+				transform: rotation !== 0 ? `rotate( ${ rotation }deg )` : null,
 			} }
 		/>
 	);
@@ -63,7 +73,9 @@ export const Save = ( props: {
 				<a
 					href={ href }
 					target={ linkTarget }
-					rel={ linkTarget ? NEW_TAB_REL : undefined }
+					rel={ linkTarget ? NEW_TAB_REL : null }
+					title={ title ?? null }
+					onclick={ onclick }
 					dangerouslySetInnerHTML={ getSVG( props.attributes ) }
 				/>
 			) : null }
