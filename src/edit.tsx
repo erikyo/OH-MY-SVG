@@ -119,12 +119,6 @@ export const Edit = (
 	/* Emit notices */
 	const { createErrorNotice } = useDispatch( noticesStore );
 
-	/* Setting the first color detected as the default color. */
-	useEffect( () => {
-		if ( colors.length > 0 )
-			setColor( colors?.length ? colors[ 0 ].color : '' );
-	}, [ colors ] );
-
 	/**
 	 * Checking if the block is selected.
 	 * If it is not selected, it sets the isEditingURL state to false.
@@ -160,8 +154,10 @@ export const Edit = (
 				}
 				return undefined;
 			}
-
-			if ( ! height && ! width ) getSvgBoundingBox( ref.current ); // initial size
+			if ( ! isSelected ) return;
+			// if the element has a width and height set the new width
+			if ( ! height && ! width ) getSvgBoundingBox( ref.current );
+			// set the max width
 			setMaxWidth( contentMaxWidth() );
 		}
 	}, [ align ] );
@@ -184,6 +180,12 @@ export const Edit = (
 			} );
 		}
 	}, [] );
+
+	/* Setting the first color detected as the default color. */
+	useEffect( () => {
+		if ( colors.length > 0 )
+			setColor( colors?.length ? colors[ 0 ].color : '' );
+	}, [ colors ] );
 
 	const getSvgBoundingBox = ( el: HTMLElement ) => {
 		const rect = el.getBoundingClientRect();
