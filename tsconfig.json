@@ -1,17 +1,23 @@
 {
-  "compilerOptions": {
-	"target": "es2017",
-	"module": "es2015",
-	"jsx": "react-jsx",
-	"moduleResolution": "node",    // Search under node_modules for non-relative imports.
-	"allowJs": true, // Process & infer types from .js files.
-	"noEmit": true, // Don't emit; allow Babel to transform files.
-	"outDir": "build",
-    "baseUrl": "./src"
-  },
-  "include": [ "./src/**/*.ts", "./src/**/*.tsx" ],
-  "exclude": [
-	"coverage",
-	"docs",
-  ]
+	"compilerOptions": {
+		"target": "ES6",
+		"module": "esnext",
+		"jsx": "react-jsx",
+		"moduleResolution": "node",
+		// Search under node_modules for non-relative imports.
+		"allowJs": true,
+		// Process & infer types from .js files.
+		"noEmit": true,
+		// Don't emit; allow Babel to transform files.
+		"outDir": "build",
+		"baseUrl": "./src"
+	},
+	"include": [
+		"./src/**/*.ts",
+		"./src/**/*.tsx"
+	],
+	"exclude": [
+		"coverage",
+		"docs"
+	]
 }
