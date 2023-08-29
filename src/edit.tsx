@@ -349,7 +349,7 @@ export const Edit = (
 							step={ 1 }
 							onChange={ ( ev ) => {
 								setAttributes( {
-									rotation: ev,
+									rotation: Number( ev ),
 								} );
 							} }
 						/>

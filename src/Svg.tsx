@@ -9,7 +9,8 @@ import { updateHtmlProp, cleanMarkup } from './utils/common';
 const getSVG = ( attributes: any ): { __html: string } => {
 	const { svg, width, height, rotation } = attributes;
 
-	const svgStyle = `transform:rotate(${ rotation }deg)`;
+	const svgStyle =
+		Number( rotation ) !== 0 ? `transform:rotate(${ rotation }deg)` : null;
 
 	const svgDoc = updateHtmlProp( svg, [
 		{ prop: 'width', value: width || '100%' },

@@ -56,7 +56,10 @@ export const Save = ( props: {
 			style={ {
 				...getAlignStyle( align ),
 				margin: hasAlign( align, 'center' ) ? 'auto' : null,
-				transform: rotation !== 0 ? `rotate( ${ rotation }deg )` : null,
+				transform:
+					Number( rotation ) !== 0
+						? `rotate( ${ rotation }deg )`
+						: null,
 			} }
 		/>
 	);

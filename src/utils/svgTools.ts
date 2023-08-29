@@ -12,7 +12,6 @@ import {
 	SvgColorDef,
 	SvgFileDef,
 	SvgStrokeDef,
-	SvgAttributesDef,
 	SvgSizeDef,
 	SvgAttributesEditor,
 } from '../types';
