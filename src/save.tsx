@@ -40,6 +40,7 @@ export const Save = ( props: {
 	const borderProps = getBorderClassesAndStyles( props.attributes );
 	const blockProps = useBlockProps.save( {
 		style: {
+			...getAlignStyle( align ),
 			...borderProps.style,
 		},
 		className: classnames(
@@ -67,7 +68,6 @@ export const Save = ( props: {
 	return (
 		<div
 			{ ...blockProps }
-			style={ { ...getAlignStyle( align ) } }
 			dangerouslySetInnerHTML={
 				href ? undefined : getSVG( props.attributes )
 			}
