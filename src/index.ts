@@ -6,7 +6,7 @@ import { BlockAttributes, registerBlockType } from '@wordpress/blocks';
 /**
  * Plugin dependencies
  */
-import { svgIcon as icon } from './utils/icons';
+import { svgIcon as icon } from './components/icons';
 import { Edit } from './edit';
 import { Save } from './save';
 import deprecated from './deprecated';

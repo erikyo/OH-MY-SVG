@@ -1,16 +1,13 @@
-import SVG from './Svg';
+import SvgEl from './components/SvgEl';
 import classnames from 'classnames';
 
 import {
-	useBlockProps,
-	// @ts-ignore
 	__experimentalGetBorderClassesAndStyles as getBorderClassesAndStyles,
+	useBlockProps,
 } from '@wordpress/block-editor';
-import { hasAlign } from './utils/fn';
-import { SvgAttributesDef, SvgAttributesSave } from './types';
-import { NEW_TAB_REL } from './constants';
+import { SvgAttributesSave } from './types';
+import { NEW_TAB_REL } from './utils/constants';
 import { getAlignStyle } from './utils/presets';
-import getSVG from './Svg';
 
 /**
  * @module Save
@@ -24,18 +21,8 @@ import getSVG from './Svg';
 export const Save = ( props: {
 	attributes: SvgAttributesSave;
 } ): JSX.Element => {
-	const {
-		svg,
-		href,
-		linkTarget,
-		width,
-		height,
-		title,
-		rotation,
-		align,
-		onclick,
-		style,
-	} = props.attributes;
+	const { href, linkTarget, width, height, title, rotation, align } =
+		props.attributes;
 
 	const borderProps = getBorderClassesAndStyles( props.attributes );
 	const blockProps = useBlockProps.save( {
@@ -43,45 +30,31 @@ export const Save = ( props: {
 			...getAlignStyle( align ),
 			...borderProps.style,
 		},
-		className: classnames(
+		classNames: classnames(
 			align ? `align${ align }` : 'alignnone',
 			borderProps.className
 		),
 	} );
 
-	const SvgTag = () => (
-		<svg
-			dangerouslySetInnerHTML={ getSVG( props.attributes ) }
-			width={ ! hasAlign( align, [ 'full', 'wide' ] ) ? width : '100%' }
-			height={ ! hasAlign( align, [ 'full', 'wide' ] ) ? height : null }
-			style={ {
-				...getAlignStyle( align ),
-				margin: hasAlign( align, 'center' ) ? 'auto' : null,
-				transform:
-					Number( rotation ) !== 0
-						? `rotate( ${ rotation }deg )`
-						: null,
-			} }
-		/>
-	);
+	if ( ! href ) {
+		return (
+			<div
+				{ ...blockProps }
+				dangerouslySetInnerHTML={ SvgEl( props.attributes ) }
+			/>
+		);
+	}
 
 	return (
-		<div
-			{ ...blockProps }
-			dangerouslySetInnerHTML={
-				href ? undefined : getSVG( props.attributes )
-			}
-		>
-			{ href ? (
-				<a
-					href={ href }
-					target={ linkTarget }
-					rel={ linkTarget ? NEW_TAB_REL : null }
-					title={ title ?? null }
-					onclick={ onclick }
-					dangerouslySetInnerHTML={ getSVG( props.attributes ) }
-				/>
-			) : null }
+		<div { ...blockProps }>
+			<a
+				href={ href }
+				target={ linkTarget }
+				rel={ linkTarget ? NEW_TAB_REL : null }
+				aria-label={ title }
+				title={ title ?? null }
+				dangerouslySetInnerHTML={ SvgEl( props.attributes ) }
+			/>
 		</div>
 	);
 };
