@@ -1,0 +1,263 @@
+import {
+	Button,
+	ColorPalette,
+	Panel,
+	PanelBody,
+	PanelRow,
+	RangeControl,
+	SelectControl,
+	TextareaControl,
+	TextControl,
+	ToggleControl,
+} from '@wordpress/components';
+import { __experimentalImageSizeControl as ImageSizeControl } from '@wordpress/block-editor';
+import { SvgSizeDef } from '../types';
+import { __ } from '@wordpress/i18n';
+import { relOptions, rotationRangePresets } from '../utils/presets';
+import { SvgoStats } from './SvgoStats';
+import {
+	optimizeSvg,
+	svgAddPathStroke,
+	svgRemoveFill,
+	updateColor,
+} from '../utils/svgTools';
+import {useEffect, useMemo, useState} from '@wordpress/element';
+
+function SvgPanel( {
+	attributes,
+	setAttributes,
+	colors,
+	originalSize,
+} ): JSX.Element {
+	const {
+		width,
+		height,
+		rotation,
+		originalSvg,
+		svg,
+		href,
+		rel,
+		title,
+		linkTarget,
+	} = attributes;
+	const [ currentColor, setColor ] = useState< string >( '' );
+	const [ pathStrokeWith, setPathStrokeWith ] = useState< number >( 1.0 );
+
+	/* Setting the first color detected as the default color. */
+	useEffect( () => {
+		if ( colors.length > 0 )
+			setColor( colors?.length ? colors[ 0 ].color : '' );
+	}, [] );
+
+	return (
+		<Panel>
+			<PanelBody title="Settings">
+				<ImageSizeControl
+					width={ width }
+					height={ height }
+					imageWidth={ originalSize?.width || 0 }
+					imageHeight={ originalSize?.height || 0 }
+					onChange={ ( e: SvgSizeDef ) => {
+						setAttributes( {
+							width: e.width,
+							height: e.height,
+						} );
+					} }
+				/>
+
+				<RangeControl
+					// @ts-ignore
+					__nextHasNoMarginBottom
+					label={ __( 'Rotation' ) }
+					value={ rotation || 0 }
+					min={ -180 }
+					max={ 180 }
+					marks={ rotationRangePresets }
+					step={ 1 }
+					onChange={ ( ev ) => {
+						setAttributes( {
+							rotation: Number( ev ),
+						} );
+					} }
+				/>
+			</PanelBody>
+
+			<PanelBody title="Optimization">
+				<PanelRow>
+					<p>
+						SVGO{ ' ' }
+						<SvgoStats
+							original={ originalSvg }
+							compressed={ svg }
+						/>
+					</p>
+					<Button
+						isSmall={ true }
+						variant={ 'primary' }
+						onClick={ async () => {
+							optimizeSvg( svg ).then(
+								( optimizedSvg: string ) => {
+									setAttributes( {
+										optimizedSvg,
+									} );
+								}
+							);
+						} }
+					>
+						{ __( 'Optimize' ) }
+					</Button>
+				</PanelRow>
+
+				<PanelRow>
+					<p>{ __( 'Restore Original' ) }</p>
+					<Button
+						disabled={ ! originalSvg }
+						isSmall={ true }
+						variant={ 'secondary' }
+						onClick={ () => {
+							setAttributes( {
+								svg: originalSvg,
+							} );
+						} }
+					>
+						{ __( 'Reset' ) }
+					</Button>
+				</PanelRow>
+
+				<hr />
+
+				<TextareaControl
+					label={ __( 'SVG Markup Editor' ) }
+					value={ svg || '' }
+					onChange={ ( newSvg ) => {
+						setAttributes( { svg: newSvg } );
+					} }
+				/>
+			</PanelBody>
+
+			<PanelBody title={ 'Tools' } initialOpen={ false }>
+				<PanelRow>
+					<p>{ __( 'Fill' ) }</p>
+					<Button
+						isSmall={ true }
+						variant={ 'primary' }
+						onClick={ () =>
+							setAttributes( {
+								svg: svgRemoveFill( svg ),
+							} )
+						}
+					>
+						{ __( 'Remove Fill' ) }
+					</Button>
+				</PanelRow>
+
+				<PanelRow>
+					<p>{ __( 'Outline' ) }</p>
+					<Button
+						isSmall={ true }
+						variant={ 'primary' }
+						onClick={ () =>
+							setAttributes( {
+								svg: svgAddPathStroke( {
+									svgMarkup: svg,
+									pathStrokeWith,
+									pathStrokeColor: currentColor || undefined,
+								} ),
+							} )
+						}
+					>
+						{ __( 'Add Stroke' ) }
+					</Button>
+				</PanelRow>
+
+				<RangeControl
+					label={ 'Stroke Size' }
+					value={ pathStrokeWith }
+					onChange={ ( e ) =>
+						typeof e === 'number' ? setPathStrokeWith( e ) : null
+					}
+					min={ 0 }
+					max={ 20 }
+					step={ 0.1 }
+				/>
+			</PanelBody>
+
+			<PanelBody title="Editor">
+				<h2 className={ 'block-editor-image-size-control__row' }>
+					SVG Colors
+				</h2>
+
+				<ColorPalette
+					enableAlpha={ true }
+					clearable={ false }
+					colors={ colors }
+					value={ currentColor }
+					onSelect={ ( newColor ) => setColor( newColor ) }
+					onChange={ ( newColor ) => {
+						if ( newColor ) {
+							if (
+								! colors
+									.map( ( c ) => c.color )
+									.includes( newColor )
+							) {
+								const newSvg = updateColor(
+									svg,
+									newColor,
+									currentColor
+								);
+								setAttributes( {
+									svg: newSvg,
+								} );
+							}
+							setColor( newColor );
+						}
+					} }
+				/>
+			</PanelBody>
+
+			<PanelBody title="Seo">
+				<SelectControl
+					label={ __( 'Rel target' ) }
+					help={ __(
+						'The rel attribute defines the relationship between a linked resource and the current document.'
+					) }
+					options={ relOptions }
+					value={ rel ?? 'icon' }
+					onChange={ ( newRel ) => setAttributes( { rel: newRel } ) }
+				/>
+				<TextControl
+					label={ __( 'Svg title' ) }
+					help={ __(
+						'Notice: This inline style will override any other inline style generated by Gutenberg.'
+					) }
+					value={ title }
+					onChange={ ( newTitle ) =>
+						setAttributes( { title: newTitle } )
+					}
+				/>
+				<TextControl
+					label={ __( 'Svg link' ) }
+					help={ __(
+						'Notice: This inline style will override any other inline style generated by Gutenberg.'
+					) }
+					value={ href }
+					onChange={ ( newTitle ) =>
+						setAttributes( { href: newTitle } )
+					}
+				/>
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label={ __( 'Open in new tab' ) }
+					onChange={ ( value ) =>
+						setAttributes( {
+							linkTarget: value ? '_blank' : '_self',
+						} )
+					}
+					checked={ linkTarget === '_blank' }
+				/>
+			</PanelBody>
+		</Panel>
+	);
+}
+
+export default SvgPanel;
