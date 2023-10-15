@@ -1,6 +1,4 @@
-import SVG from '../Svg';
-import { svgIcon } from './icons';
-import { humanFileSize } from './common';
+import { humanFileSize } from '../utils/common';
 
 /* A function that returns a JSX element that displays the difference of size between the old and the new image. */
 export const SvgoStats = ( {
@@ -31,5 +29,3 @@ export const SvgoStats = ( {
 		</i>
 	);
 };
-
-export const mediaPreview = () => svgIcon;
