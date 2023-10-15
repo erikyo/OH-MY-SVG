@@ -5,31 +5,35 @@
 	"attributes": {
 		"svg": {
 			"type": "string",
-			"default": ""
-		},
+            "source": "html",
+            "selector": ".wp-block-codekraft-oh-my-svg"
+        },
 		"originalSvg": {
 			"type": "string",
-			"default": false
-		},
+            "source": "html",
+            "selector": ".wp-block-codekraft-oh-my-svg"
+        },
 		"href": {
 			"type": "string"
 		},
-		"linkTarget": {
+		"alt": {
 			"type": "string"
+		},
+		"rel": {
+			"type": "string"
+		},
+		"linkTarget": {
+			"type": "string",
+            "default": "_self"
 		},
 		"title": {
 			"type": "string"
 		},
-		"onclick": {
-			"type": "string"
-		},
 		"height": {
-			"type": "number",
-			"default": false
+			"type": "number"
 		},
 		"width": {
-			"type": "number",
-			"default": false
+			"type": "number"
 		},
 		"rotation": {
 			"type": "number",
@@ -62,6 +66,12 @@
 				"radius": true
 			}
 		},
+        "selectors": {
+          "border": "svg",
+          "filter": {
+            "duotone": "svg"
+          }
+        },
 		"spacing": {
 			"margin": true,
 			"padding": true,
