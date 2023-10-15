@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"target": "ES6",
+		"target": "ES2021",
 		"module": "esnext",
 		"jsx": "react-jsx",
 		"moduleResolution": "node",
