@@ -66,12 +66,6 @@
 				"radius": true
 			}
 		},
-        "selectors": {
-          "border": "svg",
-          "filter": {
-            "duotone": "svg"
-          }
-        },
 		"spacing": {
 			"margin": true,
 			"padding": true,
@@ -82,11 +76,12 @@
 			"display": "table"
 		}
 	},
-	"selectors": {
-		"filter": {
-			"duotone": ".wp-block-codekraft-oh-my-svg svg"
-		}
-	},
+    "selectors": {
+      "border": ".wp-block-codekraft-oh-my-svg svg, .wp-block-codekraft-oh-my-svg .components-placeholder",
+      "filter": {
+        "duotone": ".wp-block-codekraft-oh-my-svg svg, .wp-block-codekraft-oh-my-svg .components-placeholder"
+      }
+    },
 	"category": "media",
 	"editorScript": "file:./build/oh-my-svg-editor.js"
 }

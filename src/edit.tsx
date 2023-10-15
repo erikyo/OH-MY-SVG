@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from '@wordpress/element';
-import { ResizableBox } from '@wordpress/components';
+import { ResizableBox, SVG } from '@wordpress/components';
 import {
 	__experimentalUseBorderProps as useBorderProps,
 	InspectorControls,
@@ -9,7 +9,6 @@ import {
 } from '@wordpress/block-editor';
 
 import { __ } from '@wordpress/i18n';
-import SvgEl from './components/SvgEl';
 import {
 	collectColors,
 	getSvgSize,
@@ -25,6 +24,7 @@ import { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
 import SvgPanel from './components/SvgPanel';
 import SvgControls from './components/SvgControls';
 import SvgPlaceholder from './components/SvgPlaceholder';
+import OHMYSVG from './components/SVG';
 
 /**
  * @module Edit
@@ -49,11 +49,11 @@ export const Edit = (
 	 *
 	 * Create a refs for the input element created with the render method
 	 */
-	const ref = useRef( null );
+	const svgRef = useRef( null );
 
 	const [ maxWidth, setMaxWidth ] = useState( undefined );
 
-	let [ colors, setColors ] = useState< [] | SvgColorDef[] >( [] );
+	const [ colors, setColors ] = useState< [] | SvgColorDef[] >( [] );
 	const [ originalSize, setOriginalSize ] = useState< SvgSizeDef >( {
 		width: 0,
 		height: 0,
@@ -61,7 +61,6 @@ export const Edit = (
 
 	/* the block editor sizes */
 	const defaultLayout = useSetting( 'layout' ) || {};
-	let contentWidth;
 
 	/* Emit notices */
 	const { createErrorNotice } = useDispatch( noticesStore );
@@ -76,23 +75,44 @@ export const Edit = (
 	}, [ svg ] );
 
 	/**
+	 * Returns the maximum content width based on the alignment.
+	 *
+	 * @return {number|undefined} The maximum content width. Returns `defaultLayout.contentSize` if `align` is undefined,
+	 * `defaultLayout.wideSize` if `align` is 'wide', and `undefined` otherwise.
+	 */
+	function contentMaxWidth() {
+		if ( typeof align === 'undefined' ) {
+			return defaultLayout.contentSize;
+		} else if ( align === 'wide' ) {
+			return defaultLayout.wideSize;
+		}
+		return undefined;
+	}
+
+	/**
 	 * Whenever the alignment is changed set the max width of the current block
 	 *
 	 * @type {useEffect}
 	 */
 	useEffect( () => {
-		if ( align ) {
-			function contentMaxWidth() {
-				if ( align?.includes( 'wide' ) ) {
-					return defaultLayout.wideSize;
-				}
-				return undefined;
-			}
-			if ( ! isSelected ) return;
-			// if the element has a width and height set the new width
-			if ( ! height && ! width ) getSvgBoundingBox( ref.current );
-			// set the max width
-			setMaxWidth( contentMaxWidth() );
+		if ( ! isSelected ) return;
+		// if the element has a width and height set the new width
+		const svgbbox = getSvgBoundingBox( svgRef.current );
+		if ( ! height || ! width ) {
+			setAttributes( { width: svgbbox.width, height: svgbbox.height } );
+			return;
+		}
+		// get the max width of the content
+		const maxWidth = contentMaxWidth();
+		if ( maxWidth ) {
+			setAttributes( calcSvgResize( maxWidth ) );
+			setMaxWidth( maxWidth );
+		} else {
+			setAttributes( {
+				width: width || svgbbox.width,
+				height: height || svgbbox.height,
+			} );
+			setMaxWidth( undefined );
 		}
 	}, [ align ] );
 
@@ -104,7 +124,7 @@ export const Edit = (
 	useEffect( () => {
 		// on load collect colors
 		if ( svg ) {
-			colors = collectColors( svg );
+			setColors( collectColors( svg ) );
 
 			const size: SvgSizeDef = getSvgSize( svg );
 			setOriginalSize( size );
@@ -122,10 +142,10 @@ export const Edit = (
 	 */
 	const getSvgBoundingBox = ( el: HTMLElement ) => {
 		const rect = el.getBoundingClientRect();
-		setAttributes( {
+		return {
 			width: rect.width,
 			height: rect.height,
-		} );
+		};
 	};
 
 	/**
@@ -165,14 +185,17 @@ export const Edit = (
 	/**
 	 * Calculates the size of the SVG image after resizing.
 	 *
-	 * @param {string} newSvg   - The SVG image to be resized.
 	 * @param {number} viewSize - The desired size of the SVG image.
 	 * @return {Object} An object containing the width and height of the resized SVG image.
 	 */
-	function calcSvgResize( newSvg, viewSize ) {
+	function calcSvgResize( viewSize ) {
 		return {
-			width: Number( viewSize ),
-			height: scaleProportionally( width, height, Number( viewSize ) ),
+			width: parseInt( viewSize, 10 ),
+			height: scaleProportionally(
+				width,
+				height,
+				parseInt( viewSize, 10 )
+			),
 		};
 	}
 
@@ -189,7 +212,7 @@ export const Edit = (
 		/* if the svg with is bigger than the content width rescale it */
 		const size =
 			newSvg.width >= Number( defaultLayout.contentSize )
-				? calcSvgResize( newSvg, defaultLayout.contentSize )
+				? calcSvgResize( defaultLayout.contentSize )
 				: newSvgSize;
 
 		setAttributes( {
@@ -200,14 +223,7 @@ export const Edit = (
 	}
 
 	const borderProps = useBorderProps( attributes );
-	const blockProps = useBlockProps( {
-		className: borderProps.className,
-		style: {
-			width: hasAlign( align, [ 'full', 'wide' ] ) ? '100%' : width,
-			height: hasAlign( align, [ 'full', 'wide' ] ) ? 'auto' : height,
-		},
-		ref,
-	} );
+	const blockProps = useBlockProps();
 
 	return (
 		<div { ...blockProps }>
@@ -227,14 +243,22 @@ export const Edit = (
 				isSelected={ isSelected }
 				setAttributes={ setAttributes }
 				updateSvg={ updateSvg }
-				SvgRef={ ref }
+				SvgRef={ svgRef }
 			/>
 
-			{ svg && isSelected ? (
+			{ svg && isSelected && ! hasAlign( align, [ 'full', 'wide' ] ) ? (
 				<ResizableBox
 					size={ {
 						width,
 						height,
+					} }
+					style={ {
+						marginLeft: hasAlign( attributes.align, [ 'center' ] )
+							? 'auto'
+							: null,
+						marginRight: hasAlign( attributes.align, [ 'center' ] )
+							? 'auto'
+							: null,
 					} }
 					showHandle={ isSelected && align !== 'full' }
 					minHeight={ 8 }
@@ -262,12 +286,18 @@ export const Edit = (
 						toggleSelection( false );
 					} }
 				>
-					<div
-						dangerouslySetInnerHTML={ SvgEl( props.attributes ) }
+					<OHMYSVG
+						attributes={ props.attributes }
+						borderProps={ borderProps }
+						svgRef={ svgRef }
 					/>
 				</ResizableBox>
 			) : (
-				<div dangerouslySetInnerHTML={ SvgEl( props.attributes ) } />
+				<OHMYSVG
+					attributes={ props.attributes }
+					borderProps={ borderProps }
+					svgRef={ svgRef }
+				/>
 			) }
 
 			{ ! svg && (

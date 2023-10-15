@@ -337,11 +337,11 @@ export function hasAlign(
  * @return {number} the second value (the height of the image, the width is the limit size)
  */
 export function scaleProportionally(
-	first: number | string,
-	second: number | string,
-	limit: number | string
+	first: number,
+	second: number,
+	limit: number
 ): number {
-	return ( Number( limit ) / Number( first ) ) * Number( second );
+	return Math.round( ( limit / first ) * second );
 }
 
 /**

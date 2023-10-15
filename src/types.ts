@@ -2,8 +2,8 @@
 export interface SvgAttributesDef {
 	svg: string;
 	href?: string;
-	width: number | string;
-	height: number | string;
+	width: number;
+	height: number;
 	rotation?: number;
 	align?: string;
 	style?: {};

@@ -13,7 +13,6 @@ import { __ } from '@wordpress/i18n';
 import { ALLOWED_MEDIA_TYPES, NEW_TAB_REL } from '../utils/constants';
 import { readSvg } from '../utils/svgTools';
 import {
-	memo,
 	useCallback,
 	useEffect,
 	useMemo,
@@ -174,7 +173,7 @@ function SvgControls( {
 				</BlockControls>
 			) }
 
-			{ isEditingURL && (
+			{ isEditingURL && svg && (
 				<Popover
 					position="top"
 					anchor={ SvgRef.current }
