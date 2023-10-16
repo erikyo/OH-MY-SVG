@@ -29,13 +29,11 @@ const placeholder = (
 			) }
 			onChange={ ( ev ) => {
 				if ( ev.target.files?.length )
-					readAndUpdateSvg( ev.target.files[ 0 ], updateSvgCallback );
+					readAndUpdateSvg( ev.target.files[ 0 ] );
 			} }
 		>
 			<DropZone
-				onFilesDrop={ ( files ) =>
-					readAndUpdateSvg( files[ 0 ], updateSvgCallback )
-				}
+				onFilesDrop={ ( files ) => readAndUpdateSvg( files[ 0 ] ) }
 			/>
 			<div
 				style={ {

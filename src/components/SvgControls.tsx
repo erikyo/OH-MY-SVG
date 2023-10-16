@@ -12,12 +12,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import { ALLOWED_MEDIA_TYPES, NEW_TAB_REL } from '../utils/constants';
 import { readSvg } from '../utils/svgTools';
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useState,
-} from '@wordpress/element';
+import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 
 /**
  * A component that renders SVG controls.
@@ -197,6 +192,7 @@ function SvgControls( {
 								alt: newAlt = '',
 								rel: newRel = '',
 								title: newTitle = '',
+								linkTarget: linkTarget = '',
 							} = nextValue;
 
 							setAttributes( {

@@ -352,3 +352,16 @@ export function scaleProportionally(
 export const onSvgReadError = ( err: string ): Error => {
 	throw new Error( 'Failed to read the given file' + err );
 };
+
+/**
+ * Get the bounding box of an SVG element.
+ *
+ * @param {HTMLElement} el - The SVG element.
+ */
+export const getSvgBoundingBox = ( el: HTMLElement ) => {
+	const rect = el.getBoundingClientRect();
+	return {
+		width: rect.width,
+		height: rect.height,
+	};
+};
