@@ -11,6 +11,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import {
 	collectColors,
+	getSvgBoundingBox,
 	getSvgSize,
 	hasAlign,
 	loadSvg,
@@ -136,19 +137,6 @@ export const Edit = (
 	}, [] );
 
 	/**
-	 * Get the bounding box of an SVG element.
-	 *
-	 * @param {HTMLElement} el - The SVG element.
-	 */
-	const getSvgBoundingBox = ( el: HTMLElement ) => {
-		const rect = el.getBoundingClientRect();
-		return {
-			width: rect.width,
-			height: rect.height,
-		};
-	};
-
-	/**
 	 * Since the updateSvg function is shared we can set attributes with the result of the updateSvg function
 	 *
 	 * @param result
@@ -173,11 +161,19 @@ export const Edit = (
 	 * @param {Function}         updateSvgCallback - The callback function to update the SVG.
 	 * @return {void}
 	 */
-	function readAndUpdateSvg( newFile: File | undefined, updateSvgCallback ) {
+	function readAndUpdateSvg( newFile: File | undefined ) {
 		if ( ! newFile ) return;
-		readSvg( newFile ).then( ( newSvg ) => {
-			if ( newSvg !== null ) {
-				updateSvgCallback( newSvg, newFile );
+		readSvg( newFile ).then( ( newSvg: string ) => {
+			if ( newFile !== null ) {
+				const svgDecoded = loadSvg( {
+					newSvg,
+					fileData: newFile || undefined,
+					oldSvg: attributes,
+				} );
+
+				return svgDecoded
+					? updateSvgData( svgDecoded )
+					: createErrorNotice( __( '😓 cannot update!' ) );
 			}
 		} );
 	}
@@ -260,7 +256,6 @@ export const Edit = (
 							? 'auto'
 							: null,
 					} }
-					showHandle={ isSelected && align !== 'full' }
 					minHeight={ 8 }
 					minWidth={ 8 }
 					maxWidth={ maxWidth }

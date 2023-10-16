@@ -29,7 +29,6 @@ export const Save = ( props: {
 				<OHMYSVG
 					attributes={ props.attributes }
 					borderProps={ borderProps }
-					tag={ !! href ? 'a' : 'div' }
 				/>
 			</div>
 		);
