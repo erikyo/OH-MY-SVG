@@ -100,7 +100,12 @@ export const Edit = (
 		// if the element has a width and height set the new width
 		const svgbbox = getSvgBoundingBox( svgRef.current );
 		if ( ! height || ! width ) {
-			setAttributes( { width: svgbbox.width, height: svgbbox.height } );
+			if ( svgbbox ) {
+				setAttributes( {
+					width: svgbbox.width,
+					height: svgbbox.height,
+				} );
+			}
 			return;
 		}
 		// get the max width of the content

@@ -100,14 +100,13 @@ function SvgControls( {
 			linkTarget: undefined,
 			rel: undefined,
 			title: undefined,
-			opensInNewTab: false,
 		} );
 		setIsEditingURL( false );
 	};
 
 	const onToggleOpenInNewTab = useCallback(
 		( value ) => {
-			const newLinkTarget = value ? '_blank' : undefined;
+			const newLinkTarget = value ? '_blank' : '_self';
 
 			let updatedRel = rel;
 			if ( newLinkTarget && ! rel ) {
@@ -192,7 +191,6 @@ function SvgControls( {
 								alt: newAlt = '',
 								rel: newRel = '',
 								title: newTitle = '',
-								linkTarget: linkTarget = '',
 							} = nextValue;
 
 							setAttributes( {

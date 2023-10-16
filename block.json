@@ -6,12 +6,12 @@
 		"svg": {
 			"type": "string",
             "source": "html",
-            "selector": ".wp-block-codekraft-oh-my-svg"
+            "selector": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper"
         },
 		"originalSvg": {
 			"type": "string",
             "source": "html",
-            "selector": ".wp-block-codekraft-oh-my-svg"
+            "selector": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper"
         },
 		"href": {
 			"type": "string"
@@ -72,14 +72,13 @@
 			"blockGap": true
 		},
 		"default": {
-			"align": "none",
-			"display": "table"
+			"align": "none"
 		}
 	},
     "selectors": {
-      "border": ".wp-block-codekraft-oh-my-svg svg, .wp-block-codekraft-oh-my-svg .components-placeholder",
+      "border": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper, .wp-block-codekraft-oh-my-svg .components-placeholder",
       "filter": {
-        "duotone": ".wp-block-codekraft-oh-my-svg svg, .wp-block-codekraft-oh-my-svg .components-placeholder"
+        "duotone": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper, .wp-block-codekraft-oh-my-svg .components-placeholder"
       }
     },
 	"category": "media",

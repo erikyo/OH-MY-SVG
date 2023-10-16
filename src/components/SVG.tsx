@@ -90,6 +90,7 @@ function OHMYSVG( {
 	return (
 		<a
 			{ ...wrapperProps }
+			ref={ svgRef }
 			href={ href }
 			target={ linkTarget }
 			rel={ linkTarget ? NEW_TAB_REL : null }
