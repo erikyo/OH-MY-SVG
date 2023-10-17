@@ -1,6 +1,8 @@
 import {
+	__experimentalUnitControl as UnitControl,
 	Button,
 	ColorPalette,
+	IconButton,
 	Panel,
 	PanelBody,
 	PanelRow,
@@ -8,10 +10,7 @@ import {
 	SelectControl,
 	TextareaControl,
 	TextControl,
-	ToggleControl,
 } from '@wordpress/components';
-import { __experimentalImageSizeControl as ImageSizeControl } from '@wordpress/block-editor';
-import { SvgSizeDef } from '../types';
 import { __ } from '@wordpress/i18n';
 import { relOptions, rotationRangePresets } from '../utils/presets';
 import { SvgoStats } from './SvgoStats';
@@ -21,25 +20,15 @@ import {
 	svgRemoveFill,
 	updateColor,
 } from '../utils/svgTools';
-import {useEffect, useMemo, useState} from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 
 function SvgPanel( {
 	attributes,
 	setAttributes,
 	colors,
-	originalSize,
+	originalSvg,
 } ): JSX.Element {
-	const {
-		width,
-		height,
-		rotation,
-		originalSvg,
-		svg,
-		href,
-		rel,
-		title,
-		linkTarget,
-	} = attributes;
+	const { width, height, rotation, svg, rel, title } = attributes;
 	const [ currentColor, setColor ] = useState< string >( '' );
 	const [ pathStrokeWith, setPathStrokeWith ] = useState< number >( 1.0 );
 
@@ -52,18 +41,50 @@ function SvgPanel( {
 	return (
 		<Panel>
 			<PanelBody title="Settings">
-				<ImageSizeControl
-					width={ width }
-					height={ height }
-					imageWidth={ originalSize?.width || 0 }
-					imageHeight={ originalSize?.height || 0 }
-					onChange={ ( e: SvgSizeDef ) => {
-						setAttributes( {
-							width: e.width,
-							height: e.height,
-						} );
+				<div
+					style={ {
+						display: 'flex',
+						gap: '10px',
+						alignItems: 'start',
 					} }
-				/>
+				>
+					<UnitControl
+						isPressEnterToChange
+						label={ __( 'Width' ) }
+						value={ width }
+						units={ [
+							{
+								a11yLabel: 'Pixels (px)',
+								label: 'px',
+								step: 1,
+								value: 'px',
+							},
+						] }
+						onChange={ ( newValue ) => {
+							setAttributes( {
+								width: parseInt( newValue, 10 ),
+							} );
+						} }
+					/>
+					<UnitControl
+						isPressEnterToChange
+						label={ __( 'Height' ) }
+						value={ height }
+						units={ [
+							{
+								a11yLabel: 'Pixels (px)',
+								label: 'px',
+								step: 1,
+								value: 'px',
+							},
+						] }
+						onChange={ ( newValue ) => {
+							setAttributes( {
+								height: parseInt( newValue, 10 ),
+							} );
+						} }
+					/>
+				</div>
 
 				<RangeControl
 					// @ts-ignore
