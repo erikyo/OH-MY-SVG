@@ -286,6 +286,13 @@ export const convertSvgToBitmap = async ( {
 	width = 100,
 	format = 'webp',
 	quality = 0.8,
+}: {
+	svgBase64?: string;
+	sizeRatio?: number;
+	height?: number;
+	width?: number;
+	format?: string;
+	quality?: number;
 } ): Promise< string > => {
 	// Create an image element from the SVG markup
 	const img = new window.Image();
@@ -358,7 +365,7 @@ export const onSvgReadError = ( err: string ): Error => {
  *
  * @param {HTMLElement} el - The SVG element.
  */
-export const getSvgBoundingBox = ( el: HTMLElement ) => {
+export const getSvgBoundingBox = ( el: HTMLElement ): SvgSizeDef => {
 	const rect = el.getBoundingClientRect();
 	return {
 		width: rect.width,
@@ -369,14 +376,22 @@ export const getSvgBoundingBox = ( el: HTMLElement ) => {
 /**
  * Returns the maximum content width based on the alignment.
  *
+ * @param  align                     The alignment to check for
+ * @param  defaultLayout             The default layout value
+ * @param  defaultLayout.contentSize The content size
+ * @param  defaultLayout.wideSize    The wide size
+ *
  * @return {number|undefined} The maximum content width. Returns `defaultLayout.contentSize` if `align` is undefined,
  * `defaultLayout.wideSize` if `align` is 'wide', and `undefined` otherwise.
  */
-export function contentMaxWidth( align, defaultLayout ) {
-    if ( typeof align === 'undefined' ) {
-        return defaultLayout.contentSize;
-    } else if ( align === 'wide' ) {
-        return defaultLayout.wideSize;
-    }
-    return undefined;
+export function contentMaxWidth(
+	align: string | undefined,
+	defaultLayout: { contentSize?: number; wideSize?: number }
+): number | undefined {
+	if ( typeof align === 'undefined' ) {
+		return defaultLayout.contentSize;
+	} else if ( align === 'wide' ) {
+		return defaultLayout.wideSize;
+	}
+	return undefined;
 }
