@@ -27,6 +27,7 @@ import SvgPanel from './components/SvgPanel';
 import SvgControls from './components/SvgControls';
 import SvgPlaceholder from './components/SvgPlaceholder';
 import OHMYSVG from './components/SVG';
+import { isKeyboardEvent } from '@wordpress/keycodes';
 
 /**
  * @module Edit
@@ -56,10 +57,6 @@ export const Edit = (
 	const [ originalSvg, setOriginalSvg ] = useState< string | null >( null );
 
 	const [ colors, setColors ] = useState< [] | SvgColorDef[] >( [] );
-	const [ originalSize, setOriginalSize ] = useState< SvgSizeDef >( {
-		width: 0,
-		height: 0,
-	} );
 
 	/** The block editor sizes */
 	const defaultLayout = useSetting( 'layout' ) || {};
@@ -129,8 +126,6 @@ export const Edit = (
 			height: newSvg.height,
 		};
 
-		setOriginalSize( newSvgSize );
-
 		/* if the svg with is bigger than the content width rescale it */
 		const size =
 			newSvg.width >= Number( defaultLayout.contentSize )
@@ -150,7 +145,6 @@ export const Edit = (
 	 * @type {useEffect}
 	 */
 	useEffect( () => {
-		setOriginalSvg( svg );
 		setColors( collectColors( svg ) );
 	}, [ svg ] );
 
@@ -199,7 +193,6 @@ export const Edit = (
 			setColors( collectColors( svg ) );
 
 			const size: SvgSizeDef = getSvgSize( svg );
-			setOriginalSize( size );
 
 			setAttributes( {
 				originalSvg: originalSvg || svg,
@@ -218,7 +211,7 @@ export const Edit = (
 						colors={ colors }
 						attributes={ attributes }
 						setAttributes={ setAttributes }
-                        originalSvg={ originalSvg }
+						originalSvg={ originalSvg }
 					/>
 				</InspectorControls>
 			) }

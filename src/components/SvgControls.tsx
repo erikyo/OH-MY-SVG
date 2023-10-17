@@ -70,15 +70,6 @@ function SvgControls( {
 		}
 	}, [ isSelected ] );
 
-	function onKeyDown( event ) {
-		if ( isKeyboardEvent.primary( event, 'k' ) ) {
-			setIsEditingURL( event );
-		} else if ( isKeyboardEvent.primaryShift( event, 'k' ) ) {
-			unlinkItem();
-			SvgRef.current?.focus();
-		}
-	}
-
 	/**
 	 * It sets the attributes of the block to undefined, and then sets the state of the block to not editing the URL
 	 */
@@ -101,14 +92,12 @@ function SvgControls( {
 							icon="admin-links"
 							title={ __( 'Edit Link' ) }
 							onClick={ openLinkControl }
-							shortcut={ displayShortcut.primary( 'k' ) }
 							isActive={ isURLSet }
 						/>
 						<ToolbarButton
 							icon="editor-unlink"
 							title={ __( 'Unlink' ) }
 							onClick={ unlinkItem }
-							shortcut={ displayShortcut.primary( 'k' ) }
 							isDisabled={ ! isURLSet }
 						/>
 					</ToolbarGroup>

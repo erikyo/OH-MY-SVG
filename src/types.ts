@@ -5,17 +5,16 @@ export interface SvgAttributesDef {
 	width: number;
 	height: number;
 	rotation?: number;
-	align?: string;
 	style?: {};
 	linkTarget?: string;
+	title?: string;
+	rel?: string;
 }
 
 /** the svg component prop */
 export interface SvgAttributesEditor extends SvgAttributesDef {
-	originalSvg?: {}; // the original Svg before changes
-	rel?: string; // stores whether the link opens into a new window
+	ref?: React.RefObject< HTMLDivElement | HTMLAnchorElement >; // stores whether the link opens into a new window
 	fileData?: SvgFileDef;
-	alt?: string;
 }
 
 /** the svg component prop */

@@ -21,12 +21,18 @@ import {
 	updateColor,
 } from '../utils/svgTools';
 import { useEffect, useState } from '@wordpress/element';
+import { SvgAttributesDef, SvgColorDef } from '../types';
 
 function SvgPanel( {
 	attributes,
 	setAttributes,
 	colors,
 	originalSvg,
+}: {
+	attributes: SvgAttributesDef;
+	setAttributes: ( attributes: any ) => void;
+	colors: SvgColorDef[];
+	originalSvg: string;
 } ): JSX.Element {
 	const { width, height, rotation, svg, rel, title } = attributes;
 	const [ currentColor, setColor ] = useState< string >( '' );
@@ -213,9 +219,9 @@ function SvgPanel( {
 					clearable={ false }
 					colors={ colors }
 					value={ currentColor }
-					onSelect={ ( newColor ) => setColor( newColor ) }
 					onChange={ ( newColor ) => {
 						if ( newColor ) {
+							// check if the color is already in the list
 							if (
 								! colors
 									.map( ( c ) => c.color )
@@ -230,6 +236,7 @@ function SvgPanel( {
 									svg: newSvg,
 								} );
 							}
+							// store the new color
 							setColor( newColor );
 						}
 					} }
