@@ -40,7 +40,7 @@ export const Edit = (
 	props: BlockEditProps< BlockAttributes >
 ): JSX.Element => {
 	const { attributes, setAttributes, isSelected } = props;
-	const { align, height, width, href, svg, originalSvg } =
+	const { align, height, width, href, svg } =
 		attributes as SvgAttributesEditor;
 
 	/**
@@ -49,9 +49,11 @@ export const Edit = (
 	 *
 	 * Create a refs for the input element created with the render method
 	 */
-	const svgRef = useRef( null );
+	const svgRef = useRef< HTMLDivElement | HTMLAnchorElement | null >( null );
 
 	const [ maxWidth, setMaxWidth ] = useState( undefined );
+
+	const [ originalSvg, setOriginalSvg ] = useState< string | null >( null );
 
 	const [ colors, setColors ] = useState< [] | SvgColorDef[] >( [] );
 	const [ originalSize, setOriginalSize ] = useState< SvgSizeDef >( {
@@ -105,7 +107,7 @@ export const Edit = (
 	 * @param {number} viewSize - The desired size of the SVG image.
 	 * @return {Object} An object containing the width and height of the resized SVG image.
 	 */
-	function calcSvgResize( viewSize ) {
+	function calcSvgResize( viewSize ): SvgSizeDef {
 		return {
 			width: parseInt( viewSize, 10 ),
 			height: scaleProportionally(
@@ -122,7 +124,10 @@ export const Edit = (
 	 * @param newSvg - Partial< BlockAttributes >
 	 */
 	function updateSvgData( newSvg: Partial< BlockAttributes > ) {
-		const newSvgSize = { width: newSvg.width, height: newSvg.height };
+		const newSvgSize: SvgSizeDef = {
+			width: newSvg.width,
+			height: newSvg.height,
+		};
 
 		setOriginalSize( newSvgSize );
 
@@ -145,6 +150,7 @@ export const Edit = (
 	 * @type {useEffect}
 	 */
 	useEffect( () => {
+		setOriginalSvg( svg );
 		setColors( collectColors( svg ) );
 	}, [ svg ] );
 
@@ -188,6 +194,8 @@ export const Edit = (
 	useEffect( () => {
 		// on load collect colors
 		if ( svg ) {
+			setOriginalSvg( svg );
+
 			setColors( collectColors( svg ) );
 
 			const size: SvgSizeDef = getSvgSize( svg );
@@ -207,10 +215,10 @@ export const Edit = (
 			{ svg && (
 				<InspectorControls>
 					<SvgPanel
-						originalSize={ originalSize }
 						colors={ colors }
 						attributes={ attributes }
 						setAttributes={ setAttributes }
+                        originalSvg={ originalSvg }
 					/>
 				</InspectorControls>
 			) }

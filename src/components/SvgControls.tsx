@@ -1,5 +1,4 @@
 import {
-	// @ts-ignore
 	__experimentalLinkControl as LinkControl,
 	BlockControls,
 } from '@wordpress/block-editor';
@@ -10,9 +9,10 @@ import {
 	ToolbarGroup,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { ALLOWED_MEDIA_TYPES, NEW_TAB_REL } from '../utils/constants';
+import { displayShortcut, isKeyboardEvent } from '@wordpress/keycodes';
+import { ALLOWED_MEDIA_TYPES, NEW_TAB_TARGET } from '../utils/constants';
 import { readSvg } from '../utils/svgTools';
-import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useMemo, useState } from '@wordpress/element';
 
 /**
  * A component that renders SVG controls.
@@ -36,15 +36,17 @@ function SvgControls( {
 	 * @property {boolean} isEditingURL - a bool value that stores id the link panel is open
 	 * @callback setIsEditingURL
 	 */
-	const { svg, href, linkTarget, rel, opensInNewTab, title } = attributes;
+	const { svg, href, linkTarget, rel, title } = attributes;
 	const [ isEditingURL, setIsEditingURL ] = useState( false );
 	const isURLSet = !! href;
+
+	const opensInNewTab = linkTarget === NEW_TAB_TARGET;
 
 	const memoizedValue = useMemo(
 		() => ( {
 			url: href,
 			title,
-			opensInNewTab,
+			opensInNewTab: linkTarget === '_blank',
 			rel,
 		} ),
 		[ href, opensInNewTab, title, rel ]
@@ -54,29 +56,6 @@ function SvgControls( {
 		setIsEditingURL( true );
 		return false;
 	};
-
-	/**
-	 * Handle the checkbox state for "Open in new tab"
-	 * If the user has checked the "Open in new tab" checkbox, then set the linkTarget attribute to "_blank" and the rel attribute to "noreferrer noopener".
-	 * If the user has unchecked the "Open in new tab" checkbox, then set the linkTarget attribute to undefined and the rel attribute to undefined
-	 *
-	 * @param {boolean} value - The value of the url edit area.
-	 */
-	function setToggleOpenInNewTab( value: boolean ) {
-		const newLinkTarget = value ? '_blank' : undefined;
-
-		let updatedRel = rel;
-		if ( newLinkTarget && ! rel ) {
-			updatedRel = NEW_TAB_REL;
-		} else if ( ! newLinkTarget && rel === NEW_TAB_REL ) {
-			updatedRel = undefined;
-		}
-
-		return {
-			linkTarget: newLinkTarget,
-			rel: updatedRel,
-		};
-	}
 
 	/**
 	 * Checking if the block is selected.
@@ -91,6 +70,15 @@ function SvgControls( {
 		}
 	}, [ isSelected ] );
 
+	function onKeyDown( event ) {
+		if ( isKeyboardEvent.primary( event, 'k' ) ) {
+			setIsEditingURL( event );
+		} else if ( isKeyboardEvent.primaryShift( event, 'k' ) ) {
+			unlinkItem();
+			SvgRef.current?.focus();
+		}
+	}
+
 	/**
 	 * It sets the attributes of the block to undefined, and then sets the state of the block to not editing the URL
 	 */
@@ -104,25 +92,6 @@ function SvgControls( {
 		setIsEditingURL( false );
 	};
 
-	const onToggleOpenInNewTab = useCallback(
-		( value ) => {
-			const newLinkTarget = value ? '_blank' : '_self';
-
-			let updatedRel = rel;
-			if ( newLinkTarget && ! rel ) {
-				updatedRel = NEW_TAB_REL;
-			} else if ( ! newLinkTarget && rel === NEW_TAB_REL ) {
-				updatedRel = undefined;
-			}
-
-			setAttributes( {
-				linkTarget: newLinkTarget,
-				rel: updatedRel,
-			} );
-		},
-		[ rel, setAttributes ]
-	);
-
 	return (
 		<>
 			{ svg && (
@@ -132,12 +101,14 @@ function SvgControls( {
 							icon="admin-links"
 							title={ __( 'Edit Link' ) }
 							onClick={ openLinkControl }
+							shortcut={ displayShortcut.primary( 'k' ) }
 							isActive={ isURLSet }
 						/>
 						<ToolbarButton
 							icon="editor-unlink"
 							title={ __( 'Unlink' ) }
 							onClick={ unlinkItem }
+							shortcut={ displayShortcut.primary( 'k' ) }
 							isDisabled={ ! isURLSet }
 						/>
 					</ToolbarGroup>
@@ -188,24 +159,16 @@ function SvgControls( {
 							const {
 								url: newHref = '',
 								opensInNewTab: newOpensInNewTab,
-								alt: newAlt = '',
-								rel: newRel = '',
 								title: newTitle = '',
 							} = nextValue;
 
 							setAttributes( {
 								href: newHref,
-								alt: newAlt,
-								rel: newRel,
+								linkTarget: !! newOpensInNewTab
+									? NEW_TAB_TARGET
+									: undefined,
 								title: newTitle,
 							} );
-
-							if (
-								( linkTarget === '_blank' ) !==
-								newOpensInNewTab
-							) {
-								onToggleOpenInNewTab( newOpensInNewTab );
-							}
 
 							setIsEditingURL( false );
 						} }
