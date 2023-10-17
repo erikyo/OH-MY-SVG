@@ -1,6 +1,3 @@
-/* rotation range presets in order to provide a better ux for standard rotations like 0-90-180-270 */
-import { hasAlign } from './fn';
-
 /* the array of ticks displayed below the rotation slider */
 export const rotationRangePresets:
 	| boolean
@@ -85,3 +82,33 @@ export const getAlignStyle = ( blockAlignment: string | undefined ) => {
 			return styleDefault();
 	}
 };
+
+export const relOptions = [
+	{ label: '', value: '' },
+	{ label: 'Alternate', value: 'alternate' },
+	{ label: 'Author', value: 'author' },
+	{ label: 'Bookmark', value: 'bookmark' },
+	{ label: 'Canonical', value: 'canonical' },
+	{ label: 'DNS Prefetch', value: 'dns-prefetch' },
+	{ label: 'External', value: 'external' },
+	{ label: 'Help', value: 'help' },
+	{ label: 'Icon', value: 'icon' },
+	{ label: 'License', value: 'license' },
+	{ label: 'Manifest', value: 'manifest' },
+	{ label: 'Me', value: 'me' },
+	{ label: 'Module Preload', value: 'modulepreload' },
+	{ label: 'Next', value: 'next' },
+	{ label: 'No Follow', value: 'nofollow' },
+	{ label: 'No Opener', value: 'noopener' },
+	{ label: 'No Referrer', value: 'noreferrer' },
+	{ label: 'Opener', value: 'opener' },
+	{ label: 'Pingback', value: 'pingback' },
+	{ label: 'Preconnect', value: 'preconnect' },
+	{ label: 'Prefetch', value: 'prefetch' },
+	{ label: 'Preload', value: 'preload' },
+	{ label: 'Prerender', value: 'prerender' },
+	{ label: 'Prev', value: 'prev' },
+	{ label: 'Search', value: 'search' },
+	{ label: 'Stylesheet', value: 'stylesheet' },
+	{ label: 'Tag', value: 'tag' },
+];

@@ -5,31 +5,27 @@
 	"attributes": {
 		"svg": {
 			"type": "string",
-			"default": ""
-		},
-		"originalSvg": {
-			"type": "string",
-			"default": false
-		},
+            "source": "html",
+            "selector": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper"
+        },
 		"href": {
 			"type": "string"
 		},
-		"linkTarget": {
+		"rel": {
 			"type": "string"
+		},
+		"linkTarget": {
+			"type": "string",
+            "default": "_self"
 		},
 		"title": {
 			"type": "string"
 		},
-		"onclick": {
-			"type": "string"
-		},
 		"height": {
-			"type": "number",
-			"default": false
+			"type": "number"
 		},
 		"width": {
-			"type": "number",
-			"default": false
+			"type": "number"
 		},
 		"rotation": {
 			"type": "number",
@@ -68,15 +64,15 @@
 			"blockGap": true
 		},
 		"default": {
-			"align": "none",
-			"display": "table"
+			"align": "none"
 		}
 	},
-	"selectors": {
-		"filter": {
-			"duotone": ".wp-block-codekraft-oh-my-svg svg"
-		}
-	},
+    "selectors": {
+      "border": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper, .wp-block-codekraft-oh-my-svg .components-placeholder",
+      "filter": {
+        "duotone": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper, .wp-block-codekraft-oh-my-svg .components-placeholder"
+      }
+    },
 	"category": "media",
 	"editorScript": "file:./build/oh-my-svg-editor.js"
 }

@@ -2,8 +2,8 @@
 export interface SvgAttributesDef {
 	svg: string;
 	href?: string;
-	width: number | string;
-	height: number | string;
+	width: number;
+	height: number;
 	rotation?: number;
 	align?: string;
 	style?: {};
@@ -12,7 +12,7 @@ export interface SvgAttributesDef {
 
 /** the svg component prop */
 export interface SvgAttributesEditor extends SvgAttributesDef {
-	originalSvg?: string; // the original Svg before changes
+	originalSvg?: {}; // the original Svg before changes
 	rel?: string; // stores whether the link opens into a new window
 	fileData?: SvgFileDef;
 	alt?: string;
@@ -39,8 +39,8 @@ export interface SvgImgAttributesDef extends SvgAttributesDef {
  * @property {number | string} height - The height of the SVG.
  */
 export type SvgSizeDef = {
-	width?: number | string;
-	height?: number | string;
+	width?: number;
+	height?: number;
 };
 
 /**

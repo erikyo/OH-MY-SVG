@@ -4,16 +4,15 @@ import {
 	SVG_MIN_SIZE,
 	SVGBASE64,
 	SVGO_DEFAULTS,
-} from '../constants';
-import { optimize } from 'svgo';
+} from './constants';
 import { closest } from 'color-2-name';
 import { __ } from '@wordpress/i18n';
-import {
+import type {
+	SvgAttributesEditor,
 	SvgColorDef,
 	SvgFileDef,
-	SvgStrokeDef,
 	SvgSizeDef,
-	SvgAttributesEditor,
+	SvgStrokeDef,
 } from '../types';
 import { BlockAttributes } from '@wordpress/blocks';
 
@@ -100,7 +99,8 @@ export const loadSvg = ( {
  * @param {string} svgString - waits SVGO to optimize the svg then return the markup
  * @return  {string} result
  */
-export function optimizeSvg( svgString: string ): string {
+export async function optimizeSvg( svgString: string ): Promise< string > {
+	const { optimize } = await import( 'svgo' );
 	const result = optimize( svgString, SVGO_DEFAULTS );
 	return result.data;
 }
@@ -111,7 +111,6 @@ export function optimizeSvg( svgString: string ): string {
  * @param {Document} svgDoc - The SVG document that you want to convert to a string.
  *
  * @return {string} A uncleaned string of the svgDoc.
- *
  */
 export const getSvgString = ( svgDoc: Document ): string => {
 	const serializer = new window.XMLSerializer();
@@ -245,7 +244,7 @@ export const svgAddPathStroke = ( {
 }: SvgStrokeDef ) => {
 	const svgDoc = getSvgDoc( svgMarkup );
 	svgDoc.querySelectorAll( pathStrokeEl.join() ).forEach( ( item ) => {
-		item.setAttribute( 'stroke', pathStrokeColor || '#20FF12' );
+		item.setAttribute( 'stroke', pathStrokeColor ?? '#20FF12' );
 		item.setAttribute( 'stroke-width', pathStrokeWith + 'px' );
 	} );
 	return getSvgString( svgDoc );
@@ -287,6 +286,13 @@ export const convertSvgToBitmap = async ( {
 	width = 100,
 	format = 'webp',
 	quality = 0.8,
+}: {
+	svgBase64?: string;
+	sizeRatio?: number;
+	height?: number;
+	width?: number;
+	format?: string;
+	quality?: number;
 } ): Promise< string > => {
 	// Create an image element from the SVG markup
 	const img = new window.Image();
@@ -310,3 +316,82 @@ export const convertSvgToBitmap = async ( {
 		return Promise.reject( err );
 	}
 };
+
+/**
+ * Check if the current align is the one specified
+ *
+ * @param {string}          currentAlign   - the current align
+ * @param {string|string[]} alignmentCheck
+ * @return {boolean} true if the alignment check contains the current alignment
+ */
+export function hasAlign(
+	currentAlign: string = 'none',
+	alignmentCheck: string | string[]
+): boolean {
+	if ( alignmentCheck instanceof Array ) {
+		return alignmentCheck.includes( currentAlign );
+	}
+	return currentAlign === alignmentCheck;
+}
+
+/**
+ * if the limit is bigger than the original values returns the proportionally scaled second value
+ * this is useful to resize an image because given the container size the image width will be of the size of the limit and the height will be proportionally scaled
+ *
+ * @param {number} first
+ * @param {number} second
+ * @param {number} limit
+ * @return {number} the second value (the height of the image, the width is the limit size)
+ */
+export function scaleProportionally(
+	first: number,
+	second: number,
+	limit: number
+): number {
+	return Math.round( ( limit / first ) * second );
+}
+
+/**
+ * It throws an error if the file fails to read
+ *
+ * @param {string} err - string - The error message that was thrown.
+ */
+export const onSvgReadError = ( err: string ): Error => {
+	throw new Error( 'Failed to read the given file' + err );
+};
+
+/**
+ * Get the bounding box of an SVG element.
+ *
+ * @param {HTMLElement} el - The SVG element.
+ */
+export const getSvgBoundingBox = ( el: HTMLElement ): SvgSizeDef => {
+	const rect = el.getBoundingClientRect();
+	return {
+		width: rect.width,
+		height: rect.height,
+	};
+};
+
+/**
+ * Returns the maximum content width based on the alignment.
+ *
+ * @param  align                     The alignment to check for
+ * @param  defaultLayout             The default layout value
+ * @param  defaultLayout.contentSize The content size
+ * @param  defaultLayout.wideSize    The wide size
+ *
+ * @return {number|undefined} The maximum content width. Returns `defaultLayout.contentSize` if `align` is undefined,
+ * `defaultLayout.wideSize` if `align` is 'wide', and `undefined` otherwise.
+ */
+export function contentMaxWidth(
+	align: string | undefined,
+	defaultLayout: { contentSize?: number; wideSize?: number }
+): number | undefined {
+	if ( typeof align === 'undefined' ) {
+		return defaultLayout.contentSize;
+	} else if ( align === 'wide' ) {
+		return defaultLayout.wideSize;
+	}
+	return undefined;
+}
