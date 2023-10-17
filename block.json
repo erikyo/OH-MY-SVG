@@ -8,15 +8,7 @@
             "source": "html",
             "selector": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper"
         },
-		"originalSvg": {
-			"type": "string",
-            "source": "html",
-            "selector": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper"
-        },
 		"href": {
-			"type": "string"
-		},
-		"alt": {
 			"type": "string"
 		},
 		"rel": {

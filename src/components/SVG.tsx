@@ -1,7 +1,8 @@
 import { updateHtmlProp, cleanMarkup } from '../utils/common';
 import { hasAlign } from '../utils/svgTools';
 import { __experimentalUseBorderProps as useBorderProps } from '@wordpress/block-editor';
-import { NEW_TAB_REL } from '../utils/constants';
+import { NEW_TAB_TARGET } from '../utils/constants';
+import classNames from 'classnames';
 
 /**
  * Svg component - it can be used to render SVG files
@@ -58,12 +59,13 @@ function OHMYSVG( {
 	svgRef?: React.RefObject< HTMLDivElement >;
 	tag?: 'div' | 'a';
 } ) {
-	const { href, linkTarget, title, align } = attributes;
+	const { href, linkTarget, title, align, rel } = attributes;
 
 	// these are the default attributes for the svg
 	const wrapperProps = {
 		className: 'svg-block-wrapper',
 		style: {
+			display: 'block',
 			width: hasAlign( align, [ 'full', 'wide', 'none' ] )
 				? '100%'
 				: attributes.width,
@@ -94,9 +96,8 @@ function OHMYSVG( {
 			{ ...wrapperProps }
 			ref={ svgRef }
 			href={ href }
-			target={ linkTarget }
-			rel={ linkTarget ? NEW_TAB_REL : null }
-			aria-label={ title }
+			target={ linkTarget === NEW_TAB_TARGET ? NEW_TAB_TARGET : null }
+			rel={ rel ?? null }
 			title={ title ?? null }
 			dangerouslySetInnerHTML={ svgMarkup }
 		/>

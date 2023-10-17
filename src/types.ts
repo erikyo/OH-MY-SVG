@@ -39,8 +39,8 @@ export interface SvgImgAttributesDef extends SvgAttributesDef {
  * @property {number | string} height - The height of the SVG.
  */
 export type SvgSizeDef = {
-	width?: number | string;
-	height?: number | string;
+	width?: number;
+	height?: number;
 };
 
 /**
