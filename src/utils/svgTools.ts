@@ -365,3 +365,18 @@ export const getSvgBoundingBox = ( el: HTMLElement ) => {
 		height: rect.height,
 	};
 };
+
+/**
+ * Returns the maximum content width based on the alignment.
+ *
+ * @return {number|undefined} The maximum content width. Returns `defaultLayout.contentSize` if `align` is undefined,
+ * `defaultLayout.wideSize` if `align` is 'wide', and `undefined` otherwise.
+ */
+export function contentMaxWidth( align, defaultLayout ) {
+    if ( typeof align === 'undefined' ) {
+        return defaultLayout.contentSize;
+    } else if ( align === 'wide' ) {
+        return defaultLayout.wideSize;
+    }
+    return undefined;
+}

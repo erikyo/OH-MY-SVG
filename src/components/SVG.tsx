@@ -51,10 +51,12 @@ function OHMYSVG( {
 	attributes,
 	borderProps,
 	svgRef = undefined,
+	tag = undefined,
 }: {
 	attributes: any;
 	borderProps: ReturnType< typeof useBorderProps >;
 	svgRef?: React.RefObject< HTMLDivElement >;
+	tag?: 'div' | 'a';
 } ) {
 	const { href, linkTarget, title, align } = attributes;
 
@@ -77,13 +79,13 @@ function OHMYSVG( {
 	const svgMarkup = SvgEl( attributes, borderProps );
 
 	// if the tag is a div then it will render a div
-	if ( ! href ) {
+	if ( tag === 'div' || ! href ) {
 		return (
 			<div
 				{ ...wrapperProps }
 				dangerouslySetInnerHTML={ svgMarkup }
 				ref={ svgRef }
-			></div>
+			/>
 		);
 	}
 	// if the href attribute is set, it will render an anchor tag
