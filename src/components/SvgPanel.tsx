@@ -119,7 +119,7 @@ function SvgPanel( {
 							optimizeSvg( svg ).then(
 								( optimizedSvg: string ) => {
 									setAttributes( {
-										optimizedSvg,
+										svg: optimizedSvg,
 									} );
 								}
 							);
