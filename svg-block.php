@@ -3,9 +3,9 @@
 /**
  * Plugin Name:       OH MY SVG
  * Description:       A Simple plugin that adds the SVG Block to your Gutenberg block editor.
- * Version:           0.1.4.1
+ * Version:           0.1.4.3
  * Requires at least: 5.7
- * Tested up to:      6.0.3
+ * Tested up to:      6.3
  * Requires PHP:      7.1.0
  * Author:            codekraft
  * Author URI:        https://codekraft.it
