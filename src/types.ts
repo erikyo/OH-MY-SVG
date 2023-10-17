@@ -12,7 +12,7 @@ export interface SvgAttributesDef {
 
 /** the svg component prop */
 export interface SvgAttributesEditor extends SvgAttributesDef {
-	originalSvg?: string; // the original Svg before changes
+	originalSvg?: {}; // the original Svg before changes
 	rel?: string; // stores whether the link opens into a new window
 	fileData?: SvgFileDef;
 	alt?: string;

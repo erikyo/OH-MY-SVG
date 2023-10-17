@@ -10,8 +10,9 @@
 		"noEmit": true,
 		// Don't emit; allow Babel to transform files.
 		"outDir": "build",
-		"baseUrl": "./src"
-	},
+		"baseUrl": "./src",
+      "allowSyntheticDefaultImports": true
+    },
 	"include": [
 		"./src/**/*.ts",
 		"./src/**/*.tsx"
