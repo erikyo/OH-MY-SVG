@@ -1,10 +1,17 @@
 import OHMYSVG from './components/SVG';
 
 import {
+	__experimentalGetElementClassName as getElementClassName,
 	__experimentalGetBorderClassesAndStyles as getBorderClassesAndStyles,
+	__experimentalGetShadowClassesAndStyles as getShadowClassesAndStyles,
 	useBlockProps,
 } from '@wordpress/block-editor';
 import { SvgAttributesSave } from './types';
+import {
+	getRotationCss,
+	getWrapperProps,
+	updateSvgMarkup,
+} from './utils/svgTools';
 
 /**
  * @module Save
@@ -19,16 +26,24 @@ import { SvgAttributesSave } from './types';
 export const Save = ( props: {
 	attributes: SvgAttributesSave;
 } ): JSX.Element => {
-	const { href } = props.attributes;
+	const attributes = props.attributes;
 
-	const borderProps = getBorderClassesAndStyles( props.attributes );
+	const wrapperProps = getWrapperProps( props.attributes, {
+		...getBorderClassesAndStyles( attributes ),
+		...getShadowClassesAndStyles( attributes ),
+	} );
+
+	const svgMarkup = updateSvgMarkup( attributes );
 	const blockProps = useBlockProps.save();
 
 	return (
-		<div { ...blockProps }>
+		<div { ...blockProps } style={ wrapperProps }>
 			<OHMYSVG
+				style={ {
+					transform: getRotationCss( attributes.rotation ),
+				} }
 				attributes={ props.attributes }
-				borderProps={ borderProps }
+				svgData={ svgMarkup }
 			/>
 		</div>
 	);
