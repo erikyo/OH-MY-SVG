@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from '@wordpress/element';
-import { ResizableBox, SVG } from '@wordpress/components';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import { ResizableBox } from '@wordpress/components';
 import {
+	__experimentalGetShadowClassesAndStyles as getShadowClassesAndStyles,
 	__experimentalUseBorderProps as useBorderProps,
 	InspectorControls,
 	store as blockEditorStore,
 	useBlockProps,
-	useSetting,
 } from '@wordpress/block-editor';
 
 import { __ } from '@wordpress/i18n';
@@ -13,33 +13,39 @@ import {
 	collectColors,
 	contentMaxWidth,
 	getSvgBoundingBox,
-	getSvgSize,
+	getWrapperProps,
 	hasAlign,
 	loadSvg,
 	readSvg,
 	scaleProportionally,
+	updateSvgMarkup,
 } from './utils/svgTools';
 import { SvgAttributesEditor, SvgColorDef, SvgSizeDef } from './types';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
-import { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
+import { type BlockAttributes } from '@wordpress/blocks';
 import SvgPanel from './components/SvgPanel';
 import SvgControls from './components/SvgControls';
 import SvgPlaceholder from './components/SvgPlaceholder';
 import OHMYSVG from './components/SVG';
-import { isKeyboardEvent } from '@wordpress/keycodes';
 
 /**
+ * The edit function for the block
  * @module Edit
  * @description The edit view
+ * @param          props.attributes    The props to build the svg
+ * @param          props.setAttributes The function to set the attributes
+ * @param          props.isSelected    The boolean value indicating if the svg is selected
  *
- * @param {Object} props - the edit view stored props
+ * @param {Object} props               - the edit view stored props
  *
  * @return {JSX.Element} - the Block editor view
  */
-export const Edit = (
-	props: BlockEditProps< BlockAttributes >
-): JSX.Element => {
+export const Edit = ( props: {
+	attributes: SvgAttributesEditor;
+	setAttributes: ( attributes: any ) => void;
+	isSelected: boolean;
+} ): JSX.Element => {
 	const { attributes, setAttributes, isSelected } = props;
 	const { align, height, width, href, svg } =
 		attributes as SvgAttributesEditor;
@@ -52,14 +58,22 @@ export const Edit = (
 	 */
 	const svgRef = useRef< HTMLDivElement | HTMLAnchorElement | null >( null );
 
-	const [ maxWidth, setMaxWidth ] = useState( undefined );
-
+	const [ currentMaxWidth, setCurrentMaxWidth ] = useState<
+		number | string
+	>();
 	const [ originalSvg, setOriginalSvg ] = useState< string | null >( null );
-
 	const [ colors, setColors ] = useState< [] | SvgColorDef[] >( [] );
 
 	/** The block editor sizes */
-	const defaultLayout = useSetting( 'layout' ) || {};
+	const layoutData: { contentSize: number; wideSize: number } = useSelect(
+		( select ) => {
+			const settings = (
+				select( 'core/block-editor' ) as any
+			 ).getSettings();
+			return settings.__experimentalFeatures.layout;
+		},
+		[]
+	);
 
 	/** The block is selected */
 	const { toggleSelection } = useDispatch( blockEditorStore );
@@ -80,7 +94,7 @@ export const Edit = (
 			oldSvg: attributes,
 		} );
 
-		return newSvg
+		return newSvg?.svg
 			? updateSvgData( newSvg )
 			: createErrorNotice( __( '😓 cannot update!' ) );
 	}
@@ -91,8 +105,10 @@ export const Edit = (
 	 * @param {File | undefined} newFile - The new file to be read and updated.
 	 * @return {void}
 	 */
-	function readAndUpdateSvg( newFile: File | undefined ) {
-		if ( ! newFile ) return;
+	function readAndUpdateSvg( newFile: File | undefined ): void {
+		if ( ! newFile ) {
+			return;
+		}
 		readSvg( newFile ).then( ( newSvg: string ) => {
 			updateSvg( newSvg, newFile );
 		} );
@@ -104,14 +120,10 @@ export const Edit = (
 	 * @param {number} viewSize - The desired size of the SVG image.
 	 * @return {Object} An object containing the width and height of the resized SVG image.
 	 */
-	function calcSvgResize( viewSize ): SvgSizeDef {
+	function calcSvgResize( viewSize: number ): SvgSizeDef {
 		return {
-			width: parseInt( viewSize, 10 ),
-			height: scaleProportionally(
-				width,
-				height,
-				parseInt( viewSize, 10 )
-			),
+			width: viewSize,
+			height: scaleProportionally( width, height, viewSize ),
 		};
 	}
 
@@ -126,16 +138,21 @@ export const Edit = (
 			height: newSvg.height,
 		};
 
-		/* if the svg with is bigger than the content width rescale it */
-		const size =
-			newSvg.width >= Number( defaultLayout.contentSize )
-				? calcSvgResize( defaultLayout.contentSize )
+		setOriginalSvg( attributes.svg );
+
+		// width and height are calculated by the resize function
+		const svgSize =
+			newSvg.width >= Number( layoutData.contentSize )
+				? calcSvgResize( layoutData.contentSize )
 				: newSvgSize;
 
 		setAttributes( {
-			originalSvg: newSvg.svg,
-			...newSvg,
-			...size,
+			svg: cleanSvg( newSvg.svg ).__html,
+			alt: newSvg.alt,
+			title: newSvg.fileData?.name,
+			lastModified: newSvg.fileData?.lastModified,
+			fileSize: newSvg.fileData?.size,
+			...svgSize,
 		} );
 	}
 
@@ -154,7 +171,9 @@ export const Edit = (
 	 * @type {useEffect}
 	 */
 	useEffect( () => {
-		if ( ! isSelected ) return;
+		if ( ! isSelected ) {
+			return;
+		}
 		// if the element has a width and height set the new width
 		const svgbbox = getSvgBoundingBox( svgRef.current );
 		if ( ! height || ! width ) {
@@ -167,18 +186,25 @@ export const Edit = (
 			return;
 		}
 		// get the max width of the content
-		const maxWidth = contentMaxWidth( align, defaultLayout );
-		if ( maxWidth ) {
-			setAttributes( calcSvgResize( maxWidth ) );
-			setMaxWidth( maxWidth );
+		const currenContentWidth = contentMaxWidth( align, layoutData );
+		if ( currenContentWidth ) {
+			setAttributes( calcSvgResize( currenContentWidth ) );
+			setCurrentMaxWidth( currenContentWidth );
 		} else {
 			setAttributes( {
 				width: width || svgbbox.width,
 				height: height || svgbbox.height,
 			} );
-			setMaxWidth( undefined );
+			setCurrentMaxWidth( undefined );
 		}
 	}, [ align ] );
+
+	const cleanSvg = useCallback(
+		( svgMarkup = attributes.svg ): { __html: TrustedHTML } => {
+			return updateSvgMarkup( attributes, svgMarkup );
+		},
+		[ svg ]
+	);
 
 	/**
 	 *  Using the useEffect hook to collect the colors and size from the SVG onload
@@ -188,23 +214,21 @@ export const Edit = (
 	useEffect( () => {
 		// on load collect colors
 		if ( svg ) {
+			/* Backup the original svg */
 			setOriginalSvg( svg );
 
+			/* prepare the color array */
 			setColors( collectColors( svg ) );
-
-			const size: SvgSizeDef = getSvgSize( svg );
-
-			setAttributes( {
-				originalSvg: originalSvg || svg,
-			} );
 		}
 	}, [] );
 
-	const borderProps = useBorderProps( attributes );
-	const blockProps = useBlockProps();
+	const currentStyle = getWrapperProps( attributes, {
+		...useBorderProps( attributes ),
+		...getShadowClassesAndStyles( attributes ),
+	} );
 
 	return (
-		<div { ...blockProps }>
+		<div { ...useBlockProps() } style={ currentStyle }>
 			{ svg && (
 				<InspectorControls>
 					<SvgPanel
@@ -224,7 +248,7 @@ export const Edit = (
 				SvgRef={ svgRef }
 			/>
 
-			{ svg && isSelected && ! hasAlign( align, [ 'full', 'wide' ] ) ? (
+			{ svg ? (
 				<ResizableBox
 					size={ {
 						width,
@@ -240,7 +264,7 @@ export const Edit = (
 					} }
 					minHeight={ 8 }
 					minWidth={ 8 }
-					maxWidth={ maxWidth }
+					maxWidth={ currentMaxWidth }
 					lockAspectRatio
 					enable={
 						! hasAlign( align, [ 'full', 'wide' ] )
@@ -264,18 +288,15 @@ export const Edit = (
 					} }
 				>
 					<OHMYSVG
-						attributes={ props.attributes }
-						borderProps={ borderProps }
-						svgRef={ svgRef }
-						tag={ 'div' }
+						attributes={ { ...attributes, href: undefined } }
+						svgData={ attributes?.svg }
 					/>
 				</ResizableBox>
 			) : (
 				<OHMYSVG
-					attributes={ props.attributes }
-					borderProps={ borderProps }
+					attributes={ { ...attributes, href: undefined } }
 					svgRef={ svgRef }
-					tag={ 'div' }
+					svgData={ attributes?.svg }
 				/>
 			) }
 
