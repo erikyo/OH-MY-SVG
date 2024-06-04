@@ -1,105 +1,52 @@
-import { updateHtmlProp, cleanMarkup } from '../utils/common';
-import { hasAlign } from '../utils/svgTools';
-import { __experimentalUseBorderProps as useBorderProps } from '@wordpress/block-editor';
+import { updateSvgMarkup } from '../utils/svgTools';
 import { NEW_TAB_TARGET } from '../utils/constants';
-import classNames from 'classnames';
-
-/**
- * Svg component - it can be used to render SVG files
- *
- * @param  attributes
- * @param  borderProps
- * @return { string | null } the SVG components
- */
-export const SvgEl = (
-	attributes: any,
-	borderProps = {
-		style: { borderWidth: false, borderRadius: false, borderColor: false },
-		className: '',
-	}
-): { __html: TrustedHTML } => {
-	const { svg, width, height, rotation, align } = attributes;
-
-	const svgStyle = [
-		Number( rotation ) !== 0 ? `transform:rotate(${ rotation }deg)` : null,
-		!! borderProps.style.borderWidth &&
-			'border-width:' + borderProps.style.borderWidth,
-		!! borderProps.style.borderRadius &&
-			'border-radius:' + borderProps.style.borderRadius,
-		!! borderProps.style.borderColor &&
-			'border-color:' + borderProps.style.borderColor,
-		'box-sizing: border-box',
-	]
-		.filter( Boolean )
-		.join( ';' );
-
-	const svgWidth =
-		width && ! hasAlign( align, [ 'full', 'wide' ] ) ? width : '100%';
-	const svgHeight =
-		height && ! hasAlign( align, [ 'full', 'wide' ] ) ? height : null;
-
-	const svgDoc = updateHtmlProp( svg, [
-		{ prop: 'width', value: svgWidth },
-		{ prop: 'height', value: svgHeight },
-		{ prop: 'style', value: svgStyle || false },
-		{ prop: 'class', value: borderProps.className },
-	] );
-
-	return cleanMarkup( svgDoc );
-};
+import type { RefObject } from '@wordpress/element';
+import { ErrorSvg } from './icons';
+import { SvgAttributesDef } from '../types';
 
 function OHMYSVG( {
 	attributes,
-	borderProps,
-	svgRef = undefined,
-	tag = undefined,
+	style = {},
+	svgData,
+	svgRef,
 }: {
-	attributes: any;
-	borderProps: ReturnType< typeof useBorderProps >;
-	svgRef?: React.RefObject< HTMLDivElement >;
-	tag?: 'div' | 'a';
+	attributes: SvgAttributesDef;
+	style?: {};
+	svgData?: { __html: TrustedHTML };
+	svgRef?: RefObject< HTMLDivElement | HTMLAnchorElement >;
 } ) {
-	const { href, linkTarget, title, align, rel } = attributes;
+	const { href, linkTarget, title, rel } = attributes;
 
-	// these are the default attributes for the svg
-	const wrapperProps = {
-		className: 'svg-block-wrapper',
-		style: {
-			display: 'block',
-			width: hasAlign( align, [ 'full', 'wide', 'none' ] )
-				? '100%'
-				: attributes.width,
-			height: hasAlign( align, [ 'full', 'wide', 'none' ] )
-				? null
-				: attributes.height,
-			marginLeft: hasAlign( align, [ 'center' ] ) ? 'auto' : null,
-			marginRight: hasAlign( align, [ 'center' ] ) ? 'auto' : null,
-		},
-	};
+	// build the SVG markup
+	const cleanMarkup = updateSvgMarkup( attributes );
 
-	// the svg tag
-	const svgMarkup = SvgEl( attributes, borderProps );
-
-	// if the tag is a div then it will render a div
-	if ( tag === 'div' || ! href ) {
+	// If the attribute href is not set, it will render a div element
+	if ( href === undefined ) {
 		return (
 			<div
-				{ ...wrapperProps }
-				dangerouslySetInnerHTML={ svgMarkup }
-				ref={ svgRef }
+				className={ 'svg-block-wrapper' }
+				{ ...style }
+				dangerouslySetInnerHTML={ cleanMarkup }
+				ref={ svgRef as RefObject< HTMLDivElement > }
 			/>
 		);
 	}
-	// if the href attribute is set, it will render an anchor tag
+
+	const anchorAttributes = {
+		href,
+		rel,
+		target: linkTarget === NEW_TAB_TARGET ? NEW_TAB_TARGET : null,
+		title: title ?? null,
+	};
+
+	// otherwise it will render an anchor element
 	return (
 		<a
-			{ ...wrapperProps }
-			ref={ svgRef }
-			href={ href }
-			target={ linkTarget === NEW_TAB_TARGET ? NEW_TAB_TARGET : null }
-			rel={ rel ?? null }
-			title={ title ?? null }
-			dangerouslySetInnerHTML={ svgMarkup }
+			className={ 'svg-block-wrapper' }
+			dangerouslySetInnerHTML={ cleanMarkup }
+			ref={ svgRef as RefObject< HTMLAnchorElement > }
+			{ ...anchorAttributes }
+			{ ...style }
 		/>
 	);
 }
