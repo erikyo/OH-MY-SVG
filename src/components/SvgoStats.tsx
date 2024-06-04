@@ -8,7 +8,9 @@ export const SvgoStats = ( {
 	original: string | undefined;
 	compressed: string;
 } ): JSX.Element | null => {
-	if ( ! original ) return null;
+	if ( ! original ) {
+		return null;
+	}
 	const sizeOriginal = original?.length || 1;
 	const sizeCompressed = compressed?.length || 1;
 
@@ -16,7 +18,9 @@ export const SvgoStats = ( {
 	const percentOriginal =
 		( ( sizeOriginal - sizeCompressed ) / sizeOriginal ) * -100;
 
-	if ( ! original || sizeOriginal === sizeCompressed ) return null;
+	if ( ! original || sizeOriginal === sizeCompressed ) {
+		return null;
+	}
 
 	return (
 		<i

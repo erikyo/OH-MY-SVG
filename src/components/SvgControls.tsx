@@ -9,7 +9,6 @@ import {
 	ToolbarGroup,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { displayShortcut, isKeyboardEvent } from '@wordpress/keycodes';
 import { ALLOWED_MEDIA_TYPES, NEW_TAB_TARGET } from '../utils/constants';
 import { readSvg } from '../utils/svgTools';
 import { useEffect, useMemo, useState } from '@wordpress/element';

@@ -7,14 +7,16 @@ import {
 } from './constants';
 import { closest } from 'color-2-name';
 import { __ } from '@wordpress/i18n';
-import type {
+import {
+	SvgAttributesDef,
 	SvgAttributesEditor,
 	SvgColorDef,
 	SvgFileDef,
 	SvgSizeDef,
 	SvgStrokeDef,
 } from '../types';
-import { BlockAttributes } from '@wordpress/blocks';
+import type { BlockAttributes } from '@wordpress/blocks';
+import { cleanMarkup, updateHtmlProp } from './common';
 
 /**
  * Triggered when an image is selected with an input of file type
@@ -157,8 +159,9 @@ export function collectColors( fileContent: string ): SvgColorDef[] {
 		// add the color to the collection (the first 50 colors excluding duplicates)
 		for ( const match of matchedColors ) {
 			if ( match[ 0 ] && colorCollection.length < 50 ) {
-				if ( ! colorCollection.includes( match[ 0 ] ) )
+				if ( ! colorCollection.includes( match[ 0 ] ) ) {
 					colorCollection.push( match[ 0 ] );
+				}
 			}
 		}
 	}
@@ -261,7 +264,9 @@ export const svgRemoveFill = ( svgMarkup: string ): string => {
 		.querySelectorAll< HTMLElement >( SVG_EDITABLE_ELEMENTS.join( ', ' ) )
 		.forEach( ( item ) => {
 			item.setAttribute( 'fill', 'transparent' );
-			if ( item.style.fill ) item.style.fill = 'transparent';
+			if ( item.style.fill ) {
+				item.style.fill = 'transparent';
+			}
 		} );
 	return getSvgString( svgDoc );
 };
@@ -366,10 +371,10 @@ export const onSvgReadError = ( err: string ): Error => {
  * @param {HTMLElement} el - The SVG element.
  */
 export const getSvgBoundingBox = ( el: HTMLElement ): SvgSizeDef => {
-	const rect = el.getBoundingClientRect();
+	const rect = el?.getBoundingClientRect();
 	return {
-		width: rect.width,
-		height: rect.height,
+		width: rect?.width,
+		height: rect?.height,
 	};
 };
 
@@ -385,7 +390,7 @@ export const getSvgBoundingBox = ( el: HTMLElement ): SvgSizeDef => {
  * `defaultLayout.wideSize` if `align` is 'wide', and `undefined` otherwise.
  */
 export function contentMaxWidth(
-	align: string | undefined,
+	align: string,
 	defaultLayout: { contentSize?: number; wideSize?: number }
 ): number | undefined {
 	if ( typeof align === 'undefined' ) {
@@ -394,4 +399,68 @@ export function contentMaxWidth(
 		return defaultLayout.wideSize;
 	}
 	return undefined;
+}
+
+/**
+ * Returns the CSS rotation value based on the given rotation angle.
+ *
+ * @param {number} rotation - The rotation angle in degrees.
+ * @return {string | null} The CSS rotation value or null if the rotation angle is 0.
+ */
+export function getRotationCss( rotation: number ) {
+	return Number( rotation ) !== 0 ? `rotate(${ rotation }deg)` : null;
+}
+
+/**
+ * This function updates the SVG markup with the new attributes.
+ *
+ * @param  attributes - The attributes to update the SVG markup with.
+ * @param svgMarkup The SVG markup to update.
+ * @return { string | null } the SVG components
+ */
+export const updateSvgMarkup = (
+	attributes: SvgAttributesDef,
+	svgMarkup?: string
+): { __html: TrustedHTML } => {
+	const { svg, width, height, align } = attributes;
+
+	const svgWidth =
+		width && ! hasAlign( align, [ 'full', 'wide' ] ) ? width : '100%';
+	const svgHeight =
+		height && ! hasAlign( align, [ 'full', 'wide' ] ) ? height : null;
+
+	const svgDoc = updateHtmlProp( svgMarkup ?? svg, [
+		{ prop: 'width', value: svgWidth },
+		{ prop: 'height', value: svgHeight },
+	] );
+
+	return cleanMarkup( svgDoc );
+};
+
+/**
+ * Returns the props for the SVG wrapper component.
+ *
+ * @param {SvgAttributesDef} attributes                      - The attributes for the SVG component.
+ * @param {Object}           [customStyle={}]                - The custom styles for the wrapper component.
+ * @param {string}           [className='svg-block-wrapper'] - The class name for the wrapper component.
+ * @return {Object} The props for the SVG wrapper component.
+ */
+export function getWrapperProps(
+	attributes: SvgAttributesDef,
+	customStyle: Record< string, {} > = {}
+): Record< string, string | number > {
+	const { width, height, aspectRatio, scale, align } = attributes;
+	// These are the default attributes for the svg
+	return {
+		...customStyle,
+		width: hasAlign( align, [ 'full', 'wide', 'none' ] ) ? null : width,
+		height: hasAlign( align, [ 'full', 'wide', 'none' ] )
+			? null
+			: height,
+		transform: getRotationCss( attributes.rotation ),
+		aspectRatio,
+		objectFit: scale,
+		marginLeft: hasAlign( align, [ 'center' ] ) ? 'auto' : null,
+		marginRight: hasAlign( align, [ 'center' ] ) ? 'auto' : null,
+	};
 }

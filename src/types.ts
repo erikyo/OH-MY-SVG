@@ -1,19 +1,24 @@
+import type { RefObject } from '@wordpress/element';
+
 /** the svg component prop */
 export interface SvgAttributesDef {
 	svg: string;
 	href?: string;
 	width: number;
 	height: number;
+	align: string;
 	rotation?: number;
-	style?: {};
+	aspectRatio?: string;
+	scale?: string;
 	linkTarget?: string;
 	title?: string;
 	rel?: string;
+	alt?: string;
 }
 
 /** the svg component prop */
 export interface SvgAttributesEditor extends SvgAttributesDef {
-	ref?: React.RefObject< HTMLDivElement | HTMLAnchorElement >; // stores whether the link opens into a new window
+	svgData?: RefObject< HTMLDivElement | HTMLAnchorElement >; // stores whether the link opens into a new window
 	fileData?: SvgFileDef;
 }
 

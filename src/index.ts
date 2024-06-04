@@ -12,7 +12,7 @@ import { Save } from './save';
 import deprecated from './deprecated';
 
 /* Block settings */
-import jsonData from '../block.json';
+import jsonData from './block.json';
 const blockConfig = jsonData as BlockAttributes;
 
 /**
@@ -27,9 +27,8 @@ const blockConfig = jsonData as BlockAttributes;
 // @ts-ignore
 registerBlockType( blockConfig.name, {
 	...blockConfig,
-	apiVersion: 2,
 	icon,
+	deprecated,
 	edit: Edit,
 	save: Save,
-	deprecated,
 } );
