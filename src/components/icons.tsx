@@ -16,9 +16,10 @@ export const svgIcon: JSX.Element = (
 /**
  * The error icon displayed when the svg cannot be loaded
  *
- * @param {string} message
+ * @param {Object} props
+ * @param {string} props.message
  */
-export const ErrorSvg = ( message: string ): JSX.Element => (
+export const ErrorSvg = ( { message }: { message: string } ): JSX.Element => (
 	<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
 		<rect
 			stroke="#ccc"

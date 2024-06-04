@@ -15,8 +15,8 @@ import { onSvgReadError } from '../utils/svgTools';
  */
 const placeholder = (
 	content: JSX.Element,
-	readAndUpdateSvg,
-	updateSvgCallback
+	readAndUpdateSvg: ( file: File ) => void,
+	updateSvgCallback: ( newSvg: string, oldSvg: string ) => void
 ): JSX.Element => {
 	return (
 		<Placeholder
@@ -28,8 +28,10 @@ const placeholder = (
 				'Drop here your Svg, select one from your computer or copy and paste the svg markup in the textarea below'
 			) }
 			onChange={ ( ev ) => {
-				if ( ev.target.files?.length )
-					readAndUpdateSvg( ev.target.files[ 0 ] );
+				const files = ( ev.target as HTMLInputElement )?.files;
+				if ( files?.length ) {
+					readAndUpdateSvg( files[ 0 ] );
+				}
 			} }
 		>
 			<DropZone
@@ -62,10 +64,10 @@ function SvgPlaceholder( { readAndUpdateSvg, updateSvgCallback, href } ) {
 			icon={ <BlockIcon icon={ svgIcon } /> }
 			multiple={ false }
 			accept={ ALLOWED_MEDIA_TYPES.join() }
-			placeholder={ ( content ) =>
+			placeholder={ ( content: JSX.Element ) =>
 				placeholder( content, readAndUpdateSvg, updateSvgCallback )
 			}
-			onSelect={ () => {} }
+			onSelect={ () => null }
 			onError={ () => onSvgReadError }
 			mediaUploadURL={ href }
 		/>

@@ -2,7 +2,6 @@ import {
 	__experimentalUnitControl as UnitControl,
 	Button,
 	ColorPalette,
-	IconButton,
 	Panel,
 	PanelBody,
 	PanelRow,
@@ -40,8 +39,9 @@ function SvgPanel( {
 
 	/* Setting the first color detected as the default color. */
 	useEffect( () => {
-		if ( colors.length > 0 )
+		if ( colors.length > 0 ) {
 			setColor( colors?.length ? colors[ 0 ].color : '' );
+		}
 	}, [] );
 
 	return (
