@@ -7,14 +7,16 @@ import {
 } from './constants';
 import { closest } from 'color-2-name';
 import { __ } from '@wordpress/i18n';
-import type {
+import {
+	SvgAttributesDef,
 	SvgAttributesEditor,
 	SvgColorDef,
 	SvgFileDef,
 	SvgSizeDef,
 	SvgStrokeDef,
 } from '../types';
-import { BlockAttributes } from '@wordpress/blocks';
+import type { BlockAttributes } from '@wordpress/blocks';
+import { cleanMarkup, updateHtmlProp } from './common';
 
 /**
  * Triggered when an image is selected with an input of file type
@@ -157,8 +159,9 @@ export function collectColors( fileContent: string ): SvgColorDef[] {
 		// add the color to the collection (the first 50 colors excluding duplicates)
 		for ( const match of matchedColors ) {
 			if ( match[ 0 ] && colorCollection.length < 50 ) {
-				if ( ! colorCollection.includes( match[ 0 ] ) )
+				if ( ! colorCollection.includes( match[ 0 ] ) ) {
 					colorCollection.push( match[ 0 ] );
+				}
 			}
 		}
 	}
@@ -261,7 +264,9 @@ export const svgRemoveFill = ( svgMarkup: string ): string => {
 		.querySelectorAll< HTMLElement >( SVG_EDITABLE_ELEMENTS.join( ', ' ) )
 		.forEach( ( item ) => {
 			item.setAttribute( 'fill', 'transparent' );
-			if ( item.style.fill ) item.style.fill = 'transparent';
+			if ( item.style.fill ) {
+				item.style.fill = 'transparent';
+			}
 		} );
 	return getSvgString( svgDoc );
 };
@@ -366,10 +371,10 @@ export const onSvgReadError = ( err: string ): Error => {
  * @param {HTMLElement} el - The SVG element.
  */
 export const getSvgBoundingBox = ( el: HTMLElement ): SvgSizeDef => {
-	const rect = el.getBoundingClientRect();
+	const rect = el?.getBoundingClientRect();
 	return {
-		width: rect.width,
-		height: rect.height,
+		width: rect?.width,
+		height: rect?.height,
 	};
 };
 
@@ -385,7 +390,7 @@ export const getSvgBoundingBox = ( el: HTMLElement ): SvgSizeDef => {
  * `defaultLayout.wideSize` if `align` is 'wide', and `undefined` otherwise.
  */
 export function contentMaxWidth(
-	align: string | undefined,
+	align: string,
 	defaultLayout: { contentSize?: number; wideSize?: number }
 ): number | undefined {
 	if ( typeof align === 'undefined' ) {
