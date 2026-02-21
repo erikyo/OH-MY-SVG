@@ -36,9 +36,9 @@ export function updateHtmlProp( svg: string, props: htmlProperty[] ): string {
  *
  * @return {string} The sanitized SVG markup
  */
-export function cleanMarkup( svg: string ): { __html: TrustedHTML } {
+export function cleanMarkup( svg: string ): { __html: string } {
 	return {
-		__html: DOMPurify.sanitize( svg ) as unknown as TrustedHTML,
+		__html: DOMPurify.sanitize( svg ),
 	};
 }
 
