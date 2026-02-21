@@ -1,22 +1,10 @@
 import DOMPurify from 'dompurify';
-import {
-	SVG_EDITABLE_ELEMENTS,
-	SVG_MIN_SIZE,
-	SVGBASE64,
-	SVGO_DEFAULTS,
-} from './constants';
+import { SVG_EDITABLE_ELEMENTS, SVG_MIN_SIZE, SVGBASE64, SVGO_DEFAULTS } from '../constants';
+import { optimize } from 'svgo';
 import { closest } from 'color-2-name';
 import { __ } from '@wordpress/i18n';
-import {
-	SvgAttributesDef,
-	SvgAttributesEditor,
-	SvgColorDef,
-	SvgFileDef,
-	SvgSizeDef,
-	SvgStrokeDef,
-} from '../types';
-import type { BlockAttributes } from '@wordpress/blocks';
-import { cleanMarkup, updateHtmlProp } from './common';
+import type { SvgAttributesEditor, SvgColorDef, SvgFileDef, SvgSizeDef, SvgStrokeDef } from '../types';
+import { BlockAttributes } from '@wordpress/blocks';
 
 /**
  * Triggered when an image is selected with an input of file type
@@ -27,7 +15,7 @@ import { cleanMarkup, updateHtmlProp } from './common';
  *
  * @return {Promise} the file reader promise
  */
-export const readSvg = async ( file: Blob ): Promise< string | null > => {
+export async function readSvg( file: Blob ): Promise<string | null> {
 	return new Promise( ( resolve, reject ) => {
 		const reader = new window.FileReader();
 		reader.onload = () => {
@@ -46,7 +34,7 @@ export const readSvg = async ( file: Blob ): Promise< string | null > => {
 			reject( err );
 		}
 	} );
-};
+}
 
 /**
  * This function is launched when an SVG file is read.
@@ -73,11 +61,11 @@ export const loadSvg = ( {
 
 	const fileMetaData: SvgFileDef | undefined = fileData
 		? {
-				name: fileData.name,
-				size: fileData.size || cleanSvg.length,
-				type: fileData.type || 'image/svg+xml',
-				lastModified: fileData.lastModified,
-		  }
+			name: fileData.name,
+			size: fileData.size || cleanSvg.length,
+			type: fileData.type || 'image/svg+xml',
+			lastModified: fileData.lastModified,
+		}
 		: undefined;
 
 	if ( cleanSvg ) {
@@ -101,8 +89,7 @@ export const loadSvg = ( {
  * @param {string} svgString - waits SVGO to optimize the svg then return the markup
  * @return  {string} result
  */
-export async function optimizeSvg( svgString: string ): Promise< string > {
-	const { optimize } = await import( 'svgo' );
+export function optimizeSvg( svgString: string ): string {
 	const result = optimize( svgString, SVGO_DEFAULTS );
 	return result.data;
 }
@@ -240,14 +227,14 @@ export function getSvgSize( fileContent: string ): SvgSizeDef {
  * @param {Array}  stroke.pathStrokeEl
  */
 export const svgAddPathStroke = ( {
-	svgMarkup,
-	pathStrokeWith = 2,
-	pathStrokeColor,
-	pathStrokeEl = SVG_EDITABLE_ELEMENTS,
-}: SvgStrokeDef ) => {
+									 svgMarkup,
+									 pathStrokeWith = 2,
+									 pathStrokeColor,
+									 pathStrokeEl = SVG_EDITABLE_ELEMENTS,
+								 }: SvgStrokeDef ) => {
 	const svgDoc = getSvgDoc( svgMarkup );
 	svgDoc.querySelectorAll( pathStrokeEl.join() ).forEach( ( item ) => {
-		item.setAttribute( 'stroke', pathStrokeColor ?? '#20FF12' );
+		item.setAttribute( 'stroke', pathStrokeColor || '#20ff12' );
 		item.setAttribute( 'stroke-width', pathStrokeWith + 'px' );
 	} );
 	return getSvgString( svgDoc );
@@ -261,7 +248,7 @@ export const svgAddPathStroke = ( {
 export const svgRemoveFill = ( svgMarkup: string ): string => {
 	const svgDoc = getSvgDoc( svgMarkup );
 	svgDoc
-		.querySelectorAll< HTMLElement >( SVG_EDITABLE_ELEMENTS.join( ', ' ) )
+		.querySelectorAll<HTMLElement>( SVG_EDITABLE_ELEMENTS.join( ', ' ) )
 		.forEach( ( item ) => {
 			item.setAttribute( 'fill', 'transparent' );
 			if ( item.style.fill ) {
@@ -285,20 +272,13 @@ export const svgRemoveFill = ( svgMarkup: string ): string => {
  * @return {Promise<string>} the svg as bitmap image
  */
 export const convertSvgToBitmap = async ( {
-	svgBase64 = '',
-	sizeRatio = 1,
-	height = 100,
-	width = 100,
-	format = 'webp',
-	quality = 0.8,
-}: {
-	svgBase64?: string;
-	sizeRatio?: number;
-	height?: number;
-	width?: number;
-	format?: string;
-	quality?: number;
-} ): Promise< string > => {
+											 svgBase64 = '',
+											 sizeRatio = 1,
+											 height = 100,
+											 width = 100,
+											 format = 'webp',
+											 quality = 0.8,
+										 }: { svgBase64: string; sizeRatio: number; width: number; height: number; format: string; quality: number; } ): Promise<string> => {
 	// Create an image element from the SVG markup
 	const img = new window.Image();
 	img.src = svgBase64 as string;
@@ -321,146 +301,3 @@ export const convertSvgToBitmap = async ( {
 		return Promise.reject( err );
 	}
 };
-
-/**
- * Check if the current align is the one specified
- *
- * @param {string}          currentAlign   - the current align
- * @param {string|string[]} alignmentCheck
- * @return {boolean} true if the alignment check contains the current alignment
- */
-export function hasAlign(
-	currentAlign: string = 'none',
-	alignmentCheck: string | string[]
-): boolean {
-	if ( alignmentCheck instanceof Array ) {
-		return alignmentCheck.includes( currentAlign );
-	}
-	return currentAlign === alignmentCheck;
-}
-
-/**
- * if the limit is bigger than the original values returns the proportionally scaled second value
- * this is useful to resize an image because given the container size the image width will be of the size of the limit and the height will be proportionally scaled
- *
- * @param {number} first
- * @param {number} second
- * @param {number} limit
- * @return {number} the second value (the height of the image, the width is the limit size)
- */
-export function scaleProportionally(
-	first: number,
-	second: number,
-	limit: number
-): number {
-	return Math.round( ( limit / first ) * second );
-}
-
-/**
- * It throws an error if the file fails to read
- *
- * @param {string} err - string - The error message that was thrown.
- */
-export const onSvgReadError = ( err: string ): Error => {
-	throw new Error( 'Failed to read the given file' + err );
-};
-
-/**
- * Get the bounding box of an SVG element.
- *
- * @param {HTMLElement} el - The SVG element.
- */
-export const getSvgBoundingBox = ( el: HTMLElement ): SvgSizeDef => {
-	const rect = el?.getBoundingClientRect();
-	return {
-		width: rect?.width,
-		height: rect?.height,
-	};
-};
-
-/**
- * Returns the maximum content width based on the alignment.
- *
- * @param  align                     The alignment to check for
- * @param  defaultLayout             The default layout value
- * @param  defaultLayout.contentSize The content size
- * @param  defaultLayout.wideSize    The wide size
- *
- * @return {number|undefined} The maximum content width. Returns `defaultLayout.contentSize` if `align` is undefined,
- * `defaultLayout.wideSize` if `align` is 'wide', and `undefined` otherwise.
- */
-export function contentMaxWidth(
-	align: string,
-	defaultLayout: { contentSize?: number; wideSize?: number }
-): number | undefined {
-	if ( typeof align === 'undefined' ) {
-		return defaultLayout.contentSize;
-	} else if ( align === 'wide' ) {
-		return defaultLayout.wideSize;
-	}
-	return undefined;
-}
-
-/**
- * Returns the CSS rotation value based on the given rotation angle.
- *
- * @param {number} rotation - The rotation angle in degrees.
- * @return {string | null} The CSS rotation value or null if the rotation angle is 0.
- */
-export function getRotationCss( rotation: number ) {
-	return Number( rotation ) !== 0 ? `rotate(${ rotation }deg)` : null;
-}
-
-/**
- * This function updates the SVG markup with the new attributes.
- *
- * @param  attributes - The attributes to update the SVG markup with.
- * @param svgMarkup The SVG markup to update.
- * @return { string | null } the SVG components
- */
-export const updateSvgMarkup = (
-	attributes: SvgAttributesDef,
-	svgMarkup?: string
-): { __html: TrustedHTML } => {
-	const { svg, width, height, align } = attributes;
-
-	const svgWidth =
-		width && ! hasAlign( align, [ 'full', 'wide' ] ) ? width : '100%';
-	const svgHeight =
-		height && ! hasAlign( align, [ 'full', 'wide' ] ) ? height : null;
-
-	const svgDoc = updateHtmlProp( svgMarkup ?? svg, [
-		{ prop: 'width', value: svgWidth },
-		{ prop: 'height', value: svgHeight },
-	] );
-
-	return cleanMarkup( svgDoc );
-};
-
-/**
- * Returns the props for the SVG wrapper component.
- *
- * @param {SvgAttributesDef} attributes                      - The attributes for the SVG component.
- * @param {Object}           [customStyle={}]                - The custom styles for the wrapper component.
- * @param {string}           [className='svg-block-wrapper'] - The class name for the wrapper component.
- * @return {Object} The props for the SVG wrapper component.
- */
-export function getWrapperProps(
-	attributes: SvgAttributesDef,
-	customStyle: Record< string, {} > = {}
-): Record< string, string | number > {
-	const { width, height, aspectRatio, scale, align } = attributes;
-	// These are the default attributes for the svg
-	return {
-		...customStyle,
-		width: hasAlign( align, [ 'full', 'wide', 'none' ] ) ? null : width,
-		height: hasAlign( align, [ 'full', 'wide', 'none' ] )
-			? null
-			: height,
-		transform: getRotationCss( attributes.rotation ),
-		aspectRatio,
-		objectFit: scale,
-		marginLeft: hasAlign( align, [ 'center' ] ) ? 'auto' : null,
-		marginRight: hasAlign( align, [ 'center' ] ) ? 'auto' : null,
-	};
-}
