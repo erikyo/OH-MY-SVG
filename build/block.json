@@ -1,0 +1,83 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "codekraft/oh-my-svg",
+  "category": "media",
+  "title": "SVG",
+  "textdomain": "oh-my-svg",
+  "attributes": {
+    "svg": {
+      "type": "string",
+      "default": ""
+    },
+    "originalSvg": {
+      "type": "string"
+    },
+    "href": {
+      "type": "string"
+    },
+    "linkTarget": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "height": {
+      "type": "number"
+    },
+    "width": {
+      "type": "number"
+    },
+    "rotation": {
+      "type": "number",
+      "default": 0
+    },
+    "style": {
+      "type": "object"
+    },
+    "uniqueId": {
+      "type": "string"
+    },
+    "mediaId": {
+      "type": "number",
+      "default": 0
+    },
+    "mediaUrl": {
+      "type": "string"
+    },
+    "storage": {
+      "type": "string",
+      "default": "inline"
+    }
+  },
+  "supports": {
+    "align": true,
+    "anchor": true,
+    "className": true,
+    "color": {
+      "background": true,
+      "gradients": true,
+      "text": false
+    },
+    "filter": {
+      "duotone": true
+    },
+    "border": {
+      "radius": true,
+      "width": true,
+      "color": true,
+      "style": true
+    },
+    "spacing": {
+      "margin": true,
+      "padding": true,
+      "blockGap": true
+    }
+  },
+  "selectors": {
+    "filter": {
+      "duotone": ".wp-block-codekraft-oh-my-svg svg"
+    }
+  },
+  "editorScript": "file:./index.js"
+}
