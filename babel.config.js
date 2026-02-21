@@ -3,6 +3,13 @@ module.exports = ( api ) => {
 
 	return {
 		presets: [
+			'@babel/preset-env',
+			[
+				'@babel/preset-react',
+				{
+					runtime: 'classic',
+				},
+			],
 			'@babel/preset-typescript',
 			'@wordpress/babel-preset-default',
 		],
