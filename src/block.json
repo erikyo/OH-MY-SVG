@@ -4,21 +4,20 @@
 	"name": "codekraft/oh-my-svg",
 	"category": "media",
 	"title": "SVG",
+	"textdomain": "oh-my-svg",
 	"attributes": {
 		"svg": {
 			"type": "string",
-            "source": "html",
-            "selector": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper"
-        },
+			"default": ""
+		},
+		"originalSvg": {
+			"type": "string"
+		},
 		"href": {
 			"type": "string"
 		},
-		"rel": {
-			"type": "string"
-		},
 		"linkTarget": {
-			"type": "string",
-            "default": "_self"
+			"type": "string"
 		},
 		"title": {
 			"type": "string"
@@ -26,86 +25,58 @@
 		"height": {
 			"type": "number"
 		},
-		"filesize": {
-			"type": "number"
-		},
 		"width": {
 			"type": "number"
-		},
-		"aspectRatio": {
-			"type": "string"
 		},
 		"rotation": {
 			"type": "number",
 			"default": 0
 		},
 		"style": {
-			"type": "object",
-			"default": {
-				"shadow": "var:preset|shadow|deep"
-			}
+			"type": "object"
+		},
+		"uniqueId": {
+			"type": "string"
+		},
+		"mediaId": {
+			"type": "number",
+			"default": 0
+		},
+		"mediaUrl": {
+			"type": "string"
+		},
+		"storage": {
+			"type": "string",
+			"default": "inline"
 		}
 	},
 	"supports": {
 		"align": true,
-		"ariaLabel": true,
 		"anchor": true,
 		"className": true,
-		"layout": true,
-		"filter": {
-			"duotone": true,
-			"gradients": true,
-			"opacity": true,
-			"shadow": true
-		},
 		"color": {
 			"background": true,
 			"gradients": true,
-			"text": false,
-			"__experimentalDuotone": "svg"
+			"text": false
 		},
-		"__experimentalBorder": {
-			"color": true,
+		"filter": {
+			"duotone": true
+		},
+		"border": {
 			"radius": true,
-			"style": true,
 			"width": true,
-			"__experimentalSkipSerialization": true,
-			"__experimentalDefaultControls": {
-				"color": true,
-				"radius": true,
-				"style": true,
-				"width": true
-			}
+			"color": true,
+			"style": true
 		},
 		"spacing": {
 			"margin": true,
 			"padding": true,
 			"blockGap": true
-		},
-		"dimensions": {
-			"aspectRatio": true,
-			"minHeight": false
-		},
-		"position": {
-			"sticky": false
-		},
-		"shadow": {
-			"__experimentalSkipSerialization": true
-		},
-		"default": {
-			"align": "none"
 		}
 	},
 	"selectors": {
-		"root": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper",
-		"border": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper",
-		"shadow": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper",
-		"typography": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper > svg text",
 		"filter": {
-			"duotone": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper"
-		},
-		"color": {
-			"text": ".wp-block-codekraft-oh-my-svg .svg-block-wrapper > svg text"
+			"duotone": ".wp-block-codekraft-oh-my-svg svg"
 		}
 	},
 	"editorScript": "file:./index.js"

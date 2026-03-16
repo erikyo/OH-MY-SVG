@@ -1,25 +1,22 @@
-import type { RefObject } from '@wordpress/element';
-
 /** the svg component prop */
 export interface SvgAttributesDef {
 	svg: string;
 	href?: string;
-	width: number;
-	height: number;
-	align: string;
+	width?: number; // Changed from string | number to number based on block.json
+	height?: number;
 	rotation?: number;
-	aspectRatio?: string;
-	scale?: string;
+	align?: string;
+	style?: Record<string, any>;
 	linkTarget?: string;
-	title?: string;
-	rel?: string;
-	alt?: string;
+	uniqueId?: string;
+	storage?: 'inline' | 'meta';
 }
-
 /** the svg component prop */
 export interface SvgAttributesEditor extends SvgAttributesDef {
-	svgData?: RefObject< HTMLDivElement | HTMLAnchorElement >; // stores whether the link opens into a new window
+	originalSvg?: string; // the original Svg before changes
+	rel?: string; // stores whether the link opens into a new window
 	fileData?: SvgFileDef;
+	alt?: string;
 }
 
 /** the svg component prop */
@@ -43,8 +40,8 @@ export interface SvgImgAttributesDef extends SvgAttributesDef {
  * @property {number | string} height - The height of the SVG.
  */
 export type SvgSizeDef = {
-	width?: number;
-	height?: number;
+	width?: number | string;
+	height?: number | string;
 };
 
 /**
