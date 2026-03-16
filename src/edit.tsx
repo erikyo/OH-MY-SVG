@@ -96,9 +96,12 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 	const isURLSet = !!href;
 	const opensInNewTab = linkTarget === '_blank';
 
-	const defaultLayout = useSelect((select) => {
+	const { defaultLayout, themeColors } = useSelect((select) => {
 		const settings = select(blockEditorStore).getSettings();
-		return settings.layout || {};
+		return {
+			defaultLayout: settings.layout || {},
+			themeColors: settings.colors || undefined,
+		};
 	}, []);
 
 	const contentWidth = defaultLayout.contentSize ? parseInt(defaultLayout.contentSize) : 1200;
@@ -444,7 +447,7 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 									setLocalSvg(optimized);
 									// If stored in media, warn user they need to save again
 									if (storage === 'media') {
-										createErrorNotice('SVG modified. Click "Update Media" to save to library.');
+										createErrorNotice('SVG modified. Click "Update Media" to save to library.', { id: 'svg-modified-notice' });
 									} else {
 										setAttributes({ svg: optimized });
 									}
@@ -464,7 +467,7 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 									if (storage !== 'media') {
 										setAttributes({ svg: originalSvg });
 									} else {
-										createErrorNotice('SVG modified. Click "Update Media" to save to library.');
+										createErrorNotice('SVG modified. Click "Update Media" to save to library.', { id: 'svg-modified-notice' });
 									}
 								}}
 							>
@@ -526,7 +529,7 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 									if (storage !== 'media') {
 										setAttributes({ svg: noFill });
 									} else {
-										createErrorNotice('SVG modified. Click "Update Media" to save to library.');
+										createErrorNotice('SVG modified. Click "Update Media" to save to library.', { id: 'svg-modified-notice' });
 									}
 								}}
 							>
@@ -545,7 +548,7 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 									if (storage !== 'media') {
 										setAttributes({ svg: stroked });
 									} else {
-										createErrorNotice('SVG modified. Click "Update Media" to save to library.');
+										createErrorNotice('SVG modified. Click "Update Media" to save to library.', { id: 'svg-modified-notice' });
 									}
 								}}
 							>
@@ -563,20 +566,47 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 					</PanelBody>
 
 					<PanelBody title="Colors">
+						{colors.length > 0 && (
+							<div style={{ marginBottom: '16px' }}>
+								<div style={{ marginBottom: '8px', fontWeight: 500, fontSize: '13px' }}>{__('Colors in SVG')}</div>
+								<div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+									{colors.map((c, i) => (
+										<button
+											key={i}
+											type="button"
+											style={{
+												backgroundColor: c.color,
+												width: '24px',
+												height: '24px',
+												borderRadius: '50%',
+												border: currentColor === c.color ? '2px solid #555' : '1px solid #ccc',
+												padding: 0,
+												cursor: 'pointer',
+												boxShadow: currentColor === c.color ? '0 0 0 2px #fff inset' : 'none'
+											}}
+											onClick={() => setColor(c.color)}
+											aria-label={c.name ? `Select ${c.name}` : `Select ${c.color}`}
+											title={c.name || c.color}
+										/>
+									))}
+								</div>
+							</div>
+						)}
+						<div style={{ marginBottom: '8px', fontWeight: 500, fontSize: '13px' }}>{__('Replace with')}</div>
 						<ColorPalette
 							enableAlpha={true}
 							clearable={false}
-							colors={colors}
+							colors={themeColors}
 							value={currentColor}
 							onChange={(newColor) => {
-								if (newColor) {
+								if (newColor && newColor !== currentColor) {
 									const newSvg = updateColor(localSvg, newColor, currentColor);
 									setLocalSvg(newSvg);
 									setColor(newColor);
 									if (storage !== 'media') {
 										setAttributes({ svg: newSvg });
 									} else {
-										createErrorNotice('SVG modified. Click "Update Media" to save to library.');
+										createErrorNotice('SVG modified. Click "Update Media" to save to library.', { id: 'svg-modified-notice' });
 									}
 								}
 							}}
