@@ -72,11 +72,11 @@ export const loadSvg = ({
 
 	const fileMetaData: SvgFileDef | undefined = fileData
 		? {
-				name: fileData.name,
-				size: fileData.size || cleanSvg.length,
-				type: fileData.type || 'image/svg+xml',
-				lastModified: fileData.lastModified,
-			}
+			name: fileData.name,
+			size: fileData.size || cleanSvg.length,
+			type: fileData.type || 'image/svg+xml',
+			lastModified: fileData.lastModified,
+		}
 		: undefined;
 
 	if (cleanSvg) {
@@ -312,37 +312,45 @@ export const svgRemoveFill = (svgMarkup: string): string => {
 export const convertSvgToBitmap = async ({
 	svgBase64 = '',
 	sizeRatio = 1,
-	height = 100,
-	width = 100,
+	height,
+	width,
 	format = 'webp',
 	quality = 0.8,
 }: {
 	svgBase64: string;
-	sizeRatio: number;
-	width: number;
-	height: number;
-	format: string;
-	quality: number;
+	sizeRatio?: number;
+	width?: number;
+	height?: number;
+	format?: string;
+	quality?: number;
 }): Promise<string> => {
-	// Create an image element from the SVG markup
-	const img = new window.Image();
-	img.src = svgBase64 as string;
+	return new Promise((resolve, reject) => {
+		// Create an image element from the SVG markup
+		const img = new window.Image();
 
-	// Create a canvas element
-	const canvas = document.createElement('canvas');
+		img.onload = () => {
+			// Create a canvas element
+			const canvas = document.createElement('canvas');
 
-	// Set the size of the canvas
-	canvas.width = width * sizeRatio;
-	canvas.height = height * sizeRatio;
+			// Fallback to intrinsic width and height of the image to keep proportions
+			const finalWidth = width || img.width || 100;
+			const finalHeight = height || img.height || 100;
 
-	// Draw the image onto the canvas
-	const ctx = canvas.getContext('2d');
-	try {
-		ctx?.drawImage(img, 0, 0);
-		return Promise.resolve(
-			canvas.toDataURL(`image/${format}`, quality)
-		).then((dataUrl) => dataUrl);
-	} catch (err) {
-		return Promise.reject(err);
-	}
+			// Set the size of the canvas
+			canvas.width = finalWidth * (sizeRatio || 1);
+			canvas.height = finalHeight * (sizeRatio || 1);
+
+			// Draw the image onto the canvas
+			const ctx = canvas.getContext('2d');
+			try {
+				ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+				resolve(canvas.toDataURL(`image/${format}`, quality));
+			} catch (err) {
+				reject(err);
+			}
+		};
+
+		img.onerror = reject;
+		img.src = svgBase64 as string;
+	});
 };
