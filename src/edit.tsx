@@ -60,7 +60,9 @@ interface ExtendedAttributes extends SvgAttributesEditor {
 	storage?: 'inline' | 'media';
 }
 
-export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => {
+export const Edit = (
+	props: BlockEditProps<ExtendedAttributes>
+): JSX.Element => {
 	const { attributes, setAttributes, isSelected } = props;
 	const {
 		mediaId,
@@ -77,7 +79,8 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 	} = attributes;
 
 	const { toggleSelection } = useDispatch(blockEditorStore);
-	const { createErrorNotice, createSuccessNotice } = useDispatch(noticesStore);
+	const { createErrorNotice, createSuccessNotice } =
+		useDispatch(noticesStore);
 
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -88,7 +91,10 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 	const [colors, setColors] = useState<SvgColorDef[]>([]);
 	const [currentColor, setColor] = useState<string>('');
 	const [pathStrokeWith, setPathStrokeWith] = useState<number>(1.0);
-	const [originalSize, setOriginalSize] = useState<SvgSizeDef>({ width: 0, height: 0 });
+	const [originalSize, setOriginalSize] = useState<SvgSizeDef>({
+		width: 0,
+		height: 0,
+	});
 
 	// Local SVG is the source of truth for the editor view
 	const [localSvg, setLocalSvg] = useState<string>(svg);
@@ -96,12 +102,17 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 	const isURLSet = !!href;
 	const opensInNewTab = linkTarget === '_blank';
 
-	const defaultLayout = useSelect((select) => {
+	const { defaultLayout, themeColors } = useSelect((select) => {
 		const settings = select(blockEditorStore).getSettings();
-		return settings.layout || {};
+		return {
+			defaultLayout: settings.layout || {},
+			themeColors: settings.colors || undefined,
+		};
 	}, []);
 
-	const contentWidth = defaultLayout.contentSize ? parseInt(defaultLayout.contentSize) : 1200;
+	const contentWidth = defaultLayout.contentSize
+		? parseInt(defaultLayout.contentSize)
+		: 1200;
 
 	// --- 1. HANDLE UPLOAD & CONVERSION LOGIC ---
 	const handleSaveToLibrary = async () => {
@@ -123,8 +134,16 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 		try {
 			// A. Convert SVG to PNG Blob
 			// Use original size to avoid saving scaled/transformed versions
-			const w = (typeof originalSize?.width === 'number' && originalSize.width > 0) ? originalSize.width : 300;
-			const h = (typeof originalSize?.height === 'number' && originalSize.height > 0) ? originalSize.height : 300;
+			const w =
+				typeof originalSize?.width === 'number' &&
+				originalSize.width > 0
+					? originalSize.width
+					: 300;
+			const h =
+				typeof originalSize?.height === 'number' &&
+				originalSize.height > 0
+					? originalSize.height
+					: 300;
 
 			const pngBlob = await svgToPngBlob(contentToSave, w, h);
 			if (!pngBlob) {
@@ -151,7 +170,10 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 						data: { force: true },
 					});
 				} catch (e) {
-					console.warn('Could not delete old media attachment during update', e);
+					console.warn(
+						'Could not delete old media attachment during update',
+						e
+					);
 				}
 			}
 
@@ -191,10 +213,14 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 				svg: '', // Clear inline SVG to save space in post_content
 			});
 
-			createSuccessNotice(__('SVG converted and saved to Media Library!'));
+			createSuccessNotice(
+				__('SVG converted and saved to Media Library!')
+			);
 		} catch (error: any) {
 			console.error(error);
-			createErrorNotice(error.message || __('Error saving to Media Library'));
+			createErrorNotice(
+				error.message || __('Error saving to Media Library')
+			);
 		} finally {
 			setIsUploading(false);
 		}
@@ -233,12 +259,16 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 		const fetchSvgFromMedia = async () => {
 			if (storage === 'media' && mediaId && !localSvg) {
 				try {
-					const media: any = await apiFetch({ path: `/wp/v2/media/${mediaId}` });
+					const media: any = await apiFetch({
+						path: `/wp/v2/media/${mediaId}`,
+					});
 					if (media?.meta?._oh_my_svg_data) {
 						setLocalSvg(media.meta._oh_my_svg_data);
 						// Also update originalSvg if missing
 						if (!originalSvg) {
-							setAttributes({ originalSvg: media.meta._oh_my_svg_data });
+							setAttributes({
+								originalSvg: media.meta._oh_my_svg_data,
+							});
 						}
 					}
 				} catch (e) {
@@ -273,7 +303,9 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 		}
 		const getContentMaxWidth = () => {
 			if (align?.includes('wide')) {
-				return defaultLayout.wideSize ? parseInt(defaultLayout.wideSize) : undefined;
+				return defaultLayout.wideSize
+					? parseInt(defaultLayout.wideSize)
+					: undefined;
 			}
 			return undefined;
 		};
@@ -301,11 +333,17 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 			return;
 		}
 
-		const newSvgSize = { width: newSvgData.width, height: newSvgData.height };
+		const newSvgSize = {
+			width: newSvgData.width,
+			height: newSvgData.height,
+		};
 		setOriginalSize(newSvgSize);
 
 		let calculatedSize = newSvgSize;
-		if (typeof newSvgData.width === 'number' && newSvgData.width >= contentWidth) {
+		if (
+			typeof newSvgData.width === 'number' &&
+			newSvgData.width >= contentWidth
+		) {
 			calculatedSize = {
 				width: contentWidth,
 				height: scaleProportionally(width, height, contentWidth),
@@ -323,7 +361,11 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 	};
 
 	const processSvgContent = (content: string, file?: File) => {
-		const processed = loadSvg({ newSvg: content, fileData: file, oldSvg: attributes });
+		const processed = loadSvg({
+			newSvg: content,
+			fileData: file,
+			oldSvg: attributes,
+		});
 		if (processed) {
 			updateSvgData(processed);
 		} else {
@@ -337,14 +379,16 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 			return;
 		}
 		const file = files[0];
-		readSvg(file).then((content) => {
-			if (content) {
-				processSvgContent(content, file);
-			}
-		}).catch((err) => {
-			console.error(err);
-			createErrorNotice(__('Error reading file'));
-		});
+		readSvg(file)
+			.then((content) => {
+				if (content) {
+					processSvgContent(content, file);
+				}
+			})
+			.catch((err) => {
+				console.error(err);
+				createErrorNotice(__('Error reading file'));
+			});
 	};
 
 	const setToggleOpenInNewTab = (value: boolean) => {
@@ -358,10 +402,16 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 		return { linkTarget: newLinkTarget, rel: updatedRel };
 	};
 	const startEditing = (event: React.MouseEvent) => {
-		event.preventDefault(); setIsEditingURL(true);
+		event.preventDefault();
+		setIsEditingURL(true);
 	};
 	const unlink = () => {
-		setAttributes({ href: undefined, linkTarget: undefined, rel: undefined }); setIsEditingURL(false);
+		setAttributes({
+			href: undefined,
+			linkTarget: undefined,
+			rel: undefined,
+		});
+		setIsEditingURL(false);
 	};
 	const blockProps = useBlockProps({ ref });
 
@@ -376,7 +426,14 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 					label={__('SVG')}
 					instructions={__('Upload an SVG file to get started.')}
 				>
-					<div className="components-upload-btn-wrapper" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+					<div
+						className="components-upload-btn-wrapper"
+						style={{
+							display: 'flex',
+							gap: '10px',
+							alignItems: 'center',
+						}}
+					>
 						<FormFileUpload
 							onChange={handleFileUpload}
 							accept={ALLOWED_MEDIA_TYPES.join(',')}
@@ -414,8 +471,15 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 							imageHeight={originalSize.height}
 							onChange={(nextDimensions: SvgSizeDef) => {
 								setAttributes({
-									width: typeof nextDimensions.width === 'string' ? parseInt(nextDimensions.width) : nextDimensions.width,
-									height: typeof nextDimensions.height === 'string' ? parseInt(nextDimensions.height) : nextDimensions.height,
+									width:
+										typeof nextDimensions.width === 'string'
+											? parseInt(nextDimensions.width)
+											: nextDimensions.width,
+									height:
+										typeof nextDimensions.height ===
+										'string'
+											? parseInt(nextDimensions.height)
+											: nextDimensions.height,
 								});
 							}}
 							slug={'custom'}
@@ -427,14 +491,20 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 							max={180}
 							marks={rotationRangePresets}
 							step={1}
-							onChange={(ev) => setAttributes({ rotation: Number(ev) })}
+							onChange={(ev) =>
+								setAttributes({ rotation: Number(ev) })
+							}
 						/>
 					</PanelBody>
 
 					<PanelBody title="Optimization">
 						<PanelRow>
 							<p>
-								SVGO <SvgoStats original={originalSvg} compressed={localSvg} />
+								SVGO{' '}
+								<SvgoStats
+									original={originalSvg}
+									compressed={localSvg}
+								/>
 							</p>
 							<Button
 								isSmall={true}
@@ -444,7 +514,10 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 									setLocalSvg(optimized);
 									// If stored in media, warn user they need to save again
 									if (storage === 'media') {
-										createErrorNotice('SVG modified. Click "Update Media" to save to library.');
+										createErrorNotice(
+											'SVG modified. Click "Update Media" to save to library.',
+											{ id: 'svg-modified-notice' }
+										);
 									} else {
 										setAttributes({ svg: optimized });
 									}
@@ -464,7 +537,10 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 									if (storage !== 'media') {
 										setAttributes({ svg: originalSvg });
 									} else {
-										createErrorNotice('SVG modified. Click "Update Media" to save to library.');
+										createErrorNotice(
+											'SVG modified. Click "Update Media" to save to library.',
+											{ id: 'svg-modified-notice' }
+										);
 									}
 								}}
 							>
@@ -475,8 +551,19 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 
 						{/* STORAGE CONTROLS */}
 						<PanelRow>
-							<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-								<span>{storage === 'media' ? '✅ Linked to Media' : '⚠️ Inline SVG'}</span>
+							<div
+								style={{
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'space-between',
+									width: '100%',
+								}}
+							>
+								<span>
+									{storage === 'media'
+										? '✅ Linked to Media'
+										: '⚠️ Inline SVG'}
+								</span>
 								<div style={{ display: 'flex', gap: '5px' }}>
 									{storage === 'media' && (
 										<Button
@@ -495,7 +582,13 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 										disabled={isUploading}
 										onClick={handleSaveToLibrary}
 									>
-										{isUploading ? <Spinner /> : (storage === 'media' ? __('Update Media') : __('Save to Library'))}
+										{isUploading ? (
+											<Spinner />
+										) : storage === 'media' ? (
+											__('Update Media')
+										) : (
+											__('Save to Library')
+										)}
 									</Button>
 								</div>
 							</div>
@@ -526,7 +619,10 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 									if (storage !== 'media') {
 										setAttributes({ svg: noFill });
 									} else {
-										createErrorNotice('SVG modified. Click "Update Media" to save to library.');
+										createErrorNotice(
+											'SVG modified. Click "Update Media" to save to library.',
+											{ id: 'svg-modified-notice' }
+										);
 									}
 								}}
 							>
@@ -539,13 +635,17 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 									const stroked = svgAddPathStroke({
 										svgMarkup: localSvg,
 										pathStrokeWith,
-										pathStrokeColor: currentColor || undefined,
+										pathStrokeColor:
+											currentColor || undefined,
 									});
 									setLocalSvg(stroked);
 									if (storage !== 'media') {
 										setAttributes({ svg: stroked });
 									} else {
-										createErrorNotice('SVG modified. Click "Update Media" to save to library.');
+										createErrorNotice(
+											'SVG modified. Click "Update Media" to save to library.',
+											{ id: 'svg-modified-notice' }
+										);
 									}
 								}}
 							>
@@ -563,20 +663,86 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 					</PanelBody>
 
 					<PanelBody title="Colors">
+						{colors.length > 0 && (
+							<div style={{ marginBottom: '16px' }}>
+								<div
+									style={{
+										marginBottom: '8px',
+										fontWeight: 500,
+										fontSize: '13px',
+									}}
+								>
+									{__('Colors in SVG')}
+								</div>
+								<div
+									style={{
+										display: 'flex',
+										gap: '8px',
+										flexWrap: 'wrap',
+									}}
+								>
+									{colors.map((c, i) => (
+										<button
+											key={i}
+											type="button"
+											style={{
+												backgroundColor: c.color,
+												width: '24px',
+												height: '24px',
+												borderRadius: '50%',
+												border:
+													currentColor === c.color
+														? '2px solid #555'
+														: '1px solid #ccc',
+												padding: 0,
+												cursor: 'pointer',
+												boxShadow:
+													currentColor === c.color
+														? '0 0 0 2px #fff inset'
+														: 'none',
+											}}
+											onClick={() => setColor(c.color)}
+											aria-label={
+												c.name
+													? `Select ${c.name}`
+													: `Select ${c.color}`
+											}
+											title={c.name || c.color}
+										/>
+									))}
+								</div>
+							</div>
+						)}
+						<div
+							style={{
+								marginBottom: '8px',
+								fontWeight: 500,
+								fontSize: '13px',
+							}}
+						>
+							{__('Replace with')}
+						</div>
 						<ColorPalette
 							enableAlpha={true}
 							clearable={false}
-							colors={colors}
+							colors={themeColors}
 							value={currentColor}
 							onChange={(newColor) => {
-								if (newColor) {
-									const newSvg = updateColor(localSvg, newColor, currentColor);
+								if (newColor && newColor !== currentColor) {
+									const newSvg = updateColor(
+										localSvg,
+										newColor,
+										currentColor
+									);
 									setLocalSvg(newSvg);
 									setColor(newColor);
 									if (storage !== 'media') {
 										setAttributes({ svg: newSvg });
 									} else {
-										createErrorNotice('SVG modified. Click "Update Media" to save to library.');
+										createErrorNotice(
+											'SVG modified. Click "Update Media" to save to library.',
+											{ id: 'svg-modified-notice' }
+										);
 									}
 								}
 							}}
@@ -632,7 +798,10 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 				>
 					<LinkControl
 						value={{ url: href, opensInNewTab }}
-						onChange={({ url = '', opensInNewTab: newTab = false }) => {
+						onChange={({
+							url = '',
+							opensInNewTab: newTab = false,
+						}) => {
 							let toggleMeta = {};
 							if (opensInNewTab !== newTab) {
 								toggleMeta = setToggleOpenInNewTab(newTab);
@@ -652,23 +821,35 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 				style={{
 					margin: hasAlign(align, ['center']) ? 'auto' : undefined,
 					display: hasAlign(align, ['center']) ? 'flex' : undefined,
-					justifyContent: hasAlign(align, ['center']) ? 'center' : undefined,
+					justifyContent: hasAlign(align, ['center'])
+						? 'center'
+						: undefined,
 				}}
 				showHandle={isSelected && align !== 'full'}
 				minHeight={20}
 				minWidth={20}
 				maxWidth={maxWidth}
 				lockAspectRatio
-				enable={!hasAlign(align, ['full', 'wide']) ? {
-					top: false,
-					right: !hasAlign(align, 'right'),
-					bottom: true,
-					left: !hasAlign(align, 'left'),
-				} : undefined}
+				enable={
+					!hasAlign(align, ['full', 'wide'])
+						? {
+								top: false,
+								right: !hasAlign(align, 'right'),
+								bottom: true,
+								left: !hasAlign(align, 'left'),
+							}
+						: undefined
+				}
 				onResizeStop={async (e, direction, ref, delta) => {
 					setAttributes({
-						width: typeof width === 'number' ? width + delta.width : delta.width,
-						height: typeof height === 'number' ? height + delta.height : delta.height,
+						width:
+							typeof width === 'number'
+								? width + delta.width
+								: delta.width,
+						height:
+							typeof height === 'number'
+								? height + delta.height
+								: delta.height,
 					});
 					await toggleSelection(true);
 				}}
@@ -678,7 +859,10 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 			>
 				<div
 					style={{ display: 'flex', width: '100%', height: '100%' }}
-					dangerouslySetInnerHTML={getSVG({ ...attributes, svg: localSvg })}
+					dangerouslySetInnerHTML={getSVG({
+						...attributes,
+						svg: localSvg,
+					})}
 				/>
 			</ResizableBox>
 		</div>

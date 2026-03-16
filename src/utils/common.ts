@@ -13,17 +13,17 @@ interface htmlProperty {
  * @param {htmlProperty[]} props - an array of objects with two properties:
  * @return A string
  */
-export function updateHtmlProp( svg: string, props: htmlProperty[] ): string {
-	const doc = getSvgDoc( svg ).querySelector( 'svg' );
-	if ( doc !== null ) {
-		props.forEach( ( { prop, value } ) => {
-			if ( value ) {
-				doc.setAttribute( prop, value );
+export function updateHtmlProp(svg: string, props: htmlProperty[]): string {
+	const doc = getSvgDoc(svg).querySelector('svg');
+	if (doc !== null) {
+		props.forEach(({ prop, value }) => {
+			if (value) {
+				doc.setAttribute(prop, value);
 			} else {
-				doc.removeAttribute( prop );
+				doc.removeAttribute(prop);
 			}
-		} );
-		return getSvgString( doc as any );
+		});
+		return getSvgString(doc as any);
 	}
 	return svg;
 }
@@ -36,9 +36,9 @@ export function updateHtmlProp( svg: string, props: htmlProperty[] ): string {
  *
  * @return {string} The sanitized SVG markup
  */
-export function cleanMarkup( svg: string ): { __html: string } {
+export function cleanMarkup(svg: string): { __html: string } {
 	return {
-		__html: DOMPurify.sanitize( svg ),
+		__html: DOMPurify.sanitize(svg),
 	};
 }
 
@@ -47,11 +47,10 @@ export function cleanMarkup( svg: string ): { __html: string } {
  *
  * @param {number} bytes - the number of char of the string
  */
-export function humanFileSize( bytes: number ): string {
-	const i =
-		bytes === 0 ? 0 : Math.floor( Math.log( bytes ) / Math.log( 1024 ) );
+export function humanFileSize(bytes: number): string {
+	const i = bytes === 0 ? 0 : Math.floor(Math.log(bytes) / Math.log(1024));
 	return (
-		( bytes / Math.pow( 1024, i ) ).toFixed( 2 ) +
-		[ 'B', 'kB', 'MB', 'GB', 'TB' ][ i ]
+		(bytes / Math.pow(1024, i)).toFixed(2) +
+		['B', 'kB', 'MB', 'GB', 'TB'][i]
 	);
 }

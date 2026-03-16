@@ -18,7 +18,7 @@ export const svgIcon: JSX.Element = (
  *
  * @param {string} message
  */
-export const ErrorSvg = ( message: string ): JSX.Element => (
+export const ErrorSvg = (message: string): JSX.Element => (
 	<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
 		<rect
 			stroke="#ccc"
@@ -28,7 +28,7 @@ export const ErrorSvg = ( message: string ): JSX.Element => (
 			width="100%"
 		></rect>
 		<text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle">
-			{ message }
+			{message}
 		</text>
 	</svg>
 );

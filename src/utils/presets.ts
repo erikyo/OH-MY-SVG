@@ -5,27 +5,27 @@ import { hasAlign } from './fn';
 export const rotationRangePresets:
 	| boolean
 	| { value: number; label?: string }[] = [
-		{
-			value: -180,
-			label: '-180',
-		},
-		{
-			value: -90,
-			label: '-90',
-		},
-		{
-			value: 0,
-			label: '0',
-		},
-		{
-			value: 90,
-			label: '90',
-		},
-		{
-			value: 180,
-			label: '180',
-		},
-	];
+	{
+		value: -180,
+		label: '-180',
+	},
+	{
+		value: -90,
+		label: '-90',
+	},
+	{
+		value: 0,
+		label: '0',
+	},
+	{
+		value: 90,
+		label: '90',
+	},
+	{
+		value: 180,
+		label: '180',
+	},
+];
 
 /**
  * It returns an object with the css property for the alignCenter class for the svg block container
@@ -71,8 +71,8 @@ const styleDefault = () => {
  *
  * @return A function that returns a style object.
  */
-export const getAlignStyle = ( blockAlignment: string | undefined ) => {
-	switch ( blockAlignment ) {
+export const getAlignStyle = (blockAlignment: string | undefined) => {
+	switch (blockAlignment) {
 		case 'wide':
 		case 'full':
 			return styleWide();

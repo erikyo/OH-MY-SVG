@@ -1,4 +1,4 @@
-export const ALLOWED_MEDIA_TYPES: string[] = [ 'image/svg+xml' ];
+export const ALLOWED_MEDIA_TYPES: string[] = ['image/svg+xml'];
 export const SVG_VARIATION_NAMESPACE: string = 'codekraft/oh-my-svg-img';
 export const NEW_TAB_REL: string = 'Snoreferrer noopener';
 export const SVGBASE64: string = 'data:image/svg+xml;base64,';
@@ -19,4 +19,4 @@ export const SVGO_DEFAULTS: Object = {
 	],
 };
 
-export const SVG_EDITABLE_ELEMENTS: string[] = [ 'path', 'circle', 'rect' ];
+export const SVG_EDITABLE_ELEMENTS: string[] = ['path', 'circle', 'rect'];

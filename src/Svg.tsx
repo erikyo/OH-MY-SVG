@@ -6,19 +6,19 @@ import { updateHtmlProp, cleanMarkup } from './utils/common';
  * @param  attributes
  * @return { string | null } the SVG components
  */
-const getSVG = ( attributes: any ): { __html: string } => {
+const getSVG = (attributes: any): { __html: string } => {
 	const { svg, width, height, rotation } = attributes;
 
 	const svgStyle =
-		Number( rotation ) !== 0 ? `transform:rotate(${ rotation }deg)` : null;
+		Number(rotation) !== 0 ? `transform:rotate(${rotation}deg)` : null;
 
-	const svgDoc = updateHtmlProp( svg, [
+	const svgDoc = updateHtmlProp(svg, [
 		{ prop: 'width', value: width || '100%' },
 		{ prop: 'height', value: height || false },
 		{ prop: 'style', value: svgStyle || false },
-	] );
+	]);
 
-	return cleanMarkup( svgDoc );
+	return cleanMarkup(svgDoc);
 };
 
 export default getSVG;

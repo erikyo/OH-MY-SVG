@@ -1,9 +1,20 @@
 import DOMPurify from 'dompurify';
-import { SVG_EDITABLE_ELEMENTS, SVG_MIN_SIZE, SVGBASE64, SVGO_DEFAULTS } from '../constants';
+import {
+	SVG_EDITABLE_ELEMENTS,
+	SVG_MIN_SIZE,
+	SVGBASE64,
+	SVGO_DEFAULTS,
+} from '../constants';
 import { optimize } from 'svgo';
 import { closest } from 'color-2-name';
 import { __ } from '@wordpress/i18n';
-import type { SvgAttributesEditor, SvgColorDef, SvgFileDef, SvgSizeDef, SvgStrokeDef } from '../types';
+import type {
+	SvgAttributesEditor,
+	SvgColorDef,
+	SvgFileDef,
+	SvgSizeDef,
+	SvgStrokeDef,
+} from '../types';
 import { BlockAttributes } from '@wordpress/blocks';
 
 /**
@@ -15,25 +26,25 @@ import { BlockAttributes } from '@wordpress/blocks';
  *
  * @return {Promise} the file reader promise
  */
-export async function readSvg( file: Blob ): Promise<string | null> {
-	return new Promise( ( resolve, reject ) => {
+export async function readSvg(file: Blob): Promise<string | null> {
+	return new Promise((resolve, reject) => {
 		const reader = new window.FileReader();
 		reader.onload = () => {
-			resolve( reader.result ? reader.result.toString() : null );
+			resolve(reader.result ? reader.result.toString() : null);
 		};
 		reader.onabort = () => {
-			reject( 'file reading was aborted' );
+			reject('file reading was aborted');
 		};
 		reader.onerror = () => {
-			reject( 'file reading has failed' );
+			reject('file reading has failed');
 		};
 
 		try {
-			reader.readAsText( file );
-		} catch ( err ) {
-			reject( err );
+			reader.readAsText(file);
+		} catch (err) {
+			reject(err);
 		}
-	} );
+	});
 }
 
 /**
@@ -43,7 +54,7 @@ export async function readSvg( file: Blob ): Promise<string | null> {
  *
  * @param {SvgAttributesDef} res - The string that was read into the file that is supposed to be a svg
  */
-export const loadSvg = ( {
+export const loadSvg = ({
 	newSvg,
 	fileData,
 	oldSvg,
@@ -51,28 +62,28 @@ export const loadSvg = ( {
 	newSvg: string;
 	fileData: File | undefined;
 	oldSvg: BlockAttributes;
-} ): SvgAttributesEditor | null => {
-	const cleanSvg = DOMPurify.sanitize( newSvg );
-	const newSvgSize = getSvgSize( cleanSvg ) as SvgSizeDef;
+}): SvgAttributesEditor | null => {
+	const cleanSvg = DOMPurify.sanitize(newSvg);
+	const newSvgSize = getSvgSize(cleanSvg) as SvgSizeDef;
 
-	if ( ! newSvgSize.width && ! newSvgSize.height && cleanSvg.length < 10 ) {
+	if (!newSvgSize.width && !newSvgSize.height && cleanSvg.length < 10) {
 		return null;
 	}
 
 	const fileMetaData: SvgFileDef | undefined = fileData
 		? {
-			name: fileData.name,
-			size: fileData.size || cleanSvg.length,
-			type: fileData.type || 'image/svg+xml',
-			lastModified: fileData.lastModified,
-		}
+				name: fileData.name,
+				size: fileData.size || cleanSvg.length,
+				type: fileData.type || 'image/svg+xml',
+				lastModified: fileData.lastModified,
+			}
 		: undefined;
 
-	if ( cleanSvg ) {
+	if (cleanSvg) {
 		return {
 			alt:
-				__( 'The name of the image is ' ) + fileMetaData?.name ??
-				__( 'undefined' ),
+				__('The name of the image is ') + fileMetaData?.name ??
+				__('undefined'),
 			fileData: fileMetaData,
 			width: newSvgSize.width || oldSvg.width || SVG_MIN_SIZE * 10,
 			height: newSvgSize.height || oldSvg.height || SVG_MIN_SIZE * 10,
@@ -89,8 +100,8 @@ export const loadSvg = ( {
  * @param {string} svgString - waits SVGO to optimize the svg then return the markup
  * @return  {string} result
  */
-export function optimizeSvg( svgString: string ): string {
-	const result = optimize( svgString, SVGO_DEFAULTS );
+export function optimizeSvg(svgString: string): string {
+	const result = optimize(svgString, SVGO_DEFAULTS);
 	return result.data;
 }
 
@@ -101,9 +112,9 @@ export function optimizeSvg( svgString: string ): string {
  *
  * @return {string} A uncleaned string of the svgDoc.
  */
-export const getSvgString = ( svgDoc: Document ): string => {
+export const getSvgString = (svgDoc: Document): string => {
 	const serializer = new window.XMLSerializer();
-	return serializer.serializeToString( svgDoc );
+	return serializer.serializeToString(svgDoc);
 };
 
 /**
@@ -112,9 +123,9 @@ export const getSvgString = ( svgDoc: Document ): string => {
  * @param {string} svgData - The SVG data that you want to convert to a PNG.
  * @return {Document} A DOMParser object.
  */
-export const getSvgDoc = ( svgData: string ): Document => {
+export const getSvgDoc = (svgData: string): Document => {
 	const parser = new window.DOMParser();
-	return parser.parseFromString( svgData, 'image/svg+xml' );
+	return parser.parseFromString(svgData, 'image/svg+xml');
 };
 
 /**
@@ -124,8 +135,27 @@ export const getSvgDoc = ( svgData: string ): Document => {
  *
  * @return {string} the src url of the given svg markup
  */
-export function encodeSvg( svgMarkup: string ): string {
-	return SVGBASE64 + btoa( svgMarkup );
+export function encodeSvg(svgMarkup: string): string {
+	return SVGBASE64 + btoa(svgMarkup);
+}
+
+/**
+ * Normalizes a color string by converting to lowercase, removing spaces,
+ * and expanding 3-character hex codes to 6-character hex codes.
+ */
+function normalizeColor(color: string): string {
+	let normalized = color.toLowerCase().replace(/\s/g, '');
+	if (normalized.length === 4 && normalized.startsWith('#')) {
+		normalized =
+			'#' +
+			normalized[1] +
+			normalized[1] +
+			normalized[2] +
+			normalized[2] +
+			normalized[3] +
+			normalized[3];
+	}
+	return normalized;
 }
 
 /**
@@ -135,31 +165,34 @@ export function encodeSvg( svgMarkup: string ): string {
  *
  * @return An array of unique colors.
  */
-export function collectColors( fileContent: string ): SvgColorDef[] {
+export function collectColors(fileContent: string): SvgColorDef[] {
 	const colorCollection: string[] = [];
-	if ( fileContent ) {
+	const normalizedColors: string[] = [];
+	if (fileContent) {
 		// find all hex, rgb and rgba colors in the target string
 		const colorRegexp =
 			/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}|rgb\((?:\s*\d+\s*,){2}\s*\d+\)|rgba\((\s*\d+\s*,){3}[\d.]+\)/g;
-		const matchedColors = fileContent.matchAll( colorRegexp );
+		const matchedColors = fileContent.matchAll(colorRegexp);
 
 		// add the color to the collection (the first 50 colors excluding duplicates)
-		for ( const match of matchedColors ) {
-			if ( match[ 0 ] && colorCollection.length < 50 ) {
-				if ( ! colorCollection.includes( match[ 0 ] ) ) {
-					colorCollection.push( match[ 0 ] );
+		for (const match of matchedColors) {
+			if (match[0] && colorCollection.length < 50) {
+				const normalized = normalizeColor(match[0]);
+				if (!normalizedColors.includes(normalized)) {
+					normalizedColors.push(normalized);
+					colorCollection.push(match[0]);
 				}
 			}
 		}
 	}
 	return (
 		[
-			...colorCollection.map( ( color ) => {
+			...colorCollection.map((color) => {
 				return {
 					color,
-					name: closest( color ).name,
+					name: closest(color).name,
 				};
-			} ),
+			}),
 		] || []
 	);
 }
@@ -176,8 +209,16 @@ export const updateColor = (
 	newColor: string,
 	color: string
 ): string => {
-	// updates the colors array
-	return svgDoc.replaceAll( color, newColor );
+	const targetNormalized = normalizeColor(color);
+	const colorRegexp =
+		/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}|rgb\((?:\s*\d+\s*,){2}\s*\d+\)|rgba\((\s*\d+\s*,){3}[\d.]+\)/g;
+
+	return svgDoc.replace(colorRegexp, (match) => {
+		if (normalizeColor(match) === targetNormalized) {
+			return newColor;
+		}
+		return match;
+	});
 };
 
 /**
@@ -185,32 +226,29 @@ export const updateColor = (
  *
  * @param {string} fileContent
  */
-export function getSvgSize( fileContent: string ): SvgSizeDef {
+export function getSvgSize(fileContent: string): SvgSizeDef {
 	const parsedData: SvgSizeDef = {
 		width: 0,
 		height: 0,
 	};
-	if ( fileContent ) {
+	if (fileContent) {
 		// then get the image size data
-		const viewBox = fileContent.match( /viewBox=["']([^\\"']*)/ );
-		if ( viewBox ) {
-			const svgDataRaw = viewBox[ 1 ].split( ' ' );
-			parsedData.width = parseInt( svgDataRaw[ 2 ], 10 );
-			parsedData.height = parseInt( svgDataRaw[ 3 ], 10 );
+		const viewBox = fileContent.match(/viewBox=["']([^\\"']*)/);
+		if (viewBox) {
+			const svgDataRaw = viewBox[1].split(' ');
+			parsedData.width = parseInt(svgDataRaw[2], 10);
+			parsedData.height = parseInt(svgDataRaw[3], 10);
 		} else {
 			const sizes = [
-				...fileContent.matchAll( /(height|width)=["']([^\\"']*)/g ),
+				...fileContent.matchAll(/(height|width)=["']([^\\"']*)/g),
 			];
-			sizes.forEach( ( size ) => {
-				switch ( size[ 1 ] ) {
+			sizes.forEach((size) => {
+				switch (size[1]) {
 					case 'width':
 					case 'height':
-						return ( parsedData[ size[ 1 ] ] = parseInt(
-							size[ 2 ],
-							10
-						) );
+						return (parsedData[size[1]] = parseInt(size[2], 10));
 				}
-			} );
+			});
 		}
 	}
 
@@ -226,18 +264,18 @@ export function getSvgSize( fileContent: string ): SvgSizeDef {
  * @param {number} stroke.pathStrokeWith
  * @param {Array}  stroke.pathStrokeEl
  */
-export const svgAddPathStroke = ( {
-									 svgMarkup,
-									 pathStrokeWith = 2,
-									 pathStrokeColor,
-									 pathStrokeEl = SVG_EDITABLE_ELEMENTS,
-								 }: SvgStrokeDef ) => {
-	const svgDoc = getSvgDoc( svgMarkup );
-	svgDoc.querySelectorAll( pathStrokeEl.join() ).forEach( ( item ) => {
-		item.setAttribute( 'stroke', pathStrokeColor || '#20ff12' );
-		item.setAttribute( 'stroke-width', pathStrokeWith + 'px' );
-	} );
-	return getSvgString( svgDoc );
+export const svgAddPathStroke = ({
+	svgMarkup,
+	pathStrokeWith = 2,
+	pathStrokeColor,
+	pathStrokeEl = SVG_EDITABLE_ELEMENTS,
+}: SvgStrokeDef) => {
+	const svgDoc = getSvgDoc(svgMarkup);
+	svgDoc.querySelectorAll(pathStrokeEl.join()).forEach((item) => {
+		item.setAttribute('stroke', pathStrokeColor || '#20ff12');
+		item.setAttribute('stroke-width', pathStrokeWith + 'px');
+	});
+	return getSvgString(svgDoc);
 };
 
 /**
@@ -245,17 +283,17 @@ export const svgAddPathStroke = ( {
  *
  * @param {string} svgMarkup - the svg string
  */
-export const svgRemoveFill = ( svgMarkup: string ): string => {
-	const svgDoc = getSvgDoc( svgMarkup );
+export const svgRemoveFill = (svgMarkup: string): string => {
+	const svgDoc = getSvgDoc(svgMarkup);
 	svgDoc
-		.querySelectorAll<HTMLElement>( SVG_EDITABLE_ELEMENTS.join( ', ' ) )
-		.forEach( ( item ) => {
-			item.setAttribute( 'fill', 'transparent' );
-			if ( item.style.fill ) {
+		.querySelectorAll<HTMLElement>(SVG_EDITABLE_ELEMENTS.join(', '))
+		.forEach((item) => {
+			item.setAttribute('fill', 'transparent');
+			if (item.style.fill) {
 				item.style.fill = 'transparent';
 			}
-		} );
-	return getSvgString( svgDoc );
+		});
+	return getSvgString(svgDoc);
 };
 
 /**
@@ -271,33 +309,40 @@ export const svgRemoveFill = ( svgMarkup: string ): string => {
  *
  * @return {Promise<string>} the svg as bitmap image
  */
-export const convertSvgToBitmap = async ( {
-											 svgBase64 = '',
-											 sizeRatio = 1,
-											 height = 100,
-											 width = 100,
-											 format = 'webp',
-											 quality = 0.8,
-										 }: { svgBase64: string; sizeRatio: number; width: number; height: number; format: string; quality: number; } ): Promise<string> => {
+export const convertSvgToBitmap = async ({
+	svgBase64 = '',
+	sizeRatio = 1,
+	height = 100,
+	width = 100,
+	format = 'webp',
+	quality = 0.8,
+}: {
+	svgBase64: string;
+	sizeRatio: number;
+	width: number;
+	height: number;
+	format: string;
+	quality: number;
+}): Promise<string> => {
 	// Create an image element from the SVG markup
 	const img = new window.Image();
 	img.src = svgBase64 as string;
 
 	// Create a canvas element
-	const canvas = document.createElement( 'canvas' );
+	const canvas = document.createElement('canvas');
 
 	// Set the size of the canvas
 	canvas.width = width * sizeRatio;
 	canvas.height = height * sizeRatio;
 
 	// Draw the image onto the canvas
-	const ctx = canvas.getContext( '2d' );
+	const ctx = canvas.getContext('2d');
 	try {
-		ctx?.drawImage( img, 0, 0 );
+		ctx?.drawImage(img, 0, 0);
 		return Promise.resolve(
-			canvas.toDataURL( `image/${ format }`, quality )
-		).then( ( dataUrl ) => dataUrl );
-	} catch ( err ) {
-		return Promise.reject( err );
+			canvas.toDataURL(`image/${format}`, quality)
+		).then((dataUrl) => dataUrl);
+	} catch (err) {
+		return Promise.reject(err);
 	}
 };
