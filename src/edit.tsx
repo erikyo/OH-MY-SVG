@@ -45,6 +45,7 @@ import {
 	updateColor,
 } from './utils/svgTools';
 import { svgToPngBlob } from './utils/canvas';
+import { updateHtmlProp } from './utils/common';
 import { hasAlign, scaleProportionally } from './utils/fn';
 import { rotationRangePresets } from './utils/presets';
 import { svgIcon } from './utils/icons';
@@ -104,28 +105,57 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 
 	// --- 1. HANDLE UPLOAD & CONVERSION LOGIC ---
 	const handleSaveToLibrary = async () => {
-		const contentToSave = localSvg || svg;
+		let contentToSave = localSvg || svg;
 		if (!contentToSave) {
 			return;
 		}
+
+		// Strip resize and rotation style applied directly on the SVG source so the proxy image remains un-transformed
+		contentToSave = updateHtmlProp(contentToSave, [
+			{ prop: 'width', value: false },
+			{ prop: 'height', value: false },
+			{ prop: 'style', value: false },
+			{ prop: 'transform', value: false },
+		]);
 
 		setIsUploading(true);
 
 		try {
 			// A. Convert SVG to PNG Blob
-			// Use current width/height or default to 300x300 for the proxy image
-			const w = typeof width === 'number' ? width : 300;
-			const h = typeof height === 'number' ? height : 300;
+			// Use original size to avoid saving scaled/transformed versions
+			const w = (typeof originalSize?.width === 'number' && originalSize.width > 0) ? originalSize.width : 300;
+			const h = (typeof originalSize?.height === 'number' && originalSize.height > 0) ? originalSize.height : 300;
 
 			const pngBlob = await svgToPngBlob(contentToSave, w, h);
 			if (!pngBlob) {
 				throw new Error('Conversion failed');
 			}
 
-			// B. Upload PNG to Media Library
+			// B. Upload PNG to Media Library (Create or Update)
 			const filename = `svg-proxy-${Date.now()}.png`;
 			const file = new File([pngBlob], filename, { type: 'image/png' });
 
+			let uploadedMediaId = mediaId;
+
+			// If we are already connected to a media, attempt to just update it instead of creating duplicate
+			if (storage === 'media' && mediaId) {
+				// The WP REST API doesn't easily allow direct file replacement on an existing attachment,
+				// so we typically update the meta and let standard SVG rendering handle it.
+				// However, to update the actual proxy PNG for the media library grid view:
+				// Currently WP REST doesn't natively support replacing the file.
+				// So we delete the old one and re-create it, preserving the feel of an "update".
+				try {
+					await apiFetch({
+						path: `/wp/v2/media/${mediaId}`,
+						method: 'DELETE',
+						data: { force: true },
+					});
+				} catch (e) {
+					console.warn('Could not delete old media attachment during update', e);
+				}
+			}
+
+			// Create new media attachment
 			const uploadedMedia: any = await apiFetch({
 				path: '/wp/v2/media',
 				method: 'POST',
@@ -138,11 +168,12 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 			if (!uploadedMedia || !uploadedMedia.id) {
 				throw new Error('Upload failed');
 			}
+			uploadedMediaId = uploadedMedia.id;
 
 			// C. Update the Media Attachment with SVG Data (Meta)
 			// This saves the RAW SVG string into the attachment's meta field
 			await apiFetch({
-				path: `/wp/v2/media/${uploadedMedia.id}`,
+				path: `/wp/v2/media/${uploadedMediaId}`,
 				method: 'POST',
 				data: {
 					meta: {
@@ -155,7 +186,7 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 
 			// D. Update Block Attributes
 			setAttributes({
-				mediaId: uploadedMedia.id,
+				mediaId: uploadedMediaId,
 				storage: 'media',
 				svg: '', // Clear inline SVG to save space in post_content
 			});
@@ -432,6 +463,8 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 									setLocalSvg(originalSvg || '');
 									if (storage !== 'media') {
 										setAttributes({ svg: originalSvg });
+									} else {
+										createErrorNotice('SVG modified. Click "Update Media" to save to library.');
 									}
 								}}
 							>
@@ -492,6 +525,8 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 									setLocalSvg(noFill);
 									if (storage !== 'media') {
 										setAttributes({ svg: noFill });
+									} else {
+										createErrorNotice('SVG modified. Click "Update Media" to save to library.');
 									}
 								}}
 							>
@@ -509,6 +544,8 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 									setLocalSvg(stroked);
 									if (storage !== 'media') {
 										setAttributes({ svg: stroked });
+									} else {
+										createErrorNotice('SVG modified. Click "Update Media" to save to library.');
 									}
 								}}
 							>
@@ -538,6 +575,8 @@ export const Edit = (props: BlockEditProps<ExtendedAttributes>): JSX.Element => 
 									setColor(newColor);
 									if (storage !== 'media') {
 										setAttributes({ svg: newSvg });
+									} else {
+										createErrorNotice('SVG modified. Click "Update Media" to save to library.');
 									}
 								}
 							}}
