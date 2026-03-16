@@ -22,27 +22,15 @@ import { getAlignStyle } from './utils/presets';
  *
  * @return {JSX.Element} - Returns an anchor tag if the url attribute is set, otherwise it returns a div tag the collection of attributes needed for saving the svg as xml markup
  */
-export const Save = (props: {
-	attributes: SvgAttributesSave;
-}): JSX.Element => {
-	const {
-		href,
-		linkTarget,
-		width,
-		height,
-		title,
-		rotation,
-		align,
-		onclick,
-	} = props.attributes;
+export const Save = (props: { attributes: SvgAttributesSave }): JSX.Element => {
+	const { href, linkTarget, width, height, title, rotation, align, onclick } =
+		props.attributes;
 
 	const blockProps = useBlockProps.save({
 		style: {
 			...getAlignStyle(align),
 		},
-		className: classnames(
-			align ? `align${align}` : 'alignnone',
-		),
+		className: classnames(align ? `align${align}` : 'alignnone'),
 	});
 
 	const SvgTag = () => {
@@ -50,12 +38,12 @@ export const Save = (props: {
 			...getAlignStyle(align),
 			margin: hasAlign(align, 'center') ? 'auto' : undefined,
 			transform:
-				Number(rotation) !== 0
-					? `rotate( ${rotation}deg )`
-					: undefined,
+				Number(rotation) !== 0 ? `rotate( ${rotation}deg )` : undefined,
 		};
 		const widthAttr = !hasAlign(align, ['full', 'wide']) ? width : '100%';
-		const heightAttr = !hasAlign(align, ['full', 'wide']) ? height : undefined;
+		const heightAttr = !hasAlign(align, ['full', 'wide'])
+			? height
+			: undefined;
 
 		if (props.attributes.storage === 'media' && props.attributes.mediaUrl) {
 			return (
@@ -83,7 +71,11 @@ export const Save = (props: {
 		<div
 			{...blockProps}
 			dangerouslySetInnerHTML={
-				href ? undefined : (props.attributes.storage === 'media' ? undefined : getSVG(props.attributes))
+				href
+					? undefined
+					: props.attributes.storage === 'media'
+						? undefined
+						: getSVG(props.attributes)
 			}
 		>
 			{href ? (
@@ -96,9 +88,9 @@ export const Save = (props: {
 				>
 					<SvgTag />
 				</a>
-			) : (
-				props.attributes.storage === 'media' ? <SvgTag /> : null
-			)}
+			) : props.attributes.storage === 'media' ? (
+				<SvgTag />
+			) : null}
 		</div>
 	);
 };

@@ -1,9 +1,20 @@
 import DOMPurify from 'dompurify';
-import { SVG_EDITABLE_ELEMENTS, SVG_MIN_SIZE, SVGBASE64, SVGO_DEFAULTS } from '../constants';
+import {
+	SVG_EDITABLE_ELEMENTS,
+	SVG_MIN_SIZE,
+	SVGBASE64,
+	SVGO_DEFAULTS,
+} from '../constants';
 import { optimize } from 'svgo';
 import { closest } from 'color-2-name';
 import { __ } from '@wordpress/i18n';
-import type { SvgAttributesEditor, SvgColorDef, SvgFileDef, SvgSizeDef, SvgStrokeDef } from '../types';
+import type {
+	SvgAttributesEditor,
+	SvgColorDef,
+	SvgFileDef,
+	SvgSizeDef,
+	SvgStrokeDef,
+} from '../types';
 import { BlockAttributes } from '@wordpress/blocks';
 
 /**
@@ -61,11 +72,11 @@ export const loadSvg = ({
 
 	const fileMetaData: SvgFileDef | undefined = fileData
 		? {
-			name: fileData.name,
-			size: fileData.size || cleanSvg.length,
-			type: fileData.type || 'image/svg+xml',
-			lastModified: fileData.lastModified,
-		}
+				name: fileData.name,
+				size: fileData.size || cleanSvg.length,
+				type: fileData.type || 'image/svg+xml',
+				lastModified: fileData.lastModified,
+			}
 		: undefined;
 
 	if (cleanSvg) {
@@ -135,7 +146,14 @@ export function encodeSvg(svgMarkup: string): string {
 function normalizeColor(color: string): string {
 	let normalized = color.toLowerCase().replace(/\s/g, '');
 	if (normalized.length === 4 && normalized.startsWith('#')) {
-		normalized = '#' + normalized[1] + normalized[1] + normalized[2] + normalized[2] + normalized[3] + normalized[3];
+		normalized =
+			'#' +
+			normalized[1] +
+			normalized[1] +
+			normalized[2] +
+			normalized[2] +
+			normalized[3] +
+			normalized[3];
 	}
 	return normalized;
 }
@@ -228,10 +246,7 @@ export function getSvgSize(fileContent: string): SvgSizeDef {
 				switch (size[1]) {
 					case 'width':
 					case 'height':
-						return (parsedData[size[1]] = parseInt(
-							size[2],
-							10
-						));
+						return (parsedData[size[1]] = parseInt(size[2], 10));
 				}
 			});
 		}
@@ -301,7 +316,14 @@ export const convertSvgToBitmap = async ({
 	width = 100,
 	format = 'webp',
 	quality = 0.8,
-}: { svgBase64: string; sizeRatio: number; width: number; height: number; format: string; quality: number; }): Promise<string> => {
+}: {
+	svgBase64: string;
+	sizeRatio: number;
+	width: number;
+	height: number;
+	format: string;
+	quality: number;
+}): Promise<string> => {
 	// Create an image element from the SVG markup
 	const img = new window.Image();
 	img.src = svgBase64 as string;

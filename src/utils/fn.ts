@@ -9,8 +9,8 @@ export function hasAlign(
 	currentAlign: string = 'none',
 	alignmentCheck: string | string[]
 ): boolean {
-	if ( alignmentCheck instanceof Array ) {
-		return alignmentCheck.includes( currentAlign );
+	if (alignmentCheck instanceof Array) {
+		return alignmentCheck.includes(currentAlign);
 	}
 	return currentAlign === alignmentCheck;
 }
@@ -29,7 +29,7 @@ export function scaleProportionally(
 	second: number | string,
 	limit: number | string
 ): number {
-	return ( Number( limit ) / Number( first ) ) * Number( second );
+	return (Number(limit) / Number(first)) * Number(second);
 }
 
 /**
@@ -37,6 +37,6 @@ export function scaleProportionally(
  *
  * @param {string} err - string - The error message that was thrown.
  */
-export const onSvgReadError = ( err: string ): Error => {
-	throw new Error( 'Failed to read the given file' + err );
+export const onSvgReadError = (err: string): Error => {
+	throw new Error('Failed to read the given file' + err);
 };

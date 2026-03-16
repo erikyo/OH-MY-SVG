@@ -25,10 +25,10 @@ const blockConfig = jsonData as BlockAttributes;
  * @author codekraft
  */
 // @ts-ignore
-registerBlockType( blockConfig.name, {
+registerBlockType(blockConfig.name, {
 	...blockConfig,
 	icon,
 	edit: Edit,
 	save: Save,
 	deprecated,
-} );
+});

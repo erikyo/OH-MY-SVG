@@ -59,7 +59,7 @@ const v2 = {
 			blockGap: true,
 		},
 	},
-	save( props: { attributes: any } ) {
+	save(props: { attributes: any }) {
 		const { attributes } = props;
 
 		// 🚨 CRITICAL FIX: Do NOT use DOMPurify here. The DB contains raw SVG with <style> tags
@@ -74,24 +74,24 @@ const v2 = {
 		const blockProps = { ...useBlockProps.save() };
 
 		// Remove forced 'alignnone' class from block.json defaults
-		if ( typeof blockProps.className === 'string' ) {
+		if (typeof blockProps.className === 'string') {
 			blockProps.className = blockProps.className
-				.replace( /\balignnone\b/g, '' )
-				.replace( /\s+/g, ' ' )
+				.replace(/\balignnone\b/g, '')
+				.replace(/\s+/g, ' ')
 				.trim();
 		}
 
 		// Remove forced display: flex from block.json layout support
-		if ( blockProps.style ) {
+		if (blockProps.style) {
 			blockProps.style = { ...blockProps.style };
 			delete blockProps.style.display;
 		}
 
 		return (
-			<div { ...blockProps }>
+			<div {...blockProps}>
 				<div
-					style={ { width: 'inherit' } }
-					dangerouslySetInnerHTML={ createMarkup() }
+					style={{ width: 'inherit' }}
+					dangerouslySetInnerHTML={createMarkup()}
 				/>
 			</div>
 		);
@@ -149,19 +149,19 @@ const v1 = {
 		},
 	},
 
-	migrate( attributes: { url: any } ) {
+	migrate(attributes: { url: any }) {
 		return {
 			...attributes,
 			href: attributes.url,
 		};
 	},
 
-	save( props: { attributes: any } ) {
+	save(props: { attributes: any }) {
 		const { attributes } = props;
 
 		function createMarkup() {
 			return {
-				__html: DOMPurify.sanitize( attributes.svg ) || '',
+				__html: DOMPurify.sanitize(attributes.svg) || '',
 			};
 		}
 
@@ -174,22 +174,22 @@ const v1 = {
 			maxHeight: '100%',
 		};
 
-		const blockProps = useBlockProps.save( {
+		const blockProps = useBlockProps.save({
 			style: customStyle,
-		} );
+		});
 
 		const newBlock = attributes.url ? (
 			<a
-				{ ...blockProps }
-				href={ attributes.url }
-				dangerouslySetInnerHTML={ createMarkup() }
+				{...blockProps}
+				href={attributes.url}
+				dangerouslySetInnerHTML={createMarkup()}
 			/>
 		) : (
-			<div { ...blockProps } dangerouslySetInnerHTML={ createMarkup() } />
+			<div {...blockProps} dangerouslySetInnerHTML={createMarkup()} />
 		);
 
 		return newBlock;
 	},
 };
 
-export default [ v2, v1 ];
+export default [v2, v1];

@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"target": "ES2022",
 		"module": "esnext",
-		"lib": [ "ES2022", "DOM" ],
+		"lib": ["ES2022", "DOM"],
 		"jsx": "react-jsx",
 		"moduleResolution": "node",
 		// Search under node_modules for non-relative imports.
@@ -12,14 +12,8 @@
 		// Don't emit; allow Babel to transform files.
 		"outDir": "build",
 		"baseUrl": "./src",
-      "allowSyntheticDefaultImports": true
-    },
-	"include": [
-		"./src/**/*.ts",
-		"./src/**/*.tsx"
-	],
-	"exclude": [
-		"coverage",
-		"docs"
-	]
+		"allowSyntheticDefaultImports": true
+	},
+	"include": ["./src/**/*.ts", "./src/**/*.tsx"],
+	"exclude": ["coverage", "docs"]
 }
