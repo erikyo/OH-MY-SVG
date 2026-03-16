@@ -211,6 +211,7 @@ export const Edit = (
 				mediaId: uploadedMediaId,
 				storage: 'media',
 				svg: '', // Clear inline SVG to save space in post_content
+				originalSvg: '', // Clear original SVG when linked to save space
 			});
 
 			createSuccessNotice(
@@ -242,6 +243,7 @@ export const Edit = (
 				mediaId: 0,
 				storage: 'inline',
 				svg: localSvg,
+				originalSvg: localSvg, // Restore originalSvg upon unlink
 			});
 			createSuccessNotice(__('Unlinked and deleted from Media Library'));
 		} catch (error: any) {
