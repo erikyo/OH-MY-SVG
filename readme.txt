@@ -3,7 +3,7 @@ Contributors:      codekraft
 Tags:              svg, blocks, vector, icon, upload, sanitize
 Requires at least: 5.7
 Tested up to:      6.3
-Stable tag:        0.1.4.2
+Stable tag:        1.5.0
 Requires PHP:      7.1
 License:           GPLv3 or later
 License URI:       http://www.gnu.org/licenses/gpl-3.0.html
@@ -67,6 +67,9 @@ Absolutely! The Svg Block allows you to use SVGs for various elements on your we
 Yes, you can easily animate SVGs using CSS or JavaScript. The Svg Block provides the flexibility to add CSS animations or implement JavaScript scripts to bring your SVGs to life.
 
 == Changelog ==
+
+= 1.5.0 - 2026-03-16 =
+*
 
 = 0.1.4 - 2023-05-18 =
 
