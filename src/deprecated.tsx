@@ -1,7 +1,7 @@
 import { useBlockProps } from '@wordpress/block-editor';
 import DOMPurify from 'dompurify';
 
-// This handles the migration from v1.3.0 to v1.4.0
+// This handles the migration from v1.3.0 to v1.5.0
 const v2 = {
 	attributes: {
 		// 🚨 CRITICAL FIX: We must override the block.json selector for this deprecation.
@@ -59,7 +59,7 @@ const v2 = {
 			blockGap: true,
 		},
 	},
-	save(props: { attributes: any }) {
+	save( props: { attributes: any } ) {
 		const { attributes } = props;
 
 		// 🚨 CRITICAL FIX: Do NOT use DOMPurify here. The DB contains raw SVG with <style> tags
@@ -74,17 +74,19 @@ const v2 = {
 		const blockProps = { ...useBlockProps.save() };
 
 		// Remove forced 'alignnone' class from block.json defaults
-		if (typeof blockProps.className === 'string') {
+		if ( typeof blockProps.className === 'string' ) {
 			blockProps.className = blockProps.className
-				.replace(/\balignnone\b/g, '')
-				.replace(/\s+/g, ' ')
+				.replace( /\balignnone\b/g, '' )
+				.replace( /\s+/g, ' ' )
 				.trim();
 		}
 
 		// Remove forced display: flex from block.json layout support
-		if (blockProps.style) {
-			blockProps.style = { ...blockProps.style };
-			delete blockProps.style.display;
+		if ( blockProps.style ) {
+			blockProps.style = { ...blockProps.style as {} };
+			if ( blockProps.style.hasOwnProperty( 'display' ) ) {
+				delete ( blockProps.style as Record<string, string> ).display;
+			}
 		}
 
 		return (
@@ -149,19 +151,19 @@ const v1 = {
 		},
 	},
 
-	migrate(attributes: { url: any }) {
+	migrate( attributes: { url: any } ) {
 		return {
 			...attributes,
 			href: attributes.url,
 		};
 	},
 
-	save(props: { attributes: any }) {
+	save( props: { attributes: any } ) {
 		const { attributes } = props;
 
 		function createMarkup() {
 			return {
-				__html: DOMPurify.sanitize(attributes.svg) || '',
+				__html: DOMPurify.sanitize( attributes.svg ) || '',
 			};
 		}
 
@@ -174,9 +176,9 @@ const v1 = {
 			maxHeight: '100%',
 		};
 
-		const blockProps = useBlockProps.save({
+		const blockProps = useBlockProps.save( {
 			style: customStyle,
-		});
+		} );
 
 		const newBlock = attributes.url ? (
 			<a
@@ -192,4 +194,4 @@ const v1 = {
 	},
 };
 
-export default [v2, v1];
+export default [ v2, v1 ];
