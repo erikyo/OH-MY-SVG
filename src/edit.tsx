@@ -1,57 +1,24 @@
-import { useEffect, useRef, useState } from '@wordpress/element';
-import {
-	Button,
-	ColorPalette,
-	FormFileUpload,
-	Panel,
-	PanelBody,
-	PanelRow,
-	Placeholder,
-	Popover,
-	RangeControl,
-	ResizableBox,
-	TextareaControl,
-	TextControl,
-	ToolbarButton,
-	ToolbarGroup,
-	Spinner,
-} from '@wordpress/components';
-import {
-	__experimentalImageSizeControl as ImageSizeControl,
-	BlockControls,
-	BlockIcon,
-	InspectorControls,
-	LinkControl,
-	store as blockEditorStore,
-	useBlockProps,
-} from '@wordpress/block-editor';
-import { __ } from '@wordpress/i18n';
-import { link, linkOff, pencil, upload } from '@wordpress/icons';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { store as noticesStore } from '@wordpress/notices';
-import { BlockEditProps } from '@wordpress/blocks';
+import {useEffect, useRef, useState} from '@wordpress/element';
+import {Button, ColorPalette, FormFileUpload, Panel, PanelBody, PanelRow, Placeholder, Popover, RangeControl, ResizableBox, Spinner, TextareaControl, TextControl, ToolbarButton, ToolbarGroup,} from '@wordpress/components';
+import {__experimentalImageSizeControl as ImageSizeControl, BlockControls, BlockIcon, InspectorControls, LinkControl, store as blockEditorStore, useBlockProps,} from '@wordpress/block-editor';
+import {__} from '@wordpress/i18n';
+import {link, linkOff, pencil, upload} from '@wordpress/icons';
+import {useDispatch, useSelect} from '@wordpress/data';
+import {store as noticesStore} from '@wordpress/notices';
+import {BlockEditProps} from '@wordpress/blocks';
 import apiFetch from '@wordpress/api-fetch';
 
 // Local imports
 import getSVG from './Svg';
-import {
-	collectColors,
-	getSvgSize,
-	loadSvg,
-	optimizeSvg,
-	readSvg,
-	svgAddPathStroke,
-	svgRemoveFill,
-	updateColor,
-} from './utils/svgTools';
-import { svgToPngBlob } from './utils/canvas';
-import { updateHtmlProp } from './utils/common';
-import { hasAlign, scaleProportionally } from './utils/fn';
-import { rotationRangePresets } from './utils/presets';
-import { svgIcon } from './utils/icons';
-import { ALLOWED_MEDIA_TYPES, NEW_TAB_REL } from './constants';
-import { SvgoStats } from './utils/components';
-import { SvgAttributesEditor, SvgColorDef, SvgSizeDef } from './types';
+import {collectColors, getSvgSize, loadSvg, optimizeSvg, readSvg, svgAddPathStroke, svgRemoveFill, updateColor,} from './utils/svgTools';
+import {svgToPngBlob} from './utils/canvas';
+import {updateHtmlProp} from './utils/common';
+import {hasAlign, scaleProportionally} from './utils/fn';
+import {rotationRangePresets} from './utils/presets';
+import {svgIcon} from './utils/icons';
+import {ALLOWED_MEDIA_TYPES, NEW_TAB_REL} from './constants';
+import {SvgoStats} from './utils/components';
+import {SvgAttributesEditor, SvgColorDef, SvgSizeDef} from './types';
 
 // Extend attributes interface to include mediaId
 interface ExtendedAttributes extends SvgAttributesEditor {
@@ -496,6 +463,8 @@ export const Edit = (
 							onChange={(ev) =>
 								setAttributes({ rotation: Number(ev) })
 							}
+							__next40pxDefaultSize={true}
+							__nextHasNoMarginBottom={true}
 						/>
 					</PanelBody>
 
@@ -607,6 +576,7 @@ export const Edit = (
 								}
 							}}
 							rows={5}
+							__nextHasNoMarginBottom={true}
 						/>
 					</PanelBody>
 
@@ -661,6 +631,8 @@ export const Edit = (
 							min={0}
 							max={20}
 							step={0.1}
+							__next40pxDefaultSize={true}
+							__nextHasNoMarginBottom={true}
 						/>
 					</PanelBody>
 

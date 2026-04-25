@@ -171,7 +171,7 @@ export function collectColors(fileContent: string): SvgColorDef[] {
 	if (fileContent) {
 		// find all hex, rgb and rgba colors in the target string
 		const colorRegexp =
-			/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}|rgb\((?:\s*\d+\s*,){2}\s*\d+\)|rgba\((\s*\d+\s*,){3}[\d.]+\)/g;
+			/#[a-fA-F0-9]{8}|#[a-fA-F0-9]{6}|#[a-fA-F0-9]{4}|#[a-fA-F0-9]{3}|rgb\((?:\s*\d+\s*,){2}\s*\d+\)|rgba\((\s*\d+\s*,){3}[\d.]+\)/g;
 		const matchedColors = fileContent.matchAll(colorRegexp);
 
 		// add the color to the collection (the first 50 colors excluding duplicates)
@@ -185,16 +185,38 @@ export function collectColors(fileContent: string): SvgColorDef[] {
 			}
 		}
 	}
-	return (
-		[
-			...colorCollection.map((color) => {
-				return {
-					color,
-					name: closest(color).name,
-				};
-			}),
-		] || []
-	);
+	return [
+		...colorCollection.map((color) => {
+			let colorName = color;
+			try {
+				let parsedColor = color;
+
+				// Bypass the color-2-name hex parsing bug by translating hex to rgb()
+				if (parsedColor.startsWith('#')) {
+					let c = parsedColor.replace('#', '');
+					if (c.length === 3 || c.length === 4) {
+						// Expand shorthand hexes (e.g. 123 to 112233)
+						c = c.split('').map((x) => x + x).join('');
+					}
+					// Convert chunks to RGB integers
+					const r = parseInt(c.substring(0, 2), 16) || 0;
+					const g = parseInt(c.substring(2, 4), 16) || 0;
+					const b = parseInt(c.substring(4, 6), 16) || 0;
+
+					parsedColor = `rgb(${r}, ${g}, ${b})`;
+				}
+
+				colorName = closest(parsedColor).name;
+			} catch (error) {
+				// Fallback to the raw hex/rgba string if the library throws
+				colorName = color;
+			}
+			return {
+				color,
+				name: colorName,
+			};
+		}),
+	];
 }
 
 /**
@@ -211,7 +233,7 @@ export const updateColor = (
 ): string => {
 	const targetNormalized = normalizeColor(color);
 	const colorRegexp =
-		/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}|rgb\((?:\s*\d+\s*,){2}\s*\d+\)|rgba\((\s*\d+\s*,){3}[\d.]+\)/g;
+		/#[a-fA-F0-9]{8}|#[a-fA-F0-9]{6}|#[a-fA-F0-9]{4}|#[a-fA-F0-9]{3}|rgb\((?:\s*\d+\s*,){2}\s*\d+\)|rgba\((\s*\d+\s*,){3}[\d.]+\)/g;
 
 	return svgDoc.replace(colorRegexp, (match) => {
 		if (normalizeColor(match) === targetNormalized) {
